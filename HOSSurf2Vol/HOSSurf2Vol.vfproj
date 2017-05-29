@@ -14,7 +14,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL" UseMkl="mklSequential"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -35,12 +35,12 @@
 		<File RelativePath=".\src\modInput_post_process_ocean.f90"/>
 		<File RelativePath=".\src\modOutput_post_process_NWT.f90"/>
 		<File RelativePath=".\src\modOutput_post_process_ocean.f90"/>
+		<File RelativePath=".\modPost_processing.f90"/>
 		<File RelativePath=".\src\modRead_files_NWT.f90"/>
 		<File RelativePath=".\src\modRead_files_ocean.f90"/>
 		<File RelativePath=".\src\modReconstruction_NWT.f90"/>
 		<File RelativePath=".\src\modReconstruction_ocean.f90"/>
 		<File RelativePath=".\src\modType.f90"/>
 		<File RelativePath=".\src\modVariables_3d_NWT.f90"/>
-		<File RelativePath=".\src\modVariables_3d_ocean.f90"/>
-		<File RelativePath=".\modPost_processing.f90"/></Filter></Files>
+		<File RelativePath=".\src\modVariables_3d_ocean.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
