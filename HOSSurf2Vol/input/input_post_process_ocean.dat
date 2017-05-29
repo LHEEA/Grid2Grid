@@ -13,5 +13,5 @@ Maximum z in VP-card         :: z_max            :: 5.0
 Number of points in z        :: i_zvect          :: 20
 --- Input files
 Tecplot version              :: tecplot          :: 11
-Name of free-surface file    :: file_3d          :: ../../../bin/Results/3d.dat
-Name of modal description    :: file_mod         :: ../../../bin/Results/modes_HOS_SWENSE.dat
+Name of free-surface file    :: file_3d          :: input/3d.dat
+Name of modal description    :: file_mod         :: input/modes_HOS_SWENSE.dat
