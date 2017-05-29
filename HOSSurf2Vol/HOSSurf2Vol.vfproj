@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{F606D926-30EC-4FDB-8545-2498D3E6F7CC}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklSequential"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\src\Main.f90"/>
+		<File RelativePath=".\src\modAnalysis_wavefield_ocean.f90"/>
+		<File RelativePath=".\src\modFourier_r2c_FFTW3_NWT.f90"/>
+		<File RelativePath=".\src\modFourier_r2c_FFTW3_ocean.f90"/>
+		<File RelativePath=".\src\modInput_post_process_NWT.f90"/>
+		<File RelativePath=".\src\modInput_post_process_ocean.f90"/>
+		<File RelativePath=".\src\modOutput_post_process_NWT.f90"/>
+		<File RelativePath=".\src\modOutput_post_process_ocean.f90"/>
+		<File RelativePath=".\src\modRead_files_NWT.f90"/>
+		<File RelativePath=".\src\modRead_files_ocean.f90"/>
+		<File RelativePath=".\src\modReconstruction_NWT.f90"/>
+		<File RelativePath=".\src\modReconstruction_ocean.f90"/>
+		<File RelativePath=".\src\modType.f90"/>
+		<File RelativePath=".\src\modVariables_3d_NWT.f90"/>
+		<File RelativePath=".\src\modVariables_3d_ocean.f90"/>
+		<File RelativePath=".\modPost_processing.f90"/></Filter></Files>
+	<Globals/></VisualStudioProject>
