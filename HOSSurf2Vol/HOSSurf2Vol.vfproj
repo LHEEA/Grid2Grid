@@ -27,6 +27,7 @@
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\src\fftw3.f03"/>
 		<File RelativePath=".\src\Main.f90"/>
 		<File RelativePath=".\src\modAnalysis_wavefield_ocean.f90"/>
 		<File RelativePath=".\src\modFourier_r2c_FFTW3_NWT.f90"/>
@@ -35,7 +36,8 @@
 		<File RelativePath=".\src\modInput_post_process_ocean.f90"/>
 		<File RelativePath=".\src\modOutput_post_process_NWT.f90"/>
 		<File RelativePath=".\src\modOutput_post_process_ocean.f90"/>
-		<File RelativePath=".\modPost_processing.f90"/>
+		<File RelativePath=".\src\modPost_processing_NWT.f90"/>
+		<File RelativePath=".\src\modPost_processing_ocean.f90"/>
 		<File RelativePath=".\src\modRead_files_NWT.f90"/>
 		<File RelativePath=".\src\modRead_files_ocean.f90"/>
 		<File RelativePath=".\src\modReconstruction_NWT.f90"/>

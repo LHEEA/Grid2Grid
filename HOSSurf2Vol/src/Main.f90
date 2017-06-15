@@ -3,7 +3,8 @@ PROGRAM Main
 !
 !
 use modType 
-use modPost_processing
+use modPost_processing_ocean
+use modPost_processing_NWT
 !
 IMPLICIT NONE
 !
@@ -16,8 +17,8 @@ if (iargc()>0) then
     call getarg(1, HOS_simu_type)
     call getarg(2, ConfigFile)
 else
-   HOS_simu_type = 'NWT'
-   ConfigFile='C:\Grid2Grid\HOSSurf2Vol\input\input_post_process_NWT.dat'
+   HOS_simu_type = 'ocean'
+   ConfigFile='C:\Grid2Grid\HOSSurf2Vol\input\input_post_process_ocean.dat'
 endif
 write(*,*) "input_file: ", ConfigFile
 
