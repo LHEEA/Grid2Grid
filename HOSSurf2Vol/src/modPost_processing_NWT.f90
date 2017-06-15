@@ -61,8 +61,6 @@ REAL(RP) :: tiny_sp
 ! tiny_sp is single precision: useful for inequalities check with values read from files
 tiny_sp = epsilon(1.0)
 !
-! Read input file to define parameters of post-processing
-CALL read_input(ConfigFile)
 !
 ! Initialize outputs
 CALL init_output_post_process(i_card)

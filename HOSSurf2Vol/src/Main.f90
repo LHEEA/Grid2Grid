@@ -22,6 +22,15 @@ else
 endif
 write(*,*) "input_file: ", ConfigFile
 
+! Read input file to define parameters of post-processing
+if (HOS_simu_type == 'ocean') then
+    CALL read_input_ocean(ConfigFile)
+elseif (HOS_simu_type == 'NWT') then
+    CALL read_input_NWT(ConfigFile)
+else 
+    write(*,*) 'error, the type of smulation does not exist'
+    pause
+endif
 
 
 if (iargc() > 0) then

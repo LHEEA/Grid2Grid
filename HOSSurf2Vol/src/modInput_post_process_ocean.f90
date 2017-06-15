@@ -51,7 +51,7 @@ CONTAINS
 !
 !
 !
-SUBROUTINE read_input(filename)
+SUBROUTINE read_input_ocean(filename)
 !
 IMPLICIT NONE
 ! Input variables
@@ -85,7 +85,7 @@ CALL read_datum(unit, file_mod)        ! Name of modal description
 !
 CLOSE(unit)
 !
-END SUBROUTINE read_input
+END SUBROUTINE read_input_ocean
 !
 !
 !
