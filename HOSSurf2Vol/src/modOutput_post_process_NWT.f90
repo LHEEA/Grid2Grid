@@ -34,6 +34,8 @@ USE modVariables_3d_NWT
 IMPLICIT NONE
 !
 !
+INTEGER :: i_time,iout
+LOGICAL,PARAMETER :: monolithic = .false.
 !
 CONTAINS
 !
@@ -51,7 +53,7 @@ INTEGER, INTENT(IN) :: i_card
 !
 !
 IF (i_card /= 0) THEN
-	!
+  IF (monolithic) THEN
 	! Velocity and pressure card
 	IF (i_card == 1) THEN
     	! Tecplot output
@@ -65,6 +67,10 @@ IF (i_card /= 0) THEN
     	WRITE(32,'(A)') 'VARIABLES="x","y","z","eta","vitx","vity","vitz","Press"'
     ENDIF
     !
+  ELSE
+    i_time = -1
+    iout = 33
+  ENDIF
 ENDIF
 !
 END SUBROUTINE init_output_post_process
@@ -110,85 +116,169 @@ IF (i_card /= 0) THEN
 			WRITE(30,'(3(I4,X))') imax-imin+1, jmax-jmin+1, i_zvect
 			WRITE(30,'(3(ES16.9,X))') T_start, T_stop, dt_out_star*T_out !T_stop, T_start are dimensional quantities
 			CLOSE(30)
-		ENDIF
+        ENDIF
 		!
-		IF (i_test == 1) THEN ! First element in the z-loop
-			IF (time*T_out <= T_start+tiny_sp) THEN ! First time-step
-				IF (tecplot == 11) THEN
-					WRITE(31,104)'ZONE SOLUTIONTIME = ',time*T_out,', STRANDID=1, I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
-				ELSE
-					WRITE(31,104)'ZONE T = "',time*T_out,'", I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
-				END IF
-			ELSE ! Following time-steps
-				IF (tecplot == 11) THEN
-					WRITE(31,104)'ZONE SOLUTIONTIME = ',time*T_out,', STRANDID=1, VARSHARELIST = ([1, 2, 3]=1), I=', imax-imin+1, &
-					    ' J=', jmax-jmin+1,' K=', i_zvect
-				ELSE
-					WRITE(31,104)'ZONE T = "',time*T_out,'", VARSHARELIST = ([1, 2, 3]=1), I=', imax-imin+1, &
-					    ' J=', jmax-jmin+1,' K=', i_zvect
-				END IF
-			ENDIF
-		ENDIF
-		!
-		DO i2=1,jmax-jmin+1
-			DO i1=1,imax-imin+1
-				Press = - zlocal(i1,i2) - 0.5_rp*(vitx(i1,i2)**2+vity(i1,i2)**2+vitz(i1,i2)**2)-phit(i1,i2)
-				if(time*T_out <= T_start+tiny_sp) then
-					WRITE(31,'(7(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, zlocal(i1,i2)*L_out, &
-							vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, vitz(i1,i2)*L_out/T_out, &
-							Press*L_out**2/T_out**2
-				else
-					WRITE(31,'(4(ES16.9,X))') vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, &
-							vitz(i1,i2)*L_out/T_out, Press*L_out**2/T_out**2
-				endif
-			ENDDO
-		ENDDO
-		!
-		IF (ABS(zlocal(1,1)*L_out-z_max) <= tiny_sp) THEN ! Last element in the z-loop
-			IF (time*T_out <= T_start+tiny_sp) THEN ! First time-step
-				IF (tecplot == 11) THEN
-					WRITE(31,104)'ZONE SOLUTIONTIME = ',time*T_out,&
-					    ', STRANDID=2, I=', imax-imin+1,' J=', jmax-jmin+1,' K=', 1
-				ELSE
-					WRITE(31,104)'ZONE T = "',time*T_out,'", I=', imax-imin+1,' J=', jmax-jmin+1,' K=', 1
-				END IF
-			ELSE ! Following time-steps
-				IF (tecplot == 11) THEN
-					WRITE(31,104)'ZONE SOLUTIONTIME = ',time*T_out,&
-					    ', STRANDID=2, VARSHARELIST = ([1, 2]=2), I=', imax-imin+1, &
-					    ' J=', jmax-jmin+1,' K=', 1
-				ELSE
-					WRITE(31,104)'ZONE T = "',time*T_out,'", VARSHARELIST = ([1, 2]=2), I=',imax-imin+1, &
-					    ' J=', jmax-jmin+1,' K=', 1
-				END IF
-			ENDIF
-			DO i2=1,jmax-jmin+1
-                DO i1=1,imax-imin+1
-                    if(time*T_out <= T_start+tiny_sp) then
-                        WRITE(31,'(7(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, eta(i1+imin-1,i2+jmin-1)*L_out, &
-                            0.0_rp, 0.0_rp, 0.0_rp, 0.0_rp
-                    else
-                        WRITE(31,'(5(ES16.9,X))') eta(i1+imin-1,i2+jmin-1)*L_out, 0.0_rp, 0.0_rp, 0.0_rp, 0.0_rp
-                    endif
-                ENDDO
+        IF (monolithic) THEN
+		    IF (i_test == 1) THEN ! First element in the z-loop
+			    IF (time*T_out <= T_start+tiny_sp) THEN ! First time-step
+				    IF (tecplot == 11) THEN
+					    WRITE(31,104)'ZONE SOLUTIONTIME = ',time*T_out,', STRANDID=1, I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
+				    ELSE
+					    WRITE(31,104)'ZONE T = "',time*T_out,'", I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
+				    END IF
+			    ELSE ! Following time-steps
+				    IF (tecplot == 11) THEN
+					    WRITE(31,104)'ZONE SOLUTIONTIME = ',time*T_out,', STRANDID=1, VARSHARELIST = ([1, 2, 3]=1), I=', imax-imin+1, &
+					        ' J=', jmax-jmin+1,' K=', i_zvect
+				    ELSE
+					    WRITE(31,104)'ZONE T = "',time*T_out,'", VARSHARELIST = ([1, 2, 3]=1), I=', imax-imin+1, &
+					        ' J=', jmax-jmin+1,' K=', i_zvect
+				    END IF
+			    ENDIF
+		    ENDIF
+		    !
+		    DO i2=1,jmax-jmin+1
+			    DO i1=1,imax-imin+1
+				    Press = - zlocal(i1,i2) - 0.5_rp*(vitx(i1,i2)**2+vity(i1,i2)**2+vitz(i1,i2)**2)-phit(i1,i2)
+				    if(time*T_out <= T_start+tiny_sp) then
+					    WRITE(31,'(7(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, zlocal(i1,i2)*L_out, &
+							    vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, vitz(i1,i2)*L_out/T_out, &
+							    Press*L_out**2/T_out**2
+				    else
+					    WRITE(31,'(4(ES16.9,X))') vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, &
+							    vitz(i1,i2)*L_out/T_out, Press*L_out**2/T_out**2
+				    endif
+			    ENDDO
 		    ENDDO
-		ENDIF
+		    !
+		    IF (ABS(zlocal(1,1)*L_out-z_max) <= tiny_sp) THEN ! Last element in the z-loop
+			    IF (time*T_out <= T_start+tiny_sp) THEN ! First time-step
+				    IF (tecplot == 11) THEN
+					    WRITE(31,104)'ZONE SOLUTIONTIME = ',time*T_out,&
+					        ', STRANDID=2, I=', imax-imin+1,' J=', jmax-jmin+1,' K=', 1
+				    ELSE
+					    WRITE(31,104)'ZONE T = "',time*T_out,'", I=', imax-imin+1,' J=', jmax-jmin+1,' K=', 1
+				    END IF
+			    ELSE ! Following time-steps
+				    IF (tecplot == 11) THEN
+					    WRITE(31,104)'ZONE SOLUTIONTIME = ',time*T_out,&
+					        ', STRANDID=2, VARSHARELIST = ([1, 2]=2), I=', imax-imin+1, &
+					        ' J=', jmax-jmin+1,' K=', 1
+				    ELSE
+					    WRITE(31,104)'ZONE T = "',time*T_out,'", VARSHARELIST = ([1, 2]=2), I=',imax-imin+1, &
+					        ' J=', jmax-jmin+1,' K=', 1
+				    END IF
+			    ENDIF
+			    DO i2=1,jmax-jmin+1
+                    DO i1=1,imax-imin+1
+                        if(time*T_out <= T_start+tiny_sp) then
+                            WRITE(31,'(7(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, eta(i1+imin-1,i2+jmin-1)*L_out, &
+                                0.0_rp, 0.0_rp, 0.0_rp, 0.0_rp
+                        else
+                            WRITE(31,'(5(ES16.9,X))') eta(i1+imin-1,i2+jmin-1)*L_out, 0.0_rp, 0.0_rp, 0.0_rp, 0.0_rp
+                        endif
+                    ENDDO
+		        ENDDO
+            ENDIF
+        ELSE ! not monolithic, write output files at each time step
+            IF (i_test == 1) THEN ! First element in the z-loop
+                i_time = i_time +1
+                iout = iout +1
+                ! Tecplot output
+                OPEN(iout,FILE='Results/VP_card'//TRIM(int2str(i_time))//'.dat')
+                WRITE(iout,'(A)') 'TITLE =" Velocity and pressure field "'
+                WRITE(iout,'(A)') 'VARIABLES="x","y","z","vitx","vity","vitz","Press"'
+                IF (tecplot == 11) THEN
+                    WRITE(iout,104)'ZONE SOLUTIONTIME = ',time*T_out,', STRANDID=1, I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
+                ELSE
+                    WRITE(iout,104)'ZONE T = "',time*T_out,'", I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
+                ENDIF
+            ENDIF
+		    DO i2=1,jmax-jmin+1
+			    DO i1=1,imax-imin+1
+				    Press = - zlocal(i1,i2) - 0.5_rp*(vitx(i1,i2)**2+vity(i1,i2)**2+vitz(i1,i2)**2)-phit(i1,i2)
+				    if(time*T_out <= T_start+tiny_sp) then
+					    WRITE(iout,'(7(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, zlocal(i1,i2)*L_out, &
+							    vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, vitz(i1,i2)*L_out/T_out, &
+							    Press*L_out**2/T_out**2
+				    else
+					    WRITE(iout,'(4(ES16.9,X))') vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, &
+							    vitz(i1,i2)*L_out/T_out, Press*L_out**2/T_out**2
+				    endif
+			    ENDDO
+		    ENDDO
+		    !
+		    IF (ABS(zlocal(1,1)*L_out-z_max) <= tiny_sp) THEN ! Last element in the z-loop
+			    IF (time*T_out <= T_start+tiny_sp) THEN ! First time-step
+				    IF (tecplot == 11) THEN
+					    WRITE(iout,104)'ZONE SOLUTIONTIME = ',time*T_out,&
+					        ', STRANDID=2, I=', imax-imin+1,' J=', jmax-jmin+1,' K=', 1
+				    ELSE
+					    WRITE(iout,104)'ZONE T = "',time*T_out,'", I=', imax-imin+1,' J=', jmax-jmin+1,' K=', 1
+				    END IF
+			    ELSE ! Following time-steps
+				    IF (tecplot == 11) THEN
+					    WRITE(iout,104)'ZONE SOLUTIONTIME = ',time*T_out,&
+					        ', STRANDID=2, VARSHARELIST = ([1, 2]=2), I=', imax-imin+1, &
+					        ' J=', jmax-jmin+1,' K=', 1
+				    ELSE
+					    WRITE(iout,104)'ZONE T = "',time*T_out,'", VARSHARELIST = ([1, 2]=2), I=',imax-imin+1, &
+					        ' J=', jmax-jmin+1,' K=', 1
+				    END IF
+			    ENDIF
+			    DO i2=1,jmax-jmin+1
+                    DO i1=1,imax-imin+1
+                        if(time*T_out <= T_start+tiny_sp) then
+                            WRITE(iout,'(7(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, eta(i1+imin-1,i2+jmin-1)*L_out, &
+                                0.0_rp, 0.0_rp, 0.0_rp, 0.0_rp
+                        else
+                            WRITE(iout,'(5(ES16.9,X))') eta(i1+imin-1,i2+jmin-1)*L_out, 0.0_rp, 0.0_rp, 0.0_rp, 0.0_rp
+                        endif
+                    ENDDO
+		        ENDDO
+            ENDIF        
+        ENDIF     
+        !
     ELSEIF (i_card == 2) THEN
-    	IF (i_test == 1) THEN ! First element in the z-loop
-			IF (tecplot == 11) THEN
-				WRITE(32,104)'ZONE SOLUTIONTIME = ',time*T_out,', I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
-			ELSE
-				WRITE(32,104)'ZONE T = "',time*T_out,', I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
-			END IF    	
-    	ENDIF
-		!
-		DO i2=1,jmax-jmin+1
-        	DO i1=1,imax-imin+1
-				Press = - zlocal(i1,i2) - 0.5_rp*(vitx(i1,i2)**2+vity(i1,i2)**2+vitz(i1,i2)**2)-phit(i1,i2)
-				WRITE(32,'(8(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, zlocal(i1,i2)*L_out, eta(i1,i2)*L_out, &
-				    vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, vitz(i1,i2)*L_out/T_out, Press*L_out**2/T_out**2
-			ENDDO
-		ENDDO
+        IF (monolithic) THEN
+    	    IF (i_test == 1) THEN ! First element in the z-loop
+			    IF (tecplot == 11) THEN
+				    WRITE(32,104)'ZONE SOLUTIONTIME = ',time*T_out,', I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
+			    ELSE
+				    WRITE(32,104)'ZONE T = "',time*T_out,', I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
+			    END IF    	
+    	    ENDIF
+		    !
+		    DO i2=1,jmax-jmin+1
+        	    DO i1=1,imax-imin+1
+				    Press = - zlocal(i1,i2) - 0.5_rp*(vitx(i1,i2)**2+vity(i1,i2)**2+vitz(i1,i2)**2)-phit(i1,i2)
+				    WRITE(32,'(8(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, zlocal(i1,i2)*L_out, eta(i1,i2)*L_out, &
+				        vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, vitz(i1,i2)*L_out/T_out, Press*L_out**2/T_out**2
+			    ENDDO
+            ENDDO
+        ELSE ! not monolithic
+            IF (i_test == 1) THEN ! First element in the z-loop
+                i_time = i_time +1
+                iout = iout +1
+                ! Tecplot output
+                OPEN(iout,FILE='Results/VP_card_fitted.dat')
+                WRITE(iout,'(A)') 'TITLE =" Velocity and pressure field "'
+                WRITE(iout,'(A)') 'VARIABLES="x","y","z","eta","vitx","vity","vitz","Press"'
+			    IF (tecplot == 11) THEN
+				    WRITE(iout,104)'ZONE SOLUTIONTIME = ',time*T_out,', I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
+			    ELSE
+				    WRITE(iout,104)'ZONE T = "',time*T_out,', I=', imax-imin+1,' J=', jmax-jmin+1,' K=', i_zvect
+			    END IF    	
+    	    ENDIF
+		    !
+		    DO i2=1,jmax-jmin+1
+        	    DO i1=1,imax-imin+1
+				    Press = - zlocal(i1,i2) - 0.5_rp*(vitx(i1,i2)**2+vity(i1,i2)**2+vitz(i1,i2)**2)-phit(i1,i2)
+				    WRITE(iout,'(8(ES16.9,X))') x(i1+imin-1)*L_out, y(i2+jmin-1)*L_out, zlocal(i1,i2)*L_out, eta(i1,i2)*L_out, &
+				        vitx(i1,i2)*L_out/T_out, vity(i1,i2)*L_out/T_out, vitz(i1,i2)*L_out/T_out, Press*L_out**2/T_out**2
+			    ENDDO
+            ENDDO
+        ENDIF
     ENDIF
 ENDIF
 !
