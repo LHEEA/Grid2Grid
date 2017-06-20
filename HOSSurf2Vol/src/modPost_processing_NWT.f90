@@ -37,10 +37,9 @@ IMPLICIT NONE
 CONTAINS
 !  
 !
-SUBROUTINE Post_processing_NWT(ConfigFile) 
+SUBROUTINE Post_processing_NWT 
 !
 !
-character(len=StringLength), INTENT(IN) :: ConfigFile
 REAL(RP) :: time, time_prev
 !
 ! For SWENSE-type outputs + velocity/pressure cards

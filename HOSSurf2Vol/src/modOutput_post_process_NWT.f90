@@ -57,7 +57,7 @@ IF (i_card /= 0) THEN
 	! Velocity and pressure card
 	IF (i_card == 1) THEN
     	! Tecplot output
-    	OPEN(31,FILE='Results/VP_card.dat')
+    	OPEN(31,FILE='../Results/VP_card.dat')
 		WRITE(31,'(A)') 'TITLE =" Velocity and pressure field "'
     	WRITE(31,'(A)') 'VARIABLES="x","y","z","vitx","vity","vitz","Press"'
     ELSEIF (i_card == 2) THEN ! Boundary fitted coordinates

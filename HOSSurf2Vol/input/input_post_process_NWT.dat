@@ -12,4 +12,4 @@ Maximum z in VP-card         :: z_max            :: 0.5
 Number of points in z        :: i_zvect          :: 20
 --- Input files
 Tecplot version              :: tecplot          :: 11
-Name of modal description    :: file_mod         :: input/modes_HOS_SWENSE.dat
+Name of modal description    :: file_mod         :: ../input/modes_HOS_SWENSE.dat

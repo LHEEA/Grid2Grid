@@ -38,10 +38,9 @@ IMPLICIT NONE
 CONTAINS
 !    
 !
-SUBROUTINE Post_processing_ocean(ConfigFile) 
+SUBROUTINE Post_processing_ocean
 !
 !
-character(len=StringLength), INTENT(IN) :: ConfigFile
 REAL(RP) :: dt_out, time, time_prev
 REAL(RP), ALLOCATABLE, DIMENSION(:) :: H_up, L_up, H_down, L_down, crest, trough
 INTEGER, ALLOCATABLE, DIMENSION(:)  :: idx_up, idx_down, idx_crest, idx_trough

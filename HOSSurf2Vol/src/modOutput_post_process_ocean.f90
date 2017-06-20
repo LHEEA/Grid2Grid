@@ -204,7 +204,7 @@ IF (i_card /= 0) THEN
         !
         ! These are informations useful for eventual coupling using files VP_card
         IF (time*T_out <= T_start+tiny_sp) THEN ! First time-step
-            OPEN(30,file='Results/data_VP_card.dat',status='unknown')
+            OPEN(30,file='../Results/data_VP_card.dat',status='unknown')
             WRITE(30,*) 'VP_card.dat'
             WRITE(30,'(2(ES16.9,X))') x(imin)*L_out, x(imax)*L_out
             WRITE(30,'(2(ES16.9,X))') y(jmin)*L_out, y(jmax)*L_out
