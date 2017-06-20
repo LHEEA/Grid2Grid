@@ -125,7 +125,7 @@ IF (i_card /= 0) THEN
 	!
 	DO WHILE (time*T_adim <= T_stop+tiny_sp)
 		!
-		write(*,'(A,ES8.1)') 'time = ',time*T_adim
+		!write(*,'(A,ES8.1)') 'time = ',time*T_adim
 		! It reads the corresponding time in file_mod (closest to time)
 		IF (time >= dt_out_star/2) THEN
 			CALL read_mod(file_mod,i_unit,time,dt_out_star,n1,n2,n3_add, &

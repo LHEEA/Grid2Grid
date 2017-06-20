@@ -281,7 +281,7 @@ IF (i_card /= 0) THEN
                 i_time = i_time +1
                 iout = iout +1
                 ! Tecplot output
-                OPEN(iout,FILE='Results/VP_card'//TRIM(int2str(i_time))//'.dat')
+                OPEN(iout,FILE='VP_card'//TRIM(int2str(i_time))//'.dat')
                 WRITE(iout,'(A)') 'TITLE =" Velocity and pressure field "'
                 WRITE(iout,'(A)') 'VARIABLES="x","y","z","vitx","vity","vitz","Press"'
                 IF (tecplot == 11) THEN
@@ -359,7 +359,7 @@ IF (i_card /= 0) THEN
                 i_time = i_time +1
                 iout = iout +1
                 ! Tecplot output
-                OPEN(iout,FILE='Results/VP_card_fitted.dat')
+                OPEN(iout,FILE='VP_card_fitted.dat')
                 WRITE(iout,'(A)') 'TITLE =" Velocity and pressure field "'
                 WRITE(iout,'(A)') 'VARIABLES="x","y","z","eta","vitx","vity","vitz","Press"'
                 IF (tecplot == 11) THEN

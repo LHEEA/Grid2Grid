@@ -137,7 +137,7 @@ IF (i_card /= 0) THEN
     !
     DO WHILE (time*T <= T_stop+tiny_sp)
         !
-        WRITE(*,'(A,ES8.1)') 'time = ',time*T
+        !WRITE(*,'(A,ES8.1)') 'time = ',time*T
         !
         ! It reads the corresponding time in file_mod (closest to time)
         IF (time >= dt_out_star/2) THEN
