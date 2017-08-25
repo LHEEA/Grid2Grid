@@ -4,3 +4,4 @@ auxiliary/bspline-fortran/build.sh
 auxiliary/bspline-fortran/src/tests/
 resultVTK/
 VTK/
+obj/

@@ -31,9 +31,6 @@ INTEGER, PARAMETER :: StringLength = 200
 ! Input File Character Length
 INTEGER, PARAMETER :: nCharFileLength = 5000
 
-! Initilization of Fourier_ini
-LOGICAL :: isFFTWinit = .FALSE.
-
 ! surf2Vol VTK file Out
 LOGICAL :: isSurf2VolVTKWrite = .FALSE.
 
@@ -101,6 +98,12 @@ type, public :: typHOSMesh
 
     !!- Calcul dimensional flow quantities
     procedure, pass      :: calculDimValue
+
+    !!- Deallocate Dynamic Array of HOS Mesh
+    procedure,pass       :: destroyHOSMesh
+
+    !!- Destroyer
+    final                :: final_HOSMesh
 
 end type
 
@@ -183,6 +186,40 @@ contains
         allocate( this%dvdt(this%nX, this%nY, this%nZ) )
         allocate( this%dwdt(this%nX, this%nY, this%nZ) )
 
+    end subroutine
+
+    subroutine destroyHOSMesh(this)
+        implicit none
+        class(typHOSMesh),intent(inout) :: this
+        if (allocated(this%nonDimX)) deallocate( this%nonDimX )
+        if (allocated(this%nonDimY)) deallocate( this%nonDimY )
+        if (allocated(this%nonDimZ)) deallocate( this%nonDimZ )
+
+        if (allocated(this%nonDimEta)) deallocate( this%nonDimEta)
+        if (allocated(this%nonDimPhiX)) deallocate( this%nonDimPhiX )
+        if (allocated(this%nonDimPhiY)) deallocate( this%nonDimPhiY )
+        if (allocated(this%nonDimPhiZ)) deallocate( this%nonDimPhiZ )
+
+        if (allocated(this%nonDimPhit)) deallocate( this%nonDimPhit )
+        if (allocated(this%nonDimDuDt)) deallocate( this%nonDimDuDt )
+        if (allocated(this%nonDimDvDt)) deallocate( this%nonDimDvDt )
+        if (allocated(this%nonDimDwDt)) deallocate( this%nonDimDwDt )
+
+        if (allocated(this%eta)) deallocate( this%eta )
+        if (allocated(this%u))   deallocate( this%u )
+        if (allocated(this%v))   deallocate( this%v )
+        if (allocated(this%w))   deallocate( this%w )
+        if (allocated(this%pd))  deallocate( this%pd )
+
+        if (allocated(this%dudt)) deallocate( this%dudt )
+        if (allocated(this%dvdt)) deallocate( this%dvdt )
+        if (allocated(this%dwdt)) deallocate( this%dwdt )
+    end subroutine
+
+    subroutine final_HOSMesh(this)
+        implicit none
+        type(typHOSMesh),intent(inout) :: this
+        Call this%destroyHOSMesh
     end subroutine
 
     !!!- Calcul dimensional values

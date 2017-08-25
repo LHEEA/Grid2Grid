@@ -3,9 +3,9 @@ Program main
     Character(Len =100) :: inputFileName
     inputFileName = "postGrid2Grid.inp"
 
-    Call testPost(inputFileName)
+    ! Call testPost(inputFileName)
 
-    ! Call testSurf2Vol()
+    Call testSurf2Vol()
 
     ! Call testVol2Vol()
 
@@ -106,18 +106,21 @@ subroutine testSurf2Vol
     !! -----------------------------------------------------------------------
 
     !! - HOS Surf2Vol z-directional mesh Information
+
     nZmin = 50
     nZmax = 50
     zMin = -0.6
     zMax = 0.6
 
+    !!! ----------------------------------------------------------------------
+    write(*,*) ""
+    write(*,*) "HOS Ocean Surf2Vol ..."
+    write(*,*) ""
+
     !! - Initialize HOS Ocean Surf2Vol
     fileName1 = "data-modes_HOS_SWENSE.dat/hosOcean_2DIrr_modes_HOS_SWENSE.dat"
-    call hosS2V%initialize('Ocean',fileName1, zMin, zMax, nZmin, nZmax)
 
-    !! - Initialize HOS NWT Surf2Vol
-    ! fileName2 = "data-modes_HOS_SWENSE.dat/hosNWT_3DReg_modes_HOS_SWENSE.dat"
-    ! call hosS2V%initialize('NWT',fileName2, zMin, zMax, nZmin, nZmax)
+    call hosS2V%initialize('Ocean',fileName1, zMin, zMax, nZmin, nZmax)
 
     do iTime = 0, 15        !! HOS time Index
 
@@ -138,5 +141,43 @@ subroutine testSurf2Vol
         write(*,*) iTime, eta, u, v, w, pd
 
     enddo
+
+    Call hosS2V%destroy
+
+    !!! ----------------------------------------------------------------------
+    write(*,*) ""
+    write(*,*) "HOS NWT Surf2Vol ..."
+    write(*,*) ""
+
+    ! - Initialize HOS NWT Surf2Vol
+    fileName2 = "data-modes_HOS_SWENSE.dat/hosNWT_3DReg_modes_HOS_SWENSE.dat"
+
+    call hosS2V%initialize('NWT',fileName2, zMin, zMax, nZmin, nZmax)
+
+    do iTime = 0, 2        !! HOS time Index
+
+        !! - Correct time index
+        call hosS2V%correct(iTime)
+
+        ix = 20     ! HOS Surf2Vol Mesh x - Index
+        iy = 1      ! HOS Surf2Vol Mesh y - Index
+        iz = 8      ! HOS Surf2Vol Mesh z - Index (1 : Sea Bottom, nZ : Top)
+
+        !! - Get HOS Surf2Vol Flow Information for given mesh and time index
+        eta = hosS2V%ptrHOSMesh_%eta(ix, iy)
+        u   = hosS2V%ptrHOSMesh_%u(ix, iy, iz)
+        v   = hosS2V%ptrHOSMesh_%v(ix, iy, iz)
+        w   = hosS2V%ptrHOSMesh_%w(ix, iy, iz)
+        pd  = hosS2V%ptrHOSMesh_%pd(ix, iy, iz)
+
+        write(*,*) iTime, eta, u, v, w, pd
+
+    enddo
+
+    Call hosS2V%destroy
+
+    write(*,*) ""
+
+    !!! ----------------------------------------------------------------------
 
 end subroutine

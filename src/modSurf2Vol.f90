@@ -60,6 +60,11 @@ Implicit none
         !!- Correct HOS surf2vol and Point HOS Mesh
         procedure, public :: correct => correctHOS
 
+        !!- Destroy HOS surf2vol
+        procedure, public :: destroy => destroySurfVol
+
+        final :: finalSurf2Vol
+
     end type
 
     contains
@@ -144,6 +149,7 @@ Implicit none
             if (allocated(this%ptrHOSMesh_)) then
                 deallocate(this%ptrHOSMesh_)
             end if
+
             if (this%HOSSolver_.eq."NWT") then
                 allocate(this%ptrHOSMesh_, source =this%hosNWTSurf2Vol_%hosMesh_)
             else if (this%HOSSolver_.eq."Ocean") then
@@ -152,6 +158,28 @@ Implicit none
 
             this%correctIdx_ = iTime
 
+        end subroutine
+
+        subroutine destroySurfVol(this)
+            implicit none
+            class(typHOSSurf2Vol),intent(inout) :: this
+            this%isInitialized_ = .FALSE.
+            !! If HOS mesh pointer is allocated
+            if (allocated(this%ptrHOSMesh_)) then
+                deallocate(this%ptrHOSMesh_)
+            end if
+            !! Destroy HOS Surf2Vol
+            if (this%HOSSolver_.eq."NWT") then
+                Call this%hosNWTSurf2Vol_%destroy
+            else if (this%HOSSolver_.eq."Ocean") then
+                Call this%hosOceanSurf2Vol_%destroy
+            endif
+        end subroutine
+
+        subroutine finalSurf2Vol(this)
+            implicit none
+            type(typHOSSurf2Vol),intent(inout) :: this
+            Call this%destroy
         end subroutine
 
         subroutine writeSurf2VolMeshVTK(this)

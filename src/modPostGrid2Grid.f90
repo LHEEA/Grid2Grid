@@ -186,11 +186,11 @@ contains
         Call this%rectLGrid_%initialize(this%isBuildAirMesh_, this%zflag_)
 
         !! Delete VTK Folder and re-make
-        CALL System("rm -rf "//trim(postG2GVTK))
+        CALL System("rm -r "//trim(postG2GVTK)//"*.vtk")
         CALL System("mkdir -p "//trim(postG2GVTK))
 
         !! Make Wave Probe Result File
-        CALL System("rm -rf "//trim(this%waveFile_%name))
+        CALL System("rm "//trim(this%waveFile_%name))
         this%waveFile_%unit = callFileUnit()
 
         open(unit = this%waveFile_%unit,&
