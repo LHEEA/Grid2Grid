@@ -125,6 +125,12 @@ Implicit none
         !!- Get interpolated Flow Information (eta, u, pd)
         procedure, pass, public :: getFlow
 
+        !!- Destroy Vol2Vol
+        procedure, pass, public :: destroy => destroyVol2Vol
+
+        !!- Destroyer
+        final                   :: finalVol2Vol
+
     end type
 
 contains
@@ -297,6 +303,38 @@ contains
         Call constructSpline(this)
 
     END SUBROUTINE
+
+    Subroutine destroyVol2Vol(this)
+        Implicit None
+        class(typHOSVol2Vol), intent(inout) :: this
+        integer :: i
+
+        if (allocated(this%HOSs2v_)) then
+            do i = 1, this%nSaveT_
+                Call this%HOSs2v_(i)%destroy
+            enddo
+            deallocate(this%HOSs2v_)
+        endif
+
+        if (allocated(this%hosCorrectIdx_)) deallocate(this%hosCorrectIdx_)
+        if (allocated(this%hosPointerIdx_)) deallocate(this%hosPointerIdx_)
+        if (allocated(this%hosUpdate_))     deallocate(this%hosUpdate_)
+
+        if (this%isHOS2D_) then
+            Call this%itp2D_%destroy
+        else
+            Call this%itp3D_%destroy
+        end if
+
+        this%isInitialized_ = .FALSE.
+
+    End Subroutine
+
+    Subroutine finalVol2Vol(this)
+        Implicit None
+        type(typHOSVol2Vol), intent(inout) :: this
+        Call this%destroy
+    End Subroutine
 
     REAL(RP) FUNCTION getEta(this, x, y, t, iflag)
         implicit none
@@ -528,9 +566,9 @@ contains
 
         !! Destroy Spline Data
         if (this%isHOS2D_) then
-            Call this%itp2D_%destroy()
+            Call this%itp2D_%destroySplMod()
         else
-            Call this%itp3D_%destroy()
+            Call this%itp3D_%destroySplMod()
         end if
 
         !! Set Inteprolation Data Structure

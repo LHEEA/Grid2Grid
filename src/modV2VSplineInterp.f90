@@ -39,12 +39,18 @@ type,public :: typV2VInterp2D
     contains
 
     procedure, public  :: allocArray => allocSpl2DArray ! Allocate Array
-    procedure, public  :: destroy    => destroySpl2D    ! Destroy Spline type
+    procedure, public  :: destroySplMod => destroySpl2DModule  ! Destroy Spline type
     procedure, public  :: initialize => initialize2D    ! initialize Spline type
 
     procedure, public  :: interpEta  => interpEta2D     ! interpolate eta
     procedure, public  :: interpU    => interpU2D       ! interpolate velocity
     procedure, public  :: interpPd   => interpPd2D      ! interpolate dynmic pressure
+
+    ! Destroy and Deallocate interp3D
+    procedure, public  :: destroy    => destroySpl2D    ! Destroy Spline type
+
+    ! Destroyer
+    final              :: finalSpl2D
 
 end type
 
@@ -68,13 +74,19 @@ type,public :: typV2VInterp3D
 
 contains
 
-    procedure, public  :: allocArray => allocSpl3DArray ! Allocate Array
-    procedure, public  :: destroy    => destroySpl3D    ! Destroy Spline type
-    procedure, public  :: initialize => initialize3D    ! initialize Spline type
+    procedure, public  :: allocArray    => allocSpl3DArray     ! Allocate Array
+    procedure, public  :: destroySplMod => destroySpl3DModule  ! Destroy Spline type
+    procedure, public  :: initialize    => initialize3D        ! initialize Spline type
 
-    procedure, public  :: interpEta  => interpEta3D     ! interpolate eta
-    procedure, public  :: interpU    => interpU3D       ! interpolate velocity
-    procedure, public  :: interpPd   => interpPd3D      ! interpolate dynmic pressure
+    procedure, public  :: interpEta  => interpEta3D         ! interpolate eta
+    procedure, public  :: interpU    => interpU3D           ! interpolate velocity
+    procedure, public  :: interpPd   => interpPd3D          ! interpolate dynmic pressure
+
+    ! Destroy and Deallocate interp3D
+    procedure, public  :: destroy => destroySpl3D
+
+    ! Destroyer
+    final              :: finalSpl3D
 
 end type
 
@@ -245,7 +257,7 @@ subroutine allocSpl3DArray(this, nX, nY, nZ, nT, x, y, z)
 end subroutine
 
 !!- Destroy Spline Data Type
-subroutine destroySpl2D(this)
+subroutine destroySpl2DModule(this)
     implicit none
     class(typV2VInterp2D), intent(inout) :: this
     Call this%spl2eta%destroy
@@ -255,8 +267,27 @@ subroutine destroySpl2D(this)
     Call this%spl3pd%destroy
 end subroutine
 
+subroutine destroySpl2D(this)
+    implicit none
+    class(typV2VInterp2D), intent(inout) :: this
+    Call this%destroySplMod
+    if (allocated( this%xArg )) deallocate(this%xArg)
+    if (allocated( this%zArg )) deallocate(this%zArg)
+    if (allocated( this%tArg )) deallocate(this%tArg)
+
+    if (allocated( this%etaValue )) deallocate(this%etaValue)
+    if (allocated( this%uValue )) deallocate(this%uValue)
+    if (allocated( this%wValue )) deallocate(this%wValue)
+    if (allocated( this%pdValue )) deallocate(this%pdValue)
+end subroutine
+
+subroutine finalSpl2D(this)
+    type(typV2VInterp2D), intent(inout) :: this
+    Call this%destroy
+end subroutine
+
 !!- Destroy Spline Data Type
-subroutine destroySpl3D(this)
+subroutine destroySpl3DModule(this)
     implicit none
     class(typV2VInterp3D), intent(inout) :: this
     Call this%spl3eta%destroy
@@ -264,6 +295,27 @@ subroutine destroySpl3D(this)
     Call this%spl4v%destroy
     Call this%spl4w%destroy
     Call this%spl4pd%destroy
+end subroutine
+
+subroutine destroySpl3D(this)
+    implicit none
+    class(typV2VInterp3D), intent(inout) :: this
+    Call this%destroySplMod
+    if (allocated( this%xArg )) deallocate(this%xArg)
+    if (allocated( this%yArg )) deallocate(this%yArg)
+    if (allocated( this%zArg )) deallocate(this%zArg)
+    if (allocated( this%tArg )) deallocate(this%tArg)
+
+    if (allocated( this%etaValue )) deallocate(this%etaValue)
+    if (allocated( this%uValue )) deallocate(this%uValue)
+    if (allocated( this%vValue )) deallocate(this%vValue)
+    if (allocated( this%wValue )) deallocate(this%wValue)
+    if (allocated( this%pdValue )) deallocate(this%pdValue)
+end subroutine
+
+subroutine finalSpl3D(this)
+    type(typV2VInterp3D), intent(inout) :: this
+    Call this%destroy
 end subroutine
 
 !!- Intialize Spline Type Data

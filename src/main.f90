@@ -5,9 +5,9 @@ Program main
 
     ! Call testPost(inputFileName)
 
-    Call testSurf2Vol()
+    ! Call testSurf2Vol()
 
-    ! Call testVol2Vol()
+    Call testVol2Vol()
 
 End Program
 
@@ -48,16 +48,7 @@ Subroutine testVol2Vol
     nZmin = 50
     nZmax = 50
 
-    !! - HOS Ocean Intialize
-    fileName1 = "data-modes_HOS_SWENSE.dat/hosOcean_2DIrr_modes_HOS_SWENSE.dat"
-    Call hosV2V%initialize('Ocean',fileName1, zMin, zMax, nZmin, nZmax)
-
-    !! - HOS NWT Intialize
-    ! fileName2 = "data-modes_HOS_SWENSE.dat/hosNWT_3DReg_modes_HOS_SWENSE.dat"
-    ! Call hosV2V%initialize('NWT',fileName2, zMin, zMax, nZmin, nZmax)
-
     !! Time Information
-    t  = 0.0_RP
     dt = 0.1_RP
 
     !! Given Point
@@ -65,6 +56,16 @@ Subroutine testVol2Vol
     y = 0.5_RP
     z = -0.5_RP
 
+    !!! ----------------------------------------------------------------------
+    write(*,*) ""
+    write(*,*) "HOS Ocean Vol2Vol ..."
+    write(*,*) ""
+
+    !! - HOS Ocean Intialize
+    fileName1 = "data-modes_HOS_SWENSE.dat/hosOcean_2DIrr_modes_HOS_SWENSE.dat"
+    Call hosV2V%initialize('Ocean',fileName1, zMin, zMax, nZmin, nZmax)
+
+    t  = 0.0_RP
     !! Time Loop
     do it = 1,10
 
@@ -81,11 +82,50 @@ Subroutine testVol2Vol
         pd = hosV2V%getpd(x, y, z, t)
 
         !! Write Flow Information
-        write(*,*) t, eta, u, v, w
+        write(*,*) t, eta, u, v, w, pd
 
         !! Time Update
         t = t + dt
     enddo
+
+    Call hosV2V%destroy
+
+    !!! ----------------------------------------------------------------------
+    write(*,*) ""
+    write(*,*) "HOS NWT Vol2Vol ..."
+    write(*,*) ""
+
+    !! - HOS NWT Intialize
+
+    fileName2 = "data-modes_HOS_SWENSE.dat/hosNWT_2DIrr_modes_HOS_SWENSE.dat"
+    Call hosV2V%initialize('NWT',fileName2, zMin, zMax, nZmin, nZmax)
+
+    t  = 0.0_RP
+    !! Time Loop
+    do it = 1,10
+
+        !! Correct HOS Vol2VOl for given time
+        Call hosV2V%correct(t)
+
+        !! Get Wave Elevation
+        eta = hosV2V%getEta(x, y ,t)
+
+        !! Get Flow Velocity
+        Call hosV2V%getU(x, y, z, t, u, v ,w)
+
+        !! Get Dynamic Pressure
+        pd = hosV2V%getpd(x, y, z, t)
+
+        !! Write Flow Information
+        write(*,*) t, eta, u, v, w, pd
+
+        !! Time Update
+        t = t + dt
+    enddo
+
+    Call hosV2V%destroy
+
+    write(*,*) ""
 
 End Subroutine
 
