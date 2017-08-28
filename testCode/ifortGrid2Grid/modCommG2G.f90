@@ -75,7 +75,7 @@
 
         ! Define interface of call-back routine.
         abstract interface
-            subroutine proc_init(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio) &
+            subroutine proc_init(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, hosIndex) &
                 bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
@@ -85,57 +85,66 @@
                 Double precision, intent(in)   :: zMin, zMax
                 integer, intent(in)            :: nZmin, nZmax
                 Double precision, intent(in)   :: zMinRatio, zMaxRatio
+                integer, intent(out)           :: hosIndex
             end subroutine proc_init
 
-            subroutine proc_correct(simulTime) bind(c)
+            subroutine proc_correct(hosIndex, simulTime) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
+                integer, intent(in)          :: hosIndex
                 Double precision, intent(in) :: simulTime
             end subroutine
 
-            subroutine proc_getHOSEta(x, y, t, eta) bind(c)
+            subroutine proc_getHOSEta(hosIndex, x, y, t, eta) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
-                Double precision, intent(in) :: x, y, t
+                integer, intent(in)           :: hosIndex
+                Double precision, intent(in)  :: x, y, t
                 Double precision, intent(out) ::  eta
             end subroutine
 
-            subroutine proc_getHOSU(x, y, z, t, u, v, w) bind(c)
+            subroutine proc_getHOSU(hosIndex, x, y, z, t, u, v, w) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
+                integer, intent(in)           :: hosIndex
                 Double precision, intent(in)  :: x, y, z, t
                 Double precision, intent(out) :: u, v, w
             end subroutine
 
-            subroutine proc_getHOSPd(x, y, z, t, pd) bind(c)
+            subroutine proc_getHOSPd(hosIndex, x, y, z, t, pd) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
+                integer, intent(in)           :: hosIndex
                 Double precision, intent(in)  :: x, y, z, t
                 double precision, intent(out) :: pd
             end subroutine
 
-            subroutine proc_getHOSFlow(x, y, z, t, eta, u, v, w, pd) bind(c)
+            subroutine proc_getHOSFlow(hosIndex, x, y, z, t, eta, u, v, w, pd) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
+                integer, intent(in)           :: hosIndex
                 double precision, intent(in)  :: x, y, z, t
                 double precision, intent(out) :: eta, u, v, w, pd
             end subroutine
 
-            subroutine proc_getHOSEndTime(endTime) bind(c)
+            subroutine proc_getHOSEndTime(hosIndex, endTime) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
+                integer, intent(in)           :: hosIndex
                 double precision, intent(out) :: endTime
             end subroutine
 
-            subroutine proc_getHOSWaterDepth(waterDepth) bind(c)
+            subroutine proc_getHOSWaterDepth(hosIndex, waterDepth) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
+                integer, intent(in)           :: hosIndex
                 double precision, intent(out) :: waterDepth
             end subroutine
 
-            subroutine proc_isGrid2GridInitialized(isG2Initialized) bind(c)
+            subroutine proc_isGrid2GridInitialized(hosIndex, isG2Initialized) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
+                integer, intent(in)  :: hosIndex
                 logical, intent(out) :: isG2Initialized
             end subroutine
 
@@ -218,14 +227,15 @@
         End Subroutine
 
         ! Subroutine
-        subroutine initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+        subroutine initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, hosIndex)
             implicit None
-            integer, parameter :: nChar = 300
+            integer, parameter              :: nChar = 300
             character(len=nChar),intent(in) :: hosSolver
             character(len=nChar),intent(in) :: hosFileName
-            Double precision, intent(in)   :: zMin, zMax
-            integer, intent(in)            :: nZmin, nZmax
-            Double precision, intent(in)   :: zMinRatio, zMaxRatio
+            Double precision, intent(in)    :: zMin, zMax
+            integer, intent(in)             :: nZmin, nZmax
+            Double precision, intent(in)    :: zMinRatio, zMaxRatio
+            integer, intent(out)            :: hosIndex
             !! ----------------------------------------------
             character(kind=c_char, len=1), dimension(nChar) :: charC_hosSolver
             character(kind=c_char, len=1), dimension(nChar) :: charC_hosFileName
@@ -247,59 +257,67 @@
                     charC_hosFileName(i) = hosFileName(i:i)
                 end if
             enddo
-            call subG2G_init(charC_hosSolver, charC_hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+            call subG2G_init(charC_hosSolver, charC_hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, hosIndex)
         end subroutine
 
-        subroutine correctGrid2Grid(simulTime)
+        subroutine correctGrid2Grid(hosIndex, simulTime)
             implicit None
+            integer, intent(in)          :: hosIndex
             Double precision, intent(in) :: simulTime
-            Call subG2G_correct(simulTime)
+            Call subG2G_correct(hosIndex, simulTime)
         end subroutine
 
-        subroutine getHOSeta(x, y, t, eta)
+        subroutine getHOSeta(hosIndex, x, y, t, eta)
             implicit none
-            Double precision, intent(in) :: x, y, t
+            integer, intent(in)           :: hosIndex
+            Double precision, intent(in)  :: x, y, t
             Double precision, intent(out) ::  eta
-            Call subG2G_getHOSEta(x, y,t,eta)
+            Call subG2G_getHOSEta(hosIndex, x, y, t, eta)
         end subroutine
 
-        subroutine getHOSU(x, y, z, t, u, v, w)
+        subroutine getHOSU(hosIndex, x, y, z, t, u, v, w)
             implicit none
+            integer, intent(in)           :: hosIndex
             Double precision, intent(in)  :: x, y, z, t
             Double precision, intent(out) :: u, v, w
-            Call subG2G_getHOSU(x, y, z, t, u, v, w)
+            Call subG2G_getHOSU(hosIndex, x, y, z, t, u, v, w)
         end subroutine
 
-        subroutine getHOSPd(x, y, z, t, pd)
+        subroutine getHOSPd(hosIndex, x, y, z, t, pd)
             implicit none
+            integer, intent(in)           :: hosIndex
             double precision, intent(in)  :: x, y, z, t
             double precision, intent(out) :: pd
-            Call subG2G_getHOSPd(x, y, z, t, pd)
+            Call subG2G_getHOSPd(hosIndex, x, y, z, t, pd)
         end subroutine
 
-        subroutine getHOSFlow(x, y, z, t, eta, u, v, w, pd)
+        subroutine getHOSFlow(hosIndex, x, y, z, t, eta, u, v, w, pd)
             implicit none
+            integer, intent(in)           :: hosIndex
             double precision, intent(in)  :: x, y, z, t
             double precision, intent(out) :: eta, u, v, w, pd
-            Call subG2G_getHOSFlow(x, y, z, t, eta, u, v, w, pd)
+            Call subG2G_getHOSFlow(hosIndex, x, y, z, t, eta, u, v, w, pd)
         end subroutine
 
-        subroutine getHOSEndTime(endTime)
+        subroutine getHOSEndTime(hosIndex, endTime)
             implicit none
+            integer, intent(in)           :: hosIndex
             double precision, intent(out) :: endTime
-            Call subG2G_getHOSEndTime(endTime)
+            Call subG2G_getHOSEndTime(hosIndex, endTime)
         end subroutine
 
-        subroutine getHOSWaterDepth(waterDepth)
+        subroutine getHOSWaterDepth(hosIndex, waterDepth)
             implicit none
+            integer, intent(in)           :: hosIndex
             double precision, intent(out) :: waterDepth
-            Call subG2G_getHOSWaterDepth(waterDepth)
+            Call subG2G_getHOSWaterDepth(hosIndex, waterDepth)
         end subroutine
 
-        subroutine isGrid2GridInitialized(isG2Initialized)
+        subroutine isGrid2GridInitialized(hosIndex, isG2Initialized)
             implicit none
+            integer, intent(in)  :: hosIndex
             logical, intent(out) :: isG2Initialized
-            Call subG2G_isGrid2GridInitialized(isG2Initialized)
+            Call subG2G_isGrid2GridInitialized(hosIndex, isG2Initialized)
         end subroutine
 
     End Module

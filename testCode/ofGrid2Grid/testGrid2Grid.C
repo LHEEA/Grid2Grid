@@ -51,7 +51,8 @@ namespace Foam
     //      nZmin,
     //      nZmax,
     //      zMinRatio,
-    //      zMaxRatio
+    //      zMaxRatio,
+    //      hosIndex
     //  )
     //
     //    Input
@@ -60,6 +61,9 @@ namespace Foam
     //      zMin, zMax           : HOS grid zMin and zMax
     //      nZmin, nZmax         : HOS number of z grid
     //      zMinRatio, zMaxRatio : HOS z grid max/min ratio
+    //
+    //    Output
+    //      hosIndex             : HOS Vol2Vol Index
     //
     extern "C" void __modgrid2grid_MOD_initializegrid2grid
     (
@@ -70,23 +74,26 @@ namespace Foam
         const int*,
         const int*,
         const double*,
-        const double*
+        const double*,
+        int*
     );
 
     //- Correct Grid2Grid for given simulation Time
     //
-    //  __modgrid2grid_MOD_correctgrid2grid(simulTime)
+    //  __modgrid2grid_MOD_correctgrid2grid(hosIndex, simulTime)
     //
     //    Input
+    //      hosIndex   : HOS Vol2Vol Index
     //      simulTime  : Simulation Time
     //
-    extern "C" void __modgrid2grid_MOD_correctgrid2grid(const double *);
+    extern "C" void __modgrid2grid_MOD_correctgrid2grid(const int *, const double *);
 
     //- Get HOS Wave Elevation
     //
-    //  __modgrid2grid_MOD_gethoseta(x, y, t, eta)
+    //  __modgrid2grid_MOD_gethoseta(hosIndex, x, y, t, eta)
     //
     //    Input
+    //      hosIndex : HOS Vol2Vol Index
     //      x, y, t  : (x and y) position and simulation Time (t)
     //
     //    Output
@@ -94,6 +101,7 @@ namespace Foam
     //
     extern "C" void __modgrid2grid_MOD_gethoseta
     (
+        const int *,
         const double *,
         const double *,
         const double *,
@@ -102,9 +110,10 @@ namespace Foam
 
     //- Get HOS Flow Velocity
     //
-    //  __modgrid2grid_MOD_gethosu(x, y, z, t, u, v, w)
+    //  __modgrid2grid_MOD_gethosu(hosIndex, x, y, z, t, u, v, w)
     //
     //    Input
+    //      hosIndex    : HOS Vol2Vol Index
     //      x, y, z, t  : (x, y, z) position and simulation Time (t)
     //
     //    Output
@@ -112,6 +121,7 @@ namespace Foam
     //
     extern "C" void __modgrid2grid_MOD_gethosu
     (
+        const int *,
         const double *,
         const double *,
         const double *,
@@ -123,9 +133,10 @@ namespace Foam
 
     //- Get HOS Dynamic Pressure
     //
-    //  __modgrid2grid_MOD_gethospd(x, y, z, t, pd)
+    //  __modgrid2grid_MOD_gethospd(hosIndex, x, y, z, t, pd)
     //
     //    Input
+    //      hosIndex    : HOS Vol2Vol Index
     //      x, y, z, t  : (x, y, z) position and simulation Time (t)
     //
     //    Output
@@ -133,6 +144,7 @@ namespace Foam
     //
     extern "C" void __modgrid2grid_MOD_gethospd
     (
+        const int *,
         const double *,
         const double *,
         const double * ,
@@ -142,9 +154,10 @@ namespace Foam
 
     //- Get HOS Wave Elevation, Flow Velocity and Dynamic Pressure
     //
-    //  __modgrid2grid_MOD_gethosflow(x, y, z, t, eta, u, v, w, pd)
+    //  __modgrid2grid_MOD_gethosflow(hosIndex, x, y, z, t, eta, u, v, w, pd)
     //
     //    Input
+    //      hosIndex    : HOS Vol2Vol Index
     //      x, y, z, t  : (x, y, z) position and simulation Time (t)
     //
     //    Output
@@ -152,8 +165,19 @@ namespace Foam
     //      u, v, w     : (x, y, z) - directional flow velocity
     //      pd          : Dynamic Pressure p = -rho * d(phi)/dt - 0.5 * rho * |U * U|
     //
-    extern "C" void __modgrid2grid_MOD_gethosflow(const double *, const double *, const double * , const double *,
-                                                  double *, double *, double * , double *, double *);
+    extern "C" void __modgrid2grid_MOD_gethosflow
+    (
+        const int *,
+        const double *,
+        const double *,
+        const double * ,
+        const double *,
+        double *,
+        double *,
+        double * ,
+        double *,
+        double *
+    );
 
 }
 
@@ -163,7 +187,7 @@ int main(int argc, char *argv[])
 
     // Set HOS Solver Type
     const word HOSsolver_("Ocean");
-    const word HOSFileName_("./modes_HOS_SWENSE.dat");
+    const word HOSFileName_("./modes_HOS_SWENSE.dat");    
 
     // Set File Name
     string strHOSSolver = string(HOSsolver_);
@@ -176,20 +200,23 @@ int main(int argc, char *argv[])
     const char *HOSfileName = strHOSFileName.c_str();
 
     // Set HOS Z Grid Information
-    double zMin(-0.6), zMax(0.2);
-    int nZmin(10), nZMax(5);
+    int indexHOS(-1);
 
-    double zMinRatio(3.0), zMaxRatio(0.2);
+    double zMin(-0.6), zMax(0.6);
+    int nZmin(50), nZMax(50);
+
+    double zMinRatio(3.0), zMaxRatio(3.0);
 
     // Initialize Grid2Grid
     __modgrid2grid_MOD_initializegrid2grid(HOSsolver, HOSfileName,
                                           &zMin, &zMax,
                                           &nZmin, &nZMax,
-                                          &zMinRatio, &zMaxRatio);
+                                          &zMinRatio, &zMaxRatio, &indexHOS);
 
+    Info << "HOS Label : " << indexHOS << endl;
 
     // Set Position
-    double x(0.5), y(0.0), z(-0.3);
+    double x(0.5), y(0.0), z(-0.5);
 
     // Define Flow Quantities
     double eta, u, v, w, pd;
@@ -201,16 +228,16 @@ int main(int argc, char *argv[])
     for (int it = 0; it < 11; it++)
     {
         // Correct Grid2Grid
-        __modgrid2grid_MOD_correctgrid2grid(&simulTime);
+        __modgrid2grid_MOD_correctgrid2grid(&indexHOS, &simulTime);
 
         // Get Wave Eta
-        __modgrid2grid_MOD_gethoseta(&x, &y, &simulTime, &eta);
+        __modgrid2grid_MOD_gethoseta(&indexHOS, &x, &y, &simulTime, &eta);
 
         // Get Flow Velocity
-        __modgrid2grid_MOD_gethosu(&x, &y, &z, &simulTime, &u, &v, &w);
+        __modgrid2grid_MOD_gethosu(&indexHOS, &x, &y, &z, &simulTime, &u, &v, &w);
 
         // Get Dynamic Pressure
-        __modgrid2grid_MOD_gethospd(&x, &y, &z, &simulTime, &pd);
+        __modgrid2grid_MOD_gethospd(&indexHOS, &x, &y, &z, &simulTime, &pd);
 
         Info << " sumulTime : " << simulTime << endl;
         Info << "   eta     : " << eta << endl;
@@ -219,7 +246,7 @@ int main(int argc, char *argv[])
 
         // Get whole Information
 
-        __modgrid2grid_MOD_gethosflow(&x, &y, &z, &simulTime, &eta, &u, &v, &w, &pd);
+        __modgrid2grid_MOD_gethosflow(&indexHOS, &x, &y, &z, &simulTime, &eta, &u, &v, &w, &pd);
         Info << "   eta     : " << eta << endl;
         Info << "   u, v, w : " << u << " " << v << " " << w << endl;
         Info << "   pd      : " << pd << nl << endl;

@@ -3,7 +3,8 @@
         use modCommG2G
         Implicit None
 
-        Integer,Parameter :: nChar = 300
+        Integer,Parameter      :: nChar = 300
+        integer                :: hosIndex
         Character(len = nChar) :: hosSolver
         Character(len = nChar) :: hosFileName
         Character(len = nChar) :: grid2gridPath
@@ -18,9 +19,10 @@
 
         write(*,*) "Test program (Intel Fortran) to use Grid2Grid shared library"
 
-
         grid2gridPath = "../../obj/libGrid2Grid.so"
         Call callGrid2Grid(grid2gridPath)
+
+        hosIndex = -1
 
         hosSolver = "Ocean"
         hosFileName = "../../data-modes_HOS_SWENSE.dat/hosOcean_2DIrr_modes_HOS_SWENSE.dat"
@@ -34,7 +36,7 @@
         zMinRatio = 3.d0
         zMaxRatio = 3.d0
 
-        Call initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+        Call initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, hosIndex)
 
         !! Time Information
         t  = 0.0d0
@@ -49,16 +51,16 @@
         do it = 1,10
 
             !! Correct HOS Vol2VOl for given time
-            Call correctGrid2Grid(t)
+            Call correctGrid2Grid(hosIndex, t)
 
             !! Get Wave Elevation
-            Call getHOSeta(x, y , t, eta)
+            Call getHOSeta(hosIndex, x, y , t, eta)
 
             !! Get Flow Velocity
-            Call getHOSU(x, y, z, t, u, v ,w)
+            Call getHOSU(hosIndex, x, y, z, t, u, v ,w)
 
             !! Get Dynamic Pressure
-            Call getHOSPd(x, y, z, t, pd)
+            Call getHOSPd(hosIndex, x, y, z, t, pd)
 
             !! Write Flow Information
             write(*,*) t, eta, u, v, w, pd

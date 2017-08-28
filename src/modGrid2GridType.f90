@@ -26,7 +26,7 @@ REAL(RP), PARAMETER    :: tiny    = epsilon(1.0_rp)
 REAL(RP), PARAMETER    :: convErr = epsilon(1.0) * 10
 
 ! String length
-INTEGER, PARAMETER :: StringLength = 200
+INTEGER, PARAMETER :: StringLength = 300
 
 ! Input File Character Length
 INTEGER, PARAMETER :: nCharFileLength = 5000
