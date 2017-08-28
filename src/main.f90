@@ -3,11 +3,11 @@ Program main
     Character(Len =100) :: inputFileName
     inputFileName = "postGrid2Grid.inp"
 
-    ! Call testPost(inputFileName)
+    Call testPost(inputFileName)
 
     ! Call testSurf2Vol()
 
-    Call testVol2Vol()
+    ! Call testVol2Vol()
 
 End Program
 
@@ -24,6 +24,8 @@ Subroutine testPost(inputFileName)
     !! Do Post Processing
     Call postG2G%doPostProcessing()
 
+    Call postG2G%destroy
+
 end Subroutine
 
 !! - Test HOS Vol2VOL
@@ -32,13 +34,13 @@ Subroutine testVol2Vol
     Use modVol2Vol
     Implicit None
     Type(typHOSVol2Vol) :: hosV2V
-    character(len=100) :: fileName1, fileName2
-    integer              :: nZmin, nZmax
-    real(RP)             :: zMin, zMax
-    real(RP)           :: dt,t
-    real(RP)           :: x, y, z
-    real(RP)           :: eta, u, v, w, pd
-    integer            :: it
+    character(len=100)  :: fileName1, fileName2
+    integer             :: nZmin, nZmax
+    real(RP)            :: zMin, zMax
+    real(RP)            :: dt,t
+    real(RP)            :: x, y, z
+    real(RP)            :: eta, u, v, w, pd
+    integer             :: it
     ! -------------------------------------------------------------------------
 
     !! - HOS Surf2Vol z-directional mesh Information

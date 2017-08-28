@@ -56,6 +56,10 @@ contains
 
     procedure, public :: initialize => buildRectLinearMesh
 
+    procedure         :: destroy => destroyRectLGrid
+
+    final             :: finalRectLgrid
+
 end Type
 
 Type :: typWaveProbe
@@ -155,6 +159,12 @@ Type :: typPostGrid2Grid
         !!- Do Post Processing
         procedure, public :: doPostProcessing
 
+        !!- Destroy postGrid2Grid
+        procedure, public :: destroy => destroyPostG2G
+
+        !!- Destroyer
+        !final             :: finalPostG2G
+
 End Type
 
 contains
@@ -199,6 +209,24 @@ contains
 
         this%isInitialized_ = .TRUE.
 
+    end subroutine
+
+    subroutine destroyPostG2G(this)
+        implicit none
+        class(typPostGrid2Grid), intent(inout) :: this
+
+        Call this%hosVol2Vol_%destroy
+
+        Call this%rectLGrid_%destroy
+
+        if (allocated(this%waveProbe_)) deallocate(this%waveProbe_)
+
+    end subroutine
+
+    subroutine finalPostG2G(this)
+        implicit none
+        type(typPostGrid2Grid), intent(inout) :: this
+        Call this%destroy
     end subroutine
 
     SUBROUTINE doPostProcessing(this)
@@ -1261,7 +1289,36 @@ contains
 
     end subroutine
 
+    Subroutine destroyRectLGrid(this)
+        implicit none
+        class(typRectilinearGrid), intent(inout) :: this
 
+        if ( allocated( this%X_ ) ) deallocate( this%X_ )
+        if ( allocated( this%Y_ ) ) deallocate( this%Y_ )
+        if ( allocated( this%Z_ ) ) deallocate( this%Z_ )
+
+        if ( allocated( this%movingZ_ ) ) deallocate( this%movingZ_ )
+
+        if ( allocated( this%eta_ ) ) deallocate( this%eta_ )
+        if ( allocated( this%u_ ) ) deallocate( this%u_ )
+        if ( allocated( this%v_ ) ) deallocate( this%v_ )
+        if ( allocated( this%w_ ) ) deallocate( this%w_ )
+        if ( allocated( this%pd_ ) ) deallocate( this%pd_ )
+
+        this%zMinRatio_ = 1.0
+        this%zMaxRatio_ = 1.0
+
+        this%nX_ = 0
+        this%nY_ = 0
+        this%nZ_ = 0
+
+    End Subroutine
+
+    Subroutine finalRectLGrid(this)
+        implicit none
+        type(typRectilinearGrid), intent(inout) :: this
+        Call this%destroy
+    End Subroutine
 
 !-----------------------------------------------------------------------
 End Module
