@@ -4,12 +4,12 @@
 DSRC=src/
 DOBJ=obj/
 
-DTHRDLIB = ../../obj/
-
 MKDIRS  = $(DOBJ)
 
 ### Compiler -------------------------------------------------------------------
 FC      = ifort
+# FC      = gfortran
+
 OPTSC0  = -c
 
 ### Targets for compilation ----------------------------------------------------
@@ -24,7 +24,7 @@ LITEXT  = "Assembling $@"
 
 main:$(DOBJ)main.o
 	@echo $(COTEXT)
-	@$(FC) -o $@ $(DOBJ)*.o
+	@$(FC) -o $@ $(DOBJ)*.o -ldl
 EXES := main
 
 ### compiling rules ------------------------------------------------------------

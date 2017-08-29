@@ -17,7 +17,7 @@
         Double precision       :: eta, u, v, w, pd
         integer                :: it
 
-        write(*,*) "Test program (Intel Fortran) to use Grid2Grid shared library"
+        write(*,*) "Test program (Connect to Fortran) to use Grid2Grid shared library"
 
         grid2gridPath = "../../obj/libGrid2Grid.so"
         Call callGrid2Grid(grid2gridPath)
@@ -69,6 +69,6 @@
             t = t + dt
         enddo
 
-        write(*,*) "Test program (Intel Fortran) is done ..."
+        write(*,*) "Test program (Connect to Fortran) is done ..."
 
     End Program

@@ -30,17 +30,6 @@
         type(commSub) :: comm_getWaveDepth
         type(commSub) :: comm_isInit
 
-        type(c_ptr) :: handle
-        procedure(proc_init), bind(c), pointer       :: subG2G_init
-        procedure(proc_correct), bind(c), pointer    :: subG2G_correct
-        procedure(proc_getHOSEta), bind(c), pointer  :: subG2G_getHOSEta
-        procedure(proc_getHOSU), bind(c), pointer    :: subG2G_getHOSU
-        procedure(proc_getHOSPd), bind(c), pointer   :: subG2G_getHOSPd
-        procedure(proc_getHOSFlow), bind(c), pointer :: subG2G_getHOSFlow
-        procedure(proc_getHOSEndTime), bind(c), pointer :: subG2G_getHOSEndTime
-        procedure(proc_getHOSWaterDepth), bind(c), pointer :: subG2G_getHOSWaterDepth
-        procedure(proc_isGrid2GridInitialized), bind(c), pointer :: subG2G_isGrid2GridInitialized
-
         ! interface to linux API
         integer(c_int), parameter :: rtld_lazy=1 ! value extracte from the C header file
         integer(c_int), parameter :: rtld_now=2  ! value extracte from the C header file
@@ -149,6 +138,17 @@
             end subroutine
 
         end interface
+
+        type(c_ptr) :: handle
+        procedure(proc_init), bind(c), pointer       :: subG2G_init
+        procedure(proc_correct), bind(c), pointer    :: subG2G_correct
+        procedure(proc_getHOSEta), bind(c), pointer  :: subG2G_getHOSEta
+        procedure(proc_getHOSU), bind(c), pointer    :: subG2G_getHOSU
+        procedure(proc_getHOSPd), bind(c), pointer   :: subG2G_getHOSPd
+        procedure(proc_getHOSFlow), bind(c), pointer :: subG2G_getHOSFlow
+        procedure(proc_getHOSEndTime), bind(c), pointer :: subG2G_getHOSEndTime
+        procedure(proc_getHOSWaterDepth), bind(c), pointer :: subG2G_getHOSWaterDepth
+        procedure(proc_isGrid2GridInitialized), bind(c), pointer :: subG2G_isGrid2GridInitialized
 
     contains
 
