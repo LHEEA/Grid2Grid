@@ -45,7 +45,7 @@ integer, parameter :: INDEX_SINE_MESH           = 1
 integer, parameter :: INDEX_GEOMETRICRATIO_MESH = 2
 
 ! Function Z Value Criterion
-REAL(RP),PARAMETER :: FNZ_VALUE = 1000.0_RP
+REAL(RP),PARAMETER :: FNZ_VALUE = 10.0_RP
 
 ! File IO Setting
 integer :: fidUnit = 101

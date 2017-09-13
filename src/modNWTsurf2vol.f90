@@ -465,8 +465,10 @@ contains
 
         !-- Check z domain length
         if (-this%zMin_.gt.this%depth_) then
-            write(*,*) "    [Error] oceanSurf2Vol::buildGlobalMesh(zMin, zMax, nZmin, nZmax)"
+            write(*,*) "    [Error] NWTSurf2Vol::buildGlobalMesh(zMin, zMax, nZmin, nZmax)"
             write(*,*) "        zMin is over than water depth !"
+            write(*,*) "        zMin      : ", -this%zMin_
+            write(*,*) "        HOS depth : ", this%depth_
             stop
         endif
 
@@ -665,8 +667,10 @@ contains
                 k = this%hosMode_%kxy(ix,iy)
                 kZ = k * (hosZ + 1.0_rp)
                 if ((kZ.lt.50.0).and.(k.lt.50.0)) then
-                    coeff  = cosh(kZ) / cosh(k)
-                    coeff2 = sinh(kZ) / sinh(k)
+                    ! coeff  = cosh(kZ) / cosh(k)
+                    ! coeff2 = sinh(kZ) / sinh(k)
+                    coeff  = exp(k * hosZ) * (1.0_rp + exp(-2.0_rp*kZ)) / (1.0_rp + exp(-2.0_rp * k))
+                    coeff2 = exp(k * hosZ) * (1.0_rp - exp(-2.0_rp*kZ)) / (1.0_rp - exp(-2.0_rp * k))
                 else
                     coeff  = exp(kZ)
                     coeff2 = coeff

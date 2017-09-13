@@ -1,5 +1,4 @@
     Program Main
-        use iso_c_binding
         use modCommG2G
         Implicit None
 

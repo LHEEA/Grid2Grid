@@ -401,6 +401,8 @@ contains
         if (-this%zMin_.gt.this%depth_) then
             write(*,*) "    [Error] oceanSurf2Vol::buildGlobalMesh(zMin, zMax, nZmin, nZmax)"
             write(*,*) "        zMin is over than water depth !"
+            write(*,*) "        zMin      : ", -this%zMin_
+            write(*,*) "        HOS depth : ", this%depth_
             stop
         endif
 
@@ -609,7 +611,7 @@ contains
         class(typHOSOcean), intent(inout) :: this
         integer  :: ix, iy, iz
         real(rp) :: hosZ, eta
-        real(rp) :: kZ, kD, coeff, coeff2
+        real(rp) :: kZ, kD, coeff, coeff2, k
         !!!......................................
 
         !! - Compute nondimensionalized wave elevation
@@ -631,12 +633,14 @@ contains
             ! this%hosMesh_%aDwDt(ix, iy) = this%hosMode_%ktheta(ix, iy) * this%hosMode_%modet(ix, iy)
 
             do iy = 2, this%nYmode_
-                kZ = this%hosMode_%kXY(ix, iy) * (hosZ + this%nonDimDepth_ )
-                kD = this%hosMode_%kXY(ix, iy) * this%nonDimDepth_
-
+                k  = this%hosMode_%kXY(ix, iy)
+                kZ = k * (hosZ + this%nonDimDepth_ )
+                kD = k * this%nonDimDepth_
                 if ( (kZ.lt.50.0).and.(kD.le.50.0) ) then
-                    coeff  = cosh(kZ) / cosh(kD)
-                    coeff2 = sinh(kZ) / sinh(kD)
+                    ! coeff  = cosh(kZ) / cosh(kD)
+                    ! coeff2 = sinh(kZ) / sinh(kD)
+                    coeff  = exp(k * hosZ) * (1.0_rp + exp(-2.0_rp*kZ)) / (1.0_rp + exp(-2.0_rp * kD))
+                    coeff2 = exp(k * hosZ) * (1.0_rp - exp(-2.0_rp*kZ)) / (1.0_rp - exp(-2.0_rp * kD))
                 else
                     coeff  = exp(this%hosMode_%kXY(ix, iy) * hosZ)
                     coeff2 = coeff
