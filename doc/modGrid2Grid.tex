@@ -1,0 +1,80 @@
+\pagebreak
+\subsection{modGrid2Grid}
+
+\subsubsection{Description}
+
+\texttt{modGrid2Grid} is not a class but a Fortan module which contains an array of \texttt{Vol2Vol} classes and subroutines to communicate with other languages. The module structure is depicted in Fig. \ref{fig:modGrid2GridStructure}. It has two static data which are input data array and \texttt{Vol2Vol} array not to have and update multiple \texttt{Vol2Vol} classes for efficiency and to save memory. When \texttt{Grid2Grid} is initialized from a program written in another language, it firstly check the input variables and return \texttt{HOSIndex}. If the same input variables are given, it returns the same \texttt{HOSIndex} and does not allocate nor initialise \texttt{Vol2Vol}. Other languages can distiguish different HOS wave theory by using the \texttt{HOSIndex}.
+The subroutines \texttt{correct} and \texttt{get*} can be called with \texttt{HOSIndex}, position and time. 
+
+The array size of \texttt{modGrid2Grid} is 100 by default (It can deal with 100 different HOS waves) but it does not consume much memory because classes of \texttt{Grid2Grid} are programmed with dynamic arrays and consequently only a few of static data are used. If more HOS wave theories are needed, the variable \texttt{nMaxVol2Vol} in \texttt{src/modGrid2Grid.f90} can be changed to deal with over than 100 different HOS wave theory. 
+
+The functionality of \texttt{modGrid2Grid} is almost the same with \texttt{Vol2Vol}. 
+
+\vspace{0.5cm}
+
+{
+	\begin{figure} [H]
+		\centering
+		\includegraphics[scale=0.72]{images/c1.structure/"ModuleGrid2GridStructure".png}
+		\vspace{0.5cm}
+		\caption{\texttt{Grid2Grid} Module structure}
+		\label{fig:modGrid2GridStructure}
+	\end{figure}
+}
+
+\subsubsection{Subroutines}	
+
+The interface between other languages with \texttt{modGrid2Grid} will be detailed in Chap. \ref{chap:interfaceLang}. 
+
+Subroutines in \texttt{modGrid2Grid} follows \texttt{ISO\_C\_BINDING}. 
+
+\vspace{0.5cm}
+
+Static subroutines : 
+
+\vspace{0.5cm}
+
+-- Initialise Grid2Grid
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_initializegrid2grid}
+\vspace{0.2cm}
+
+-- Correct Grid2Grid
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_correctgrid2grid}
+\vspace{0.2cm}
+
+-- Get wave elevation
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_gethoseta}
+\vspace{0.2cm}
+
+-- Get wave velocity
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_gethosu}
+\vspace{0.2cm}
+
+-- Get dynamic pressure
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_gethospd}
+\vspace{0.2cm}
+
+-- Get flow information 
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_gethosflow}
+\vspace{0.2cm}
+
+-- Get HOS simulation end time
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_gethosendtime}
+\vspace{0.2cm}
+
+-- Get HOS water depth
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_gethoswaterdepth}
+\vspace{0.2cm}
+
+-- Get logical data indicating HOS wave theory is initialized
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_isgrid2gridinitialized}
+

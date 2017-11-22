@@ -1,0 +1,131 @@
+%%
+\documentclass[12pt]{article}
+%%
+
+%% Basic Setting -----------------------------------------------------------------------
+\usepackage[english]{babel}
+\usepackage{amsmath}		 		% math pack
+\usepackage{mathtools}
+\usepackage{url}					   % add urls
+\usepackage[utf8x]{inputenc}	 % latex input utf8x (various characterers)
+\usepackage{natbib}				     % reference package
+\usepackage{parskip}				 % space between paragraph
+\usepackage{fancyhdr}				% page headers and footers
+\usepackage{vmargin}				% set various marfines for header/footer and page dimension
+\usepackage{fixltx2e}				  % latex debugging package
+%% ----------------------------------------------------------------------- Basic Setting
+
+%% Table Setting -----------------------------------------------------------------------
+\usepackage{array}						% array pack
+\usepackage{caption}  				% caption Setup 
+\usepackage{chngcntr}				% caption set to follow chapter number 
+\usepackage{hhline}					% Seperate line properties (tabular)
+\usepackage{multirow}				% multi row package
+\usepackage{booktabs,caption}	% caption
+\usepackage[flushleft]{threeparttable}	 % package for tabular notes
+
+%%... Table Numbering and Format
+\captionsetup[table]{labelfont=bf,  labelsep=period}	% table caption format
+\captionsetup[table]{skip=5pt}		% space between caption and table
+\counterwithin{table}{section}			% table caption (Chapter number)
+
+%%... Table Column Alignment Variables
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%% ----------------------------------------------------------------------- Table Setting
+
+%% Figure Setting ----------------------------------------------------------------------
+
+\usepackage{graphicx}				% graph pack
+\usepackage{subfig}					% sub figure
+\usepackage{float}						% sub figure name
+\graphicspath{{images/}}				% image path
+
+%%... Figure format
+\captionsetup[figure]{labelfont=bf,  labelsep=period}	% table caption format
+\counterwithin{figure}{section}	% figure caption (Chapter number)
+%% ---------------------------------------------------------------------- Figure Setting
+
+%% Equation Setting ------------------------------------------------------------------
+\counterwithin{equation}{section}		% equation caption (Chapter number)
+
+%... frac font 
+\newcommand\ddfrac[2]{\frac{\displaystyle #1}{\displaystyle #2}}
+%% ------------------------------------------------------------------ Equation Setting
+
+%% Auxillary -----------------------------------------------------------------------------
+%\usepackage{subcaption}			% sub-caption 
+%% ----------------------------------------------------------------------------- Auxillary
+
+
+%% Page Setting ------------------------------------------------------------------------
+\pagestyle{fancy}
+\setmarginsrb{2.5 cm}{2 cm}{2.5 cm}{2 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
+%% ------------------------------------------------------------------------ Page Setting
+
+\usepackage{xcolor}
+\usepackage{listings}             % Include the listings-package
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+%\lstdefinestyle{customf}
+%{
+%	belowcaptionskip=1\baselineskip,
+%	breaklines=true,
+%	xleftmargin=0pt,
+%	language={[95]Fortran},
+%	showstringspaces=false,
+%	basicstyle=\footnotesize\ttfamily,
+%	keywordstyle=\color{blue},
+%	commentstyle=\color{codegreen},
+%	%  commentstyle=\itshape\color{red},
+%	identifierstyle=\color{black},
+%	stringstyle=\color{orange},
+%	columns=fullflexible
+%}
+
+\lstdefinestyle{customf}
+{
+	backgroundcolor=\color{backcolour},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{blue},
+	identifierstyle=\color{black},
+	breakatwhitespace=false,
+	basicstyle=\footnotesize\ttfamily,
+	breaklines=true,
+	captionpos=b,
+	keepspaces=true,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	tabsize=2
+}
+
+% Set your language (you can change the language for each code-block optionally)
+\lstset{language={[95]Fortran},style=customf}
+\newcommand{\includecode}{\lstinputlisting}
+
+\usepackage[skip=0pt]{caption}
+
+\usepackage{tcolorbox}
+
+\tcbuselibrary{listings}
+\newtcblisting{ccode}
+{
+	colframe = black,
+	boxrule=0.5pt,
+	listing only,
+	listing options={language=C++}
+}
+
+\newtcblisting{shcode}
+{
+	colframe = black,
+	boxrule=0.5pt,
+	listing only,
+	listing options={language=bash}
+}

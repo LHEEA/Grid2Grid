@@ -1,0 +1,236 @@
+\pagebreak
+	\section{Installation}
+	
+		\subsection{Pre-Install}
+		
+		\subsubsection{FFTW Install}
+		
+		\label{chap:FFTWInstall}
+		
+		\texttt{Grid2Grid} needs fast Fourier transform (FFT) library. \texttt{FFTW} is GNU licenced FFT library. The installation order is the following:
+		
+		\vspace{0.5cm}
+		
+		\textbf{1. Download FFTW library}
+		
+		At the FFTW website (http://www.fftw.org/download.html), latest version of FFTW is available. Download \texttt{FFTW} library. 
+		
+		\vspace{0.5cm}
+		{
+			\begin{figure} [H]
+				\centering
+				\begin{tcolorbox}[standard jigsaw,opacityback=0]
+				\includegraphics[scale=0.72]{images/c2.install/"fftwDownload".png}
+				\end{tcolorbox}
+				\vspace{0.3cm}
+				\caption{Download \texttt{FFTW library}}			
+				\label{fig:vol2volStructure}
+			\end{figure}
+		}
+		
+		\pagebreak
+		
+		\textbf{2. Extract FFTW library}
+
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	tar -xvf fftw-3.3.7.tar.gz
+		\end{lstlisting}
+		
+		\vspace{0.5cm}
+		\textbf{3. Compile FFTW library}
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	cd fftw-3.3.7/
+		$
+		$	export FFTW_PATH=$PWD
+		$
+		$	./configure --prefix=$FFTW_PATH		
+		$
+		$	make CFLAGS='-fPIC'
+		$
+		$	make install
+		\end{lstlisting}
+		
+		
+		\vspace{0.5cm}
+		\textbf{4. Make soft link of FFTW library }
+		
+		If user has super user authority
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	sudo ln -s $FFTW_PATH/lib/libfftw3.a  /usr/local/lib/libfftw3.a		
+		\end{lstlisting}
+				
+		\vspace{0.5cm}
+		
+		If user has no super user authority, third party path in \texttt{makefile} of \texttt{Grid2Grid} can be changed manually. If FFTW library (\texttt{libfftw3.a}) locates at \texttt{/home/lib/libfftw3.a}, then \texttt{makefile} of \texttt{Grid2Grid} can be changed as: 
+		
+		
+		\begin{lstlisting}[language=bash]
+		
+		DTHRDLIB=/home/lib/
+		\end{lstlisting}
+		
+		
+		\pagebreak
+		\subsubsection{HOS Ocean and NWT (Optional)}
+		
+		\texttt{Grid2Grid} needs the result file of HOS solver. Installation of HOS is the following: 
+		
+		\vspace{0.2cm}
+		\textbf{1. Install FFTW}
+		
+		See Chapter \ref{chap:FFTWInstall}
+		
+		\vspace{0.2cm}
+		\textbf{2. Install makedepf90}
+		
+		\begin{lstlisting}[language=bash]		
+		
+		$	sudo apt-get install makedepf90		
+		\end{lstlisting}
+		
+		\vspace{0.2cm}
+		\textbf{3. Install LAPACK}
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	sudo apt-get install liblapack-dev liblapack-doc-man liblapack-doc liblapack-pic liblapack3 liblapack-test liblapack3gf liblapacke liblapacke-dev
+		\end{lstlisting}
+		
+		\vspace{0.2cm}
+		\textbf{4. Download HOS Ocean and NWT}
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	# Path to desired installation path
+		$
+		$	cd $HOS_INSTALLATION_PATH
+		$
+		$	git clone https://github.com/LHEEA/HOS-ocean.git
+		$
+		$	git clone https://github.com/LHEEA/HOS-NWT.git		
+		\end{lstlisting}
+		
+		\vspace{0.2cm}
+		\textbf{5. Change shared library path defined in makefile}
+		
+		Open \texttt{makefile} of HOS Ocean and NWT and change as following : 
+		
+		\begin{lstlisting}[language=bash]
+
+		#LINKLIB = $(LIBDIR)libfftw3.a $(LIBDIR)liblapack.a $(LIBDIR)librefblas.a
+		
+		LINKLIB = $(LIBDIR)libfftw3.a -llapack
+		\end{lstlisting}
+		
+		If FFTW s not installed at \texttt{\$(LIBDIR)} in \texttt{makefile}, it can be changed as an example of previous chapter. 
+		
+		\pagebreak
+		
+		\vspace{0.2cm}
+		\textbf{6. Comple HOS NWT and HOS Ocean}
+		
+		\begin{lstlisting}[language=bash]
+
+		$	cd HOS-ocean/
+		$
+		$	make
+		$	
+		$	cd ../HOS-NWT/
+		$
+		$	make
+		$
+		$	cd ..		
+		\end{lstlisting}
+		
+		\vspace{0.2cm}
+		\textbf{7. Check executable is generated}
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	# Check HOS NWT
+		$	ls HOS-NWT/bin/HOS-NWT
+		$
+		$	# Check HOS Ocean
+		$	ls HOS-ocean/bin/HOS-ocean
+		\end{lstlisting}
+		
+		\vspace{0.2cm}
+		\textbf{8. Make soft link (optional)}
+		
+		\begin{lstlisting}[language=bash]
+
+		$	# Make Soft Link (Optional)
+		$
+		$	export HOS_PATH=$PWD
+		$
+		$	sudo ln -s $HOS_PATH/bin/HOS-NWT		/usr/bin/HOS-NWT
+		$
+		$	sudo ln -s $HOS_PATH/bin/HOS-ocean	/usr/bin/HOS-ocean
+		\end{lstlisting}
+
+		\pagebreak
+		\subsection{Grid2Grid Installation}
+		
+		\label{chap:Grid2GridInstall}
+		
+		\subsubsection{Download Grid2Grid}
+		
+		\textbf{Download Grid2Grid}
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	# Path to desired installation path
+		$
+		$	cd $HOS_INSTALLATION_PATH
+		$
+		$	git clone https://github.com/LHEEA/Grid2Grid.git
+		\end{lstlisting}
+		
+		\vspace{0.2cm}
+		
+		\textbf{Set FFTW Path (FFTW library is not installed on \texttt{/usr/local/lib/}}
+		
+		Change \texttt{DTHRDLIB} in \texttt{makefile} at FFTW library path.
+		
+		\begin{lstlisting}[language=bash]
+		
+		DTHRDLIB=$FFTW_LIBRARY_PATH
+		
+		# Example
+		#	DTHRDLIB=/home/lib/			if "libfftw3.a" exists at /home/lib/
+		\end{lstlisting}
+		
+		\subsubsection{Compile PostGrid2Grid}
+		
+		\begin{lstlisting}[language=bash]										
+
+		$	cd Grid2Grid
+		$
+		$	make 
+		\end{lstlisting}
+		
+		\subsubsection{Compile Grid2Grid Shared Library}
+		
+		\textbf{Compile \texttt{libGrid2Grid.so} in \texttt{Grid2Grid/obj/}}
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	make createlib
+		\end{lstlisting}		
+	
+		\vspace{0.2cm}
+
+		\textbf{Compile \texttt{libGrid2Grid.so} in \texttt{\$FOAM\_USER\_LIBBIN}}
+		
+		If OpenFOAM is installed, \texttt{libGrid2Grid.so} can be compiled at \texttt{\$FOAM\_USER\_LIBBIN}. If OpenFOAM environment is called, following make rule can be used directly. 
+		
+		\begin{lstlisting}[language=bash]
+		
+		$	make createOFlib
+		\end{lstlisting}

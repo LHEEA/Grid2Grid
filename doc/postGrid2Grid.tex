@@ -1,0 +1,250 @@
+\pagebreak
+	\subsection{PostGrid2Grid}
+	
+	\label{chap:postGrid2Grid}
+
+	\subsubsection{Description}
+	
+	\texttt{PostGrid2Grid} is a HOS post-processing class. It generates 3D VTK files of wave fields for visualization and wave elevation time series computed from \texttt{Vol2Vol} class. Wave fields at desired simulation time and spatial domain and wave elevation time series can be re-generated at some provided wave probes position. 
+
+	\texttt{PostGrid2Grid} algorithm is depicted in Fig. \ref{fig:postGrid2GridAlgorighm}. \texttt{PostGrid2Grid} is initialised with input file. The input file \texttt{postGrid2Grid.inp} contains HOS grid information and post processing information. \texttt{PostGrid2Grid} first reads and checks the input file and then build 3D visualization grid and wave probes. \texttt{Vol2Vol} class is also initialised. The subroutine \texttt{doPostProcessing} do time loop of \texttt{correct}. Subroutine \texttt{correct} first corrects the \texttt{Vol2Vol} class and gets the wave fields. If the grid option is set to no air mesh, 3D grid is fitted to wave elevation. It writes the results on files (3D VTK file and wave elevation time series). 
+	
+	\vspace{0.2cm}
+	
+	{
+		\begin{figure} [H]
+			\centering
+			\includegraphics[scale=0.78]{images/c1.structure/"postGrid2Grid_Algorithm".png}
+			\vspace{0.5cm}
+			\caption{\texttt{PostGrid2Grid} Algorithm}
+			\label{fig:postGrid2GridAlgorighm}
+		\end{figure}
+	}	
+	
+	\pagebreak
+	\subsubsection{Class(Type)}	
+	
+	\textbf{Class} : \texttt{PostGrid2Grid}
+	
+	\hspace{0.5 cm} -- Data :
+	
+	\hspace{1.0 cm} $\circ$ \texttt{hosVol2Vol\_} : \texttt{Vol2Vol} class
+	
+	\hspace{1.0 cm} $\circ$ \texttt{rectLGrid\_} : Rectangular linear grid for 3D wave fields (VTK output)
+	
+	\hspace{1.0 cm} $\circ$ \texttt{waveProbe\_(:)} : Wave probe 
+	
+	\vspace{0.5cm}
+	
+	\hspace{0.5 cm} -- Functionality (Public) :
+	
+	\hspace{1.0 cm} $\circ$ \texttt{initialize} : Initialise PostGrid2Grid class
+	
+	\hspace{1.0 cm} $\circ$ \texttt{correct} : Correct \texttt{Vol2Vol}, \texttt{rectLGrid\_} and \texttt{waveProbe\_} and write output
+	
+	\hspace{1.0 cm} $\circ$ \texttt{writeVTK} : Write 3D wave fields in VTK format
+	
+	\hspace{1.0 cm} $\circ$ \texttt{doPostProcessing} : Do post processing 
+	
+	\hspace{1.0 cm} $\circ$ \texttt{destroy} : Destuctor of PostGrid2Grid class
+	
+	\vspace{0.5cm}
+	
+	\hspace{0.5 cm} -- Functionality (Private) :
+	
+	\hspace{1.0 cm} $\circ$ \texttt{readPostG2GInputFile} : Read \texttt{PostGrid2Grid} input file
+	
+	\hspace{1.0 cm} $\circ$ \texttt{checkPostG2GParameter} : Check \texttt{PostGrid2Grid} input file
+	
+	\hspace{1.0 cm} $\circ$ \texttt{writeVTKtotalASCII} : Write wave fields (Including air domain)
+	
+	\hspace{1.0 cm} $\circ$ \texttt{writeVTKnoAirASCII} : Write wave fields (Grid is fitted to wave elevation)
+	
+	\hspace{1.0 cm} $\circ$ \texttt{writeWaveProbe} : Write wave elevation time series
+	
+	\pagebreak
+	\subsubsection{Input File of PostGrid2Grid}
+	
+	\texttt{PostGrid2Grid} needs input file. The input file name is \texttt{postGrid2Grid.inp}. The input is recognized by \texttt{keyword}. Input file has free format. \texttt{keyword} can be located at any line of file but \texttt{keyword} should be located as first word at line. If special character is added on character, it is recognized as comment. The input keyword is following. 
+	
+	\vspace{0.5cm}
+	-- HOS Type (\texttt{solver}) and Result File (\texttt{hosFile})
+	
+	\begin{lstlisting}[language=bash]
+	
+	### Select Solver (Ocean or NWT) ----------------------------------- #
+	
+	solver		Ocean
+	
+	### hosFile Path --------------------------------------------------- #
+	
+	hosFile 	modes_HOS_SWENSE.dat
+	\end{lstlisting}
+	
+	-- Post Processing Time (\texttt{startTime}, \texttt{endTime}, \texttt{dt})
+		
+	\begin{lstlisting}[language=bash]
+	
+	### Post Processing Time ------------------------------------------- #
+	
+	startTime		2712.0
+	endTime			2812.0
+	dt	     		0.1	
+	\end{lstlisting}
+	
+	-- Write VTK Option (\texttt{writeVTK}) and Air Meshing Option  (\texttt{airMesh})
+	
+	\begin{lstlisting}[language=bash]
+	
+	### Write 3D VTK File (true or false) ------------------------------ #
+	
+	writeVTK		true	
+	
+	### Air Meshing (true or false) ------------------------------------ #
+	
+	airMesh			 true
+	
+	#	If airMesh is true or yes, grid will be constructed up to zMax.
+	#				     is false or no, mesh will be constructed up to wave 
+	#					   elevation.
+	\end{lstlisting}
+	
+	\pagebreak
+	
+	-- 3D Output Domain Size (\texttt{xMin}, \texttt{xMax}, \texttt{yMin}, \texttt{yMax}, \texttt{zMin}, \texttt{zMax})
+	
+	\begin{lstlisting}[language=bash]
+	
+	### 3D Output Domain Size ------------------------------------------ #
+	
+	xMin		1200
+	xMax		2000
+	
+	yMin		1200
+	yMax		2000
+	
+	zMin	-100.0
+	zMax		50.0	
+
+	# 	zMin and zMax are used to construct Surf2Vol HOS Grid.
+	\end{lstlisting}
+	
+	-- Number of Grid (\texttt{nX}, \texttt{nY}, \texttt{nZmin}, \texttt{nZmax})
+	
+	\begin{lstlisting}[language=bash]
+	
+	### Number of Mesh for 3D Output ----------------------------------- #
+	
+	nX          500
+	nY          500
+	
+	nZmin       100
+	nZmax        60
+	
+	# 	nZmin and nZmax are used to construct Surf2Vol HOS Grid.
+	\end{lstlisting}
+	
+	-- Vertical meshing scheme (\texttt{zMesh})
+	
+	\begin{lstlisting}[language=bash]
+	
+	### Z meshing scheme ----------------------------------------------- #
+	
+	zMesh       meshRatio    3.0    3.0
+	
+	#	Meshing Scheme
+	#	
+	#	uniform 	: uniform grid 
+	#	sine			: sine spaced grid (densed grid near to z=0)
+	#	meshRatio	: grid with constant geometric ratio. Minimum dz located  
+	#					    at z=0. (given two ratio is dz_max/dz_min)
+	#
+	#	meshRatio needs two ratios (ratio for z <= 0  and ratio for z > 0)
+	#
+	\end{lstlisting}
+	
+	\pagebreak
+	
+	-- Wave probe write option (\texttt{writeWaveProbe}) and Output file path (\texttt{waveProbeFile})
+	
+	\begin{lstlisting}[language=bash]
+	
+	### Wave probe write option (true or false) ------------------------ #
+	
+	writeWaveProbe  true
+	
+	### Wave Probe File path ------------------------------------------- #
+	
+	waveProbeFile   waveElevation.dat
+
+	#	If waveProbeFile is not given in input file. 
+	#	Default iutput file name "waveElevation.dat" is used. 
+	\end{lstlisting}
+	
+	-- Wave probes
+	
+	\begin{lstlisting}[language=bash]
+	
+	### Wave probe Input Format ---------------------------------------- #
+	#
+	#   There should be no blank line after nWaveProbe and probe data.
+	#   If blank line is given, last wave probes will be discarded.
+	#
+	#		There should be no blank line. 
+	#
+	#		## Format
+	#
+	# 		nWaveProbe  nProbes
+	# 		probe1name(option)     xPos1    yPos1
+	# 		probe2name             xPos2    yPos2
+	# 		...
+	# 		probeNname             xPosN    yPosN
+	#
+	# ------------------------------------------------------------------ #
+	
+	### Wave Probe Input ----------------------------------------------- #
+	
+	nWaveProbe  5
+	wp1     0.0     0.0
+	wp2     1.0     2.0
+	wp3     2.0     3.0
+	wp4     4.0     5.0
+	6.0 		7.0	
+
+	#	probeName		xPosition		yPosition
+	#
+	#	probeName is optional.
+	\end{lstlisting}	
+	
+	\pagebreak
+	\subsubsection{How to use}
+	
+	Fortran subroutine for \texttt{postGrid2Grid} is given as example.
+	
+	\vspace{0.5cm}
+	
+	\begin{lstlisting}[language={[95]Fortran}]	
+
+	!! Subroutine to run PostGrid2Grid -----------------------------------
+	Subroutine runPostGrid2Grid(inputFileName)
+	!! -------------------------------------------------------------------
+	Use modPostGrid2Grid					!! Use PostGrid2Grid Module
+	!! -------------------------------------------------------------------
+	Implicit none	
+	Character(Len = * ),intent(in) :: inputFileName		!! postGrid2Grid.inp	
+	Type(typPostGrid2Grid)         :: postG2G				!! postGrid2Grid Class
+	!! -------------------------------------------------------------------	
+	
+	!! Initialize PostGrid2Grid with Input File	
+	Call postG2G%initialize(inputFileName)
+	
+	!! Do Post Processing
+	Call postG2G%doPostProcessing()
+	
+	!! Destroy
+	Call postG2G%destroy
+	
+	!! -------------------------------------------------------------------
+	End Subroutine
+	!! -------------------------------------------------------------------	
+	\end{lstlisting}

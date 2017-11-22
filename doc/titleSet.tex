@@ -1,0 +1,32 @@
+%% Title Setting -------------------------------------------------------------------------
+
+\fancyhf{}
+\cfoot{\thepage}
+
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+%% ------------------------------------------------------------------------- Title Setting
+
+\begin{titlepage}
+	\centering
+    \vspace*{0.5 cm}    
+
+	\rule{\linewidth}{0.2 mm} \\[0.8 cm]
+	{ \huge \bfseries \thetitle}\\[0.3 cm]
+	\rule{\linewidth}{0.2 mm} \\[0.8 cm]
+	\textup{\large YoungMyung Choi, Maite Gouin, Guillaume Ducrozet, }\\[0.5 cm]		
+	\textup{\large Benjamin Bouscasse and Pierre Ferrant}\\[1.0 cm]		
+	
+	\large{17 November, 2017} \\[0.5cm]	
+	\large{Version 1.0} \\[4.0cm]
+
+	\includegraphics[scale=0.6]{"images/basic/Logo LHEEA-CNRS".png}  \\[1.5 cm]
+	
+	 \textsc{\LARGE Ecole Centrale de Nantes}\\[1.0 cm]	% University Name	 
+%	 \textsc{\large Laboratoire de Recherche en Hydrodynamique, Energetique et Environment Atmospherique}\\[1.0 cm]	% University Name	 
+	 
+\end{titlepage}

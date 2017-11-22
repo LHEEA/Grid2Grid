@@ -1,7 +1,13 @@
 .*
 *.dat
-auxiliary/bspline-fortran/build.sh
-auxiliary/bspline-fortran/src/tests/
+*.aux
+*.log
+*.mod
+*.bbl
+*.blg
+*.listing
+*.gz
+*.toc
 resultVTK/
 VTK/
 obj/

@@ -1,0 +1,361 @@
+\pagebreak
+	\section{Interface}
+	\label{chap:interfaceLang}
+
+		\subsection{GNU and Intel Fortran}
+
+		An interface example fortran program is included in \texttt{interface/fortGrid2Grid}. To communicate with \texttt{Grid2Grid}, the fortran script \texttt{modCommG2G.f90} in \texttt{interface/}\texttt{fortGrid2Grid} is needed. It is a communication module with \texttt{libGrid2Grid.so}. The fortran interface example program is following :
+
+		\begin{lstlisting}[language={[95]Fortran}]
+
+	!! Program Start ----------------------------------------------------
+	Program Main
+	!! ------------------------------------------------------------------
+	use modCommG2G			!! Use Communication Module
+	!! ------------------------------------------------------------------
+	Implicit None
+	!! Variables --------------------------------------------------------
+	Integer,Parameter      :: nChar = 300			!! Default Character Length
+	Character(len = nChar) :: grid2gridPath		!! libGrid2Grid.so Path
+
+	integer                :: hosIndex				!! HOS Index
+	Character(len = nChar) :: hosSolver				!! HOS Solver (Ocean or NWT)
+	Character(len = nChar) :: hosFileName			!! HOS Result File Path
+
+	Double precision       :: zMin, zMax			!! Surf2Vol Domain
+	integer                :: nZmin, nZmax		!! Number of vertical grid
+	Double precision       :: zMinRatio, zMaxRatio	!! Grading ratio (=3)
+
+	Double precision       :: t, dt			!! Simulation Time, dt
+	Double precision       :: x, y, z		!! Computation Point
+	Double precision       :: eta, u, v, w, pd	!! HOS Wave Information
+	!! Dummy variables --------------------------------------------------
+	integer                :: it				!! Dummy time loop integer
+
+	!! Program Body -----------------------------------------------------
+
+	!!!... Write Program Start
+	write(*,*) "Test program (Connect to Fortran) to use Grid2Grid shared library"
+
+	!!!... Set libGrid2Grid.so path.
+	!!!    It is recommended to use absolute path
+	! grid2gridPath = "/usr/lib/libGrid2Grid.so"	(if soft link is made)
+	grid2gridPath = "../../obj/libGrid2Grid.so"
+
+	!!!... Load libGrid2Grid.so and connect subroutines
+	Call callGrid2Grid(grid2gridPath)
+
+	!!!... Declare HOS Index
+	hosIndex = -1
+
+	!!!... Set HOS Type (Ocean or NWT)
+	hosSolver = "NWT"
+
+	!!!... Set HOS Result file Path
+	hosFileName = "modes_HOS_SWENSE.dat"
+
+	!!!... Set HOS Surf2Vol Domain and Vertical Grid
+	zMin = -0.6d0; 				zMax =  0.6d0
+	nZmin = 50; 					nZmax = 50
+	zMinRatio = 3.d0; 		zMaxRatio = 3.d0
+
+	!!... Initialize Grid2Grid and Get HOS Index
+	Call initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, hosIndex)
+
+	!! Time Information
+	t  = 0.0d0; 		dt = 0.1d0
+
+	!! Given Point
+	x = 0.5d0; 			y = 0.5d0; 			z = -0.5d0
+
+	!! Time Loop
+	do it = 1,10
+
+		!! Correct HOS Vol2VOl for given time
+		Call correctGrid2Grid(hosIndex, t)
+
+		!! Get Wave Elevation
+		Call getHOSeta(hosIndex, x, y , t, eta)
+
+		!! Get Flow Velocity
+		Call getHOSU(hosIndex, x, y, z, t, u, v ,w)
+
+		!! Get Dynamic Pressure
+		Call getHOSPd(hosIndex, x, y, z, t, pd)
+
+		!! Write Flow Information
+		write(*,*) t, eta, u, v, w, pd
+
+		!! Time Update
+		t = t + dt
+	enddo
+
+	!! Write End of Program
+	write(*,*) "Test program (Connect to Fortran) is done ..."
+	!! ------------------------------------------------------------------
+	End Program
+	!! ------------------------------------------------------------------
+		\end{lstlisting}
+
+		\pagebreak
+		\subsection{OpenFOAM}
+
+		An interface example OpenFOAM program is included in \texttt{interface/ofGrid2Grid}. The shared library \texttt{libGrid2Grid.so} should be compiled at \texttt{\$FOAM\_USER\_LIBBIN}. To check \texttt{libGrid2Grid.so} exists at \texttt{\$FOAM\_USER\_LIBBIN}, use following shell command :
+
+		\begin{lstlisting}[language=bash]
+
+		$	ls $FOAM_USER_LIBBIN/libGrid2Grid.so
+		\end{lstlisting}
+
+		If \texttt{libGrid2Grid.so} not exists, refer to Chapter \ref{chap:Grid2GridInstall}.
+
+		To call shared library \texttt{libGrid2Grid.so} in \texttt{\$FOAM\_USER\_LIBBIN}, OpenFOAM compiling option is added at \texttt{Make/option}. Open \texttt{Make/option} and add following compiling option.
+
+		\begin{lstlisting}[language=bash]
+
+		EXE_LIBS = \
+							...
+							-lgfortran \
+							-L$(FOAM_USER_LIBBIN) \
+							-lGrid2Grid
+		\end{lstlisting}
+
+		OpenFOAM interface example program is given next page.
+
+		\pagebreak
+
+		\begin{lstlisting}[language=c++]
+
+#include "fvCFD.H"
+
+namespace Foam
+{
+	//- Grid2Grid Initial Character Length
+	const int nCharGridGrid(300);
+
+	//- Initialize Grid2Grid Class in Fortran
+	//
+	//  __modgrid2grid_MOD_initializegrid2grid
+	//  (
+	//      hosSolver,
+	//      hosFileName,
+	//      zMin,
+	//      zMax,
+	//      nZmin,
+	//      nZmax,
+	//      zMinRatio,
+	//      zMaxRatio,
+	//      hosIndex
+	//  )
+	//
+	//    Input
+	//      hosSolver            : "NWT" or "Ocean"
+	//      hosFileName          : filePath of HOS mode result file
+	//      zMin, zMax           : HOS grid zMin and zMax
+	//      nZmin, nZmax         : HOS number of z grid
+	//      zMinRatio, zMaxRatio : HOS z grid max/min ratio
+	//
+	//    Output
+	//      hosIndex             : HOS Vol2Vol Index
+	//
+	extern "C" void __modgrid2grid_MOD_initializegrid2grid
+	(
+	const char[nCharGridGrid],
+	const char[nCharGridGrid],
+	const double*,
+	const double*,
+	const int*,
+	const int*,
+	const double*,
+	const double*,
+	int*
+	);
+
+	//- Correct Grid2Grid for given simulation Time
+	//
+	//  __modgrid2grid_MOD_correctgrid2grid(hosIndex, simulTime)
+	//
+	//    Input
+	//      hosIndex   : HOS Vol2Vol Index
+	//      simulTime  : Simulation Time
+	//
+	extern "C" void __modgrid2grid_MOD_correctgrid2grid
+	(
+	const int *,
+	const double *
+	);
+
+	//- Get HOS Wave Elevation
+	//
+	//  __modgrid2grid_MOD_gethoseta(hosIndex, x, y, t, eta)
+	//
+	//    Input
+	//      hosIndex : HOS Vol2Vol Index
+	//      x, y, t  : (x and y) position and simulation Time (t)
+	//
+	//    Output
+	//      eta      : wave elevation
+	//
+	extern "C" void __modgrid2grid_MOD_gethoseta
+	(
+	const int *,
+	const double *,
+	const double *,
+	const double *,
+	double *
+	);
+
+	//- Get HOS Flow Velocity
+	//
+	//  __modgrid2grid_MOD_gethosu(hosIndex, x, y, z, t, u, v, w)
+	//
+	//    Input
+	//      hosIndex    : HOS Vol2Vol Index
+	//      x, y, z, t  : (x, y, z) position and simulation Time (t)
+	//
+	//    Output
+	//      u, v, w     : (x, y, z) - directional flow velocity
+	//
+	extern "C" void __modgrid2grid_MOD_gethosu
+	(
+	const int *,
+	const double *,
+	const double *,
+	const double *,
+	const double *,
+	double *,
+	double *,
+	double *
+	);
+	//- Get HOS Dynamic Pressure
+	//
+	//  __modgrid2grid_MOD_gethospd(hosIndex, x, y, z, t, pd)
+	//
+	//    Input
+	//      hosIndex    : HOS Vol2Vol Index
+	//      x, y, z, t  : (x, y, z) position and simulation Time (t)
+	//
+	//    Output
+	//      pd      : Dynamic Pressure p = -rho*d(phi)/dt-0.5*rho*|U*U|
+	//
+	extern "C" void __modgrid2grid_MOD_gethospd
+	(
+	const int *,
+	const double *,
+	const double *,
+	const double * ,
+	const double *,
+	double *
+	);
+
+	//- Get HOS Wave Elevation, Flow Velocity and Dynamic Pressure
+	//
+	//  __modgrid2grid_MOD_gethosflow(hosIndex, x, y, z, t, eta, u, v, w, pd)
+	//
+	//    Input
+	//      hosIndex    : HOS Vol2Vol Index
+	//      x, y, z, t  : (x, y, z) position and simulation Time (t)
+	//
+	//    Output
+	//      eta         : wave elevation
+	//      u, v, w     : (x, y, z) - directional flow velocity
+	//      pd          : Dynamic Pressure p = -rho * d(phi)/dt - 0.5 * rho * |U * U|
+	//
+	extern "C" void __modgrid2grid_MOD_gethosflow
+	(
+	const int *,
+	const double *,
+	const double *,
+	const double * ,
+	const double *,
+	double *,
+	double *,
+	double * ,
+	double *,
+	double *
+	);
+
+}
+
+// Main OpenFOAM Program Start
+int main(int argc, char *argv[])
+{
+
+	// Write Program Start
+	Info << "OpenFOAM Program Example to Call Grid2Grid (HOS Wrapper) in OpenFOAM" << endl;
+
+	// Set HOS Solver Type
+	const word HOSsolver_("NWT");
+	const word HOSFileName_("./modes_HOS_SWENSE.dat");
+
+	// Set File Name
+	string strHOSSolver = string(HOSsolver_);
+	string strHOSFileName = string(HOSFileName_);
+
+	// Set HOS Solver Type
+	const char *HOSsolver = strHOSSolver.c_str();
+
+	// Set HOS Mode Result File Path
+	const char *HOSfileName = strHOSFileName.c_str();
+
+	// Set HOS Z Grid Information
+	int indexHOS(-1);
+
+	double zMin(-0.6), zMax(0.6);
+	int nZmin(50), nZMax(50);
+
+	double zMinRatio(3.0), zMaxRatio(3.0);
+
+	// Initialize Grid2Grid
+	__modgrid2grid_MOD_initializegrid2grid(HOSsolver, HOSfileName,
+	&zMin, &zMax,
+	&nZmin, &nZMax,
+	&zMinRatio, &zMaxRatio, &indexHOS);
+
+	Info << "HOS Label : " << indexHOS << endl;
+
+	// Set Position
+	double x(0.5), y(0.0), z(-0.5);
+
+	// Define Flow Quantities
+	double eta, u, v, w, pd;
+
+	// Set Simulation Time and Time Difference
+	double simulTime(0.0);
+	double dt(0.1);
+
+
+
+	// Time Loop
+	for (int it = 0; it < 11; it++)
+	{
+		// Correct Grid2Grid
+		__modgrid2grid_MOD_correctgrid2grid(&indexHOS, &simulTime);
+
+		// Get Wave Eta
+		__modgrid2grid_MOD_gethoseta(&indexHOS, &x, &y, &simulTime, &eta);
+
+		// Get Flow Velocity
+		__modgrid2grid_MOD_gethosu(&indexHOS, &x, &y, &z, &simulTime, &u, &v, &w);
+
+		// Get Dynamic Pressure
+		__modgrid2grid_MOD_gethospd(&indexHOS, &x, &y, &z, &simulTime, &pd);
+
+		Info << " sumulTime : " << simulTime << endl;
+		Info << "   eta     : " << eta << endl;
+		Info << "   u, v, w : " << u << " " << v << " " << w << endl;
+		Info << "   pd      : " << pd << nl << endl;
+
+		// Get whole Information
+		__modgrid2grid_MOD_gethosflow(&indexHOS, &x, &y, &z, &simulTime, &eta, &u, &v, &w, &pd);
+		Info << "   eta     : " << eta << endl;
+		Info << "   u, v, w : " << u << " " << v << " " << w << endl;
+		Info << "   pd      : " << pd << nl << endl;
+
+		// Time Update
+		simulTime+=dt;
+	}
+
+	return 0;
+}
+		\end{lstlisting}

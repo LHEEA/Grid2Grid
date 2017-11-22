@@ -6,6 +6,8 @@ DSRC=src/
 DOBJ=obj/
 DEXE=./
 
+EXES=postG2G
+
 ### FFT library (later it should be fixed.)
 DTHRDLIB=/usr/local/lib/
 
@@ -169,7 +171,11 @@ cleanmod:
 cleanexe:
 	@echo deleting exes
 	@rm -f $(addprefix $(DEXE),$(EXES))
+.PHONY : cleanvtk
+cleanvtk:
+	@echo deleting VTK
+	@rm -rf VTK resultVTK
 .PHONY : clean
 clean: cleanobj cleanmod
 .PHONY : cleanall
-cleanall: clean cleanexe
+cleanall: clean cleanexe cleanvtk

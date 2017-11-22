@@ -1,0 +1,191 @@
+\pagebreak
+	\section{Validation}
+	
+	\texttt{foamStar} is used to validate \texttt{Grid2Grid}. \texttt{foamStar} is developed by Bureau Veritas and shared with Ecole Centrale de Nantes and it can simulate nonlinear waves, seakeeping problem and also hydro-elasticity problem. It solves multiphase problem with Reynolds Averaged Navier-Stokes equations (RANS) with Volume of fraction (VOF). It is based on standard multiphase solver in OpenFOAM (\texttt{interDymFoam}). To generate waves, \texttt{foamStar} uses explicit blending scheme which blends computed flow values to target values with weight function. The blending function is given as equation \eqref{eq:blendingScheme}. Some details of \texttt{foamStar} are explained in \cite{sopheakThesis} and \cite{Charles2017}.
+	
+	{
+		\begin{subequations}
+			\label{eq:blendingScheme}
+			\begin{align}		
+				\text{U} 	 &= (1-w)\text{U}  + w\text{U}^{target} \\
+				\alpha 		&= (1-w)\alpha + w\alpha^{target}
+			\end{align}
+		\end{subequations}
+		\centering
+		where            
+		\begin{equation*}
+		w = 1 - (1-w_{base})^{\chi} \qquad  \qquad \chi = \dfrac{\Delta \text{U} \Delta t}{\Delta x} \qquad \qquad  w_{base} = -2\xi^3 + 3\xi^2
+		\end{equation*} 
+	}
+
+	By using \texttt{Grid2Grid}, the target values at blending zone can be replaced by the wave components computed from HOS wave theory. For the validation, considered HOS simulation condition is given in Table \ref{table:HOSValidataionCase}.
+	
+	\vspace{0.2cm}	
+	{
+		\begin{table}[H]
+			\caption{HOS Wave condition for validation}
+			\label{table:HOSValidataionCase}
+			\centering
+			\begin{tabular}{  C{2.7cm}   C{1.5cm}   C{1.8cm} C{1.8cm} C{1.8cm} C{1.8cm } }
+				\hline \hline				
+				\multirow{2}{*}{Wave Type} & \multirow{2}{*}{Value} & \multicolumn{2}{c}{HOS-Ocean} &	\multicolumn{2}{c}{HOS-NWT} \\
+				\cline{3-6}
+														& 	& 2D & 3D & 2D & 3D \\				
+				\hline
+				\multirow{2}{*}{Regular Wave} & $T$ [s]    & -	 & - &  0.702 &	0.702 \\
+															& $H$ [m]  & -	 & - &  0.0431 &	0.0288 \\
+				\hline
+				\multirow{3}{*}{Irregular Waves} & $T_p$ [s] & 0.702	& 1.0 &  1.0 &	0.702 \\
+															 & $H_s$[m] & 0.0288 & 0.10 &  0.05 &	0.0384 \\
+															 & $\gamma$ [-] & 3.3	& 3.3 &  3.3 &	3.3  \\
+				\hline
+				\multirow{3}{*}{Extreme Waves} & $T_p$ [s] & -	& - &  17.5 &	- \\
+															  & $H_s$[m] & - & - &  15.5 &	- \\
+														      & $\gamma$ [-] & -	& - &  3.3 &	-  \\
+				\hline\hline
+			\end{tabular}
+		\end{table}
+	}
+	
+	\pagebreak
+	
+	\subsection{Simulation results}
+	
+	The wave elevation computed by using \texttt{foamStar} and HOS-Ocean are compared in Fig. \ref{fig:HOSOcean_WaveElevation}. 
+	Small differences are observed but it is assumed to be caused by the resolution of the finite volume mesh which is not sufficient near the free surface. The VOF solver gives then those differences. Snapshots of HOS-Ocean wave fields are shown in Fig. \ref{fig:HOSOcean_WaveElevation}. 
+
+	The results of HOS-NWT for a two dimensional case is shown in Fig. \ref{fig:HOSNWT_2DWaveElevation}. And a simulation snapshot is shown in Fig. \ref{fig:HOSNWT_2DSnapshot}. Three dimensional waves with HOS-NWT are also given in Figs. \ref{fig:HOSNWT_3DWaveElevation} and \ref{fig:HOSNWT_3DSnapshot}. 
+	
+	\vspace{0.5cm}
+	
+	{
+		\begin{figure} [H]
+			\centering
+			\subfloat[][ HOS-Ocean 2D Irregular Waves]
+			{\includegraphics[scale=0.51, trim=1.2cm 0 0 0]{c5.validation/"HOS_Ocean2DIrr".png}} \\
+			\subfloat[][ HOS-Ocean 3D Irregular Waves]
+			{\includegraphics[scale=0.51, trim=1.2cm 0 0 0]{c5.validation/"HOS_Ocean3DIrr".png}}
+			\vspace{0.5cm}
+			\caption{Comparison of HOS-Ocean wave elevation}
+			\label{fig:HOSOcean_WaveElevation}
+		\end{figure}
+	}
+	
+	{
+	\begin{figure} [H]
+		\centering
+		\subfloat[][ HOS-Ocean 2D Irregular Waves] 
+		{\includegraphics[scale=1.25]{c5.validation/"HOSOcean2D_Simul".png}} \\
+		\vspace{0.5cm}
+		\subfloat[][ HOS-Ocean 3D Irregular Waves]
+		{\includegraphics[scale=1.4]{c5.validation/"HOSOcean3D_Simul".png}}
+		\vspace{0.5cm}
+		\caption{Snapshot of HOS-Ocean wave fields by \texttt{foamStar}}
+		\label{fig:HOSOcean_Snapshot}
+	\end{figure}
+	}
+
+	\pagebreak
+	
+	{
+		\begin{figure} [H]
+			\centering
+			\subfloat[][ HOS-NWT 2D Regular Waves]
+			{\includegraphics[scale=0.42, trim=1.2cm 0 0 0]{c5.validation/"HOS_NWT2DReg".png}} \\
+			\subfloat[][ HOS-NWT 2D Irregular Waves]
+			{\includegraphics[scale=0.42, trim=1.2cm 0 0 1cm]{c5.validation/"HOS_NWT2DIrr".png}}
+			\vspace{0.2cm}
+			\caption{Comparison of HOS-NWT 2D wave elevation}
+			\label{fig:HOSNWT_2DWaveElevation}
+		\end{figure}
+	}
+
+	{
+		\begin{figure} [H]
+			\centering
+			\subfloat[][ HOS-NWT 2D Irregular Waves] 
+			{\includegraphics[scale=1.]{c5.validation/"HOSNWT2D_Reg_Simul".png}} \\
+			\vspace{0.2cm}
+			\subfloat[][ HOS-NWT 2D Irregular Waves]
+			{\includegraphics[scale=1.]{c5.validation/"HOSNWT2D_Irr_Simul".png}}
+			\vspace{0.2cm}
+			\caption{Snapshot of HOS-NWT 2D wave fields by \texttt{foamStar}}
+			\label{fig:HOSNWT_2DSnapshot}
+		\end{figure}
+	}
+
+	\pagebreak
+	
+	{
+		\begin{figure} [H]
+			\centering
+			\subfloat[][ HOS-NWT 3D Regular Waves]
+			{\includegraphics[scale=0.48, trim=1.2cm 0 0 0]{c5.validation/"HOS_NWT3DReg".png}} \\
+			\subfloat[][ HOS-NWT 3D Irregular Waves]
+			{\includegraphics[scale=0.48, trim=1.2cm 0 0 1cm]{c5.validation/"HOS_NWT3DIrr".png}}
+			\vspace{0.2cm}
+			\caption{Comparison of HOS-NWT 3D wave elevation}
+			\label{fig:HOSNWT_3DWaveElevation}
+		\end{figure}
+	}
+	
+	{
+		\begin{figure} [H]
+			\centering
+			\subfloat[][ HOS-NWT 3D Regular Waves ] 
+			{\includegraphics[scale=0.65]{c5.validation/"HOSNWT3D_Reg_Simul".png}} \quad
+			\subfloat[][ HOS-NWT 3D Irregular Waves]
+			{\includegraphics[scale=0.65]{c5.validation/"HOSNWT3D_Irr_Simul".png}}
+			\vspace{0.2cm}
+			\caption{Snapshot of HOS-NWT 3D wave fields by \texttt{foamStar}}
+			\label{fig:HOSNWT_3DSnapshot}
+		\end{figure}
+	}
+	
+	\pagebreak
+	
+	Simulation of extreme waves (1000 year return period waves in Gulf of Mexico(GOM) (Condition : $H_s=17.5 m, T_p=15.5 s, \gamma=3.3$) is simulated with HOS-NWT for 2D cases and used to generate waves in \texttt{foamStar}. The waves are compared with experiments performed in the wave basin of Ecole Centrale de Nantes (ECN). To simulate nonlinear breaking waves, the wave breaking model in HOS is utilized and allows also to capture when wave breaking occur. The expected wave breaking events are shown in Fig. \ref{fig:waveBreakingEvents}. In the experiments, wave breaking is observed at the expected position and time by HOS wave theory. The breaking moment in the experiment is shown in Fig. \ref{fig:waveBreakingExp}. The time series of wave elevation measured in the experiments are compared with the results of simulation using \texttt{Grid2Grid} in Fig \ref{fig:extremeWaveComparison}. The simulation snapshot when wave breaking occur is shown in Fig. \ref{fig:waveBreakingSimulation}. The small disturbance at the wave front is observed.
+	
+	{
+		\begin{figure} [H]
+			\centering
+			\includegraphics[scale=0.7,trim=1.5cm 0 0 0.5cm]{images/c5.validation/"waveBreaking".png}
+			\caption{Expected wave breaking by HOS}
+			\label{fig:waveBreakingEvents}
+		\end{figure}
+	}
+
+	{
+		\begin{figure} [H]
+			\centering
+			\includegraphics[scale=0.6,trim=1.5cm 0 0 1cm]{images/c5.validation/"waveBreakingExp".png}
+			\vspace{0.1cm}
+			\caption{Observed wave breaking in experiment}
+			\label{fig:waveBreakingExp}
+		\end{figure}
+	}	
+	
+	\pagebreak	
+	
+	{
+		\begin{figure} [H]
+			\centering
+			\subfloat[][ Overall wave time series ] 
+			{\includegraphics[scale=0.21, trim ={1cm 0 0 5.3cm},clip]{c5.validation/"FullView".png}} \quad
+			\subfloat[][ Wave elevation at the wave breaking moment]
+			{\includegraphics[scale=0.21, trim ={1cm 0 0 3.32cm},clip]{c5.validation/"2ndBreakEvent_withCFD".png}}
+			\vspace{0.2cm}
+			\caption{Snapshot of HOS-NWT 3D wave fields by \texttt{foamStar}}
+			\label{fig:extremeWaveComparison}
+		\end{figure}
+	}
+	
+	{
+		\begin{figure} [H]
+			\centering
+			\includegraphics[scale=0.6,trim=0 0 0 0]{images/c5.validation/"waveBreakingSimul".png}
+			\vspace{0.3cm}
+			\caption{Simulation of wave breaking by \texttt{foamStar} and \texttt{Grid2Grid}}		
+			\label{fig:waveBreakingSimulation}
+		\end{figure}
+	}		

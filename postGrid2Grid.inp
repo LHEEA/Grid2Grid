@@ -4,10 +4,10 @@
 #
 #-------------------------------------------------------------------------- #
 #
-#   Grid2Grid Post Processing Program Input File 
+#   Grid2Grid Post Processing Program Input File
 #
 #   The information written in this file is recognized by first keyword.
-#   Keyword involves small and large letter. 
+#   Keyword involves small and large letter.
 #
 #   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 #
@@ -15,15 +15,10 @@
 
 ### Select Solver (Ocean or NWT) ------------------------------------------ #
 !solver 		Ocean
-!solver         NWT
-
-solver          Ocean
+solver         NWT
 
 ### hosFile Path ---------------------------------------------------------- #
-hosFile		data-modes_HOS_SWENSE.dat/hosOcean_2DIrr_modes_HOS_SWENSE.dat
-!hosFile		data-modes_HOS_SWENSE.dat/hosNWT_2DIrr_modes_HOS_SWENSE.dat
-
-!hosFile		data-modes_HOS_SWENSE.dat/hosNWT_2DReg_modes_HOS_SWENSE.dat
+hosFile		interface/modes_HOS_SWENSE.dat
 
 ### Post Processing Time -------------------------------------------------- #
 startTime	0.0
@@ -49,7 +44,7 @@ yMin        0.0
 yMax        0.1
 
 zMin        -0.6
-zMax         0.4        
+zMax         0.4
 
 ### Number of Mesh for 3D Output ------------------------------------------ #
 nX          500
@@ -61,7 +56,7 @@ nZmax       100
 #
 #   uniform   : uniform mesh
 #   sine      : sine mesh
-#   meshRatio : increasing/decreasing mesh with constant geometric ratio. 
+#   meshRatio : increasing/decreasing mesh with constant geometric ratio.
 #               (given two ratio is dz_max/dz_min mesh size)
 
 !zMesh		uniform
@@ -79,7 +74,7 @@ writeWaveProbe  true
 
 ### Wave probe Input Format ----------------------------------------------- #
 #
-#   There should be no blank line after nWaveProbe and probe data. 
+#   There should be no blank line after nWaveProbe and probe data.
 #   If blank line is given, last wave probes will be discarded.
 #
 # nWaveProbe  nProbes
@@ -105,5 +100,3 @@ wp4     4.0     5.0
 # END OF FILE
 #
 # ------------------------------------------------------------------------- #
-
-

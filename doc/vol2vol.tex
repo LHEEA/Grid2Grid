@@ -1,0 +1,167 @@
+	\pagebreak
+	\subsection{typVol2Vol}
+
+	\subsubsection{Description}
+
+	\texttt{Vol2Vol} is an interpolation class used to give interpolated wave information data from the reconstructed HOS wave field. It holds several \texttt{Surf2Vol} classes and interpolation class. The \texttt{Vol2Vol} class structure is described in Fig \ref{fig:vol2volStructure}. 
+
+	HOS result file holds modes amplitudes time series for the whole HOS simulation time. If we construct HOS wave fields and interpolation data structure for the whole HOS simulation time, not only the computation time is long but also a huge memory is demanded. \texttt{Grid2Grid} aims for construction of demanding wave fields for relatively short period and domain, it is not necessary to construct the whole HOS wave fields and interpolation data structure. Therefore revolving algorithm is applied just to update HOS wave fields adjucent to simulation time and constuct small interpolation data structure for efficient computation time and memory.  
+
+	When \texttt{initialize} of \texttt{Vol2Vol} is called, it allocates \texttt{Surf2Vol} array, interpolation data and array related to revolving algorithm. And it initialises \texttt{Surf2Vol} classes and interpolation class and call its subroutine \texttt{correct} at $t=0$.
+
+	{
+		\begin{figure} [H]
+			\centering
+			\includegraphics[scale=0.72]{images/c1.structure/"Vol2VolClassStructure".png}
+			\vspace{0.2cm}
+			\caption{\texttt{Vol2Vol} class structure}
+			\label{fig:vol2volStructure}
+		\end{figure}
+	}
+
+	\pagebreak
+
+	The subroutine \texttt{correct} with input $t$ first determine HOS \texttt{Surf2Vol} correction index and \texttt{Surf2Vol} order based on input $t$ and previous HOS time index. By using correction index and order, only necessary HOS \texttt{Surf2Vol} is updated and re-ordered to constructed for interpolation data. After interpolation data is constructed, it is delivered to the interpolation class. The interpolation class communicates with the \texttt{bspline-Fortran} module and constructs the interpolation data structure. 
+
+	The subroutine \texttt{getEta}, \texttt{getU}, \texttt{getPd} and \texttt{getFlow} return interpolated values for given space and time from the constructed interpolation data structure.
+
+	\subsubsection{Class (Type)}
+	
+	\textbf{Class} : \texttt{Vol2Vol}
+	
+	\hspace{0.5 cm} -- Data :
+	
+	\hspace{1.0 cm} $\circ$ \texttt{nInterp\_} : Interpolation order (2 : Linear, 3 : Quadratic, 4 : Cubic, ... )
+	
+	\hspace{1.0 cm} $\circ$ \texttt{nSaveT\_} : Number of Surf2Vol wave fields  (\texttt{nSaveT\_}  $>$ \texttt{nInterp\_})
+	
+	\hspace{1.0 cm} $\circ$ \texttt{HOSs2v\_(:)} : Array of \texttt{Surf2Vol} class
+	
+	\hspace{1.0 cm} $\circ$ \texttt{itp2D\_} : Interpolation class for 2D waves
+	
+	\hspace{1.0 cm} $\circ$ \texttt{itp3D\_} : Interpolation class for 3D waves
+	
+	\vspace{0.5cm}
+	
+	\hspace{0.5 cm} -- Functionality :
+	
+	\hspace{1.0 cm} $\circ$ \texttt{initialize} : Initialise HOS Vol2Vol class with HOS type, result file path, ...
+	
+	\hspace{1.0 cm} $\circ$ \texttt{correct} : Update HOS wave fields with real-time
+	
+	\hspace{1.0 cm} $\circ$ \texttt{getEta} : Get interpolated wave elevation 
+	
+	\hspace{1.0 cm} $\circ$ \texttt{getU} : Get interpolated wave velocity 
+	
+	\hspace{1.0 cm} $\circ$ \texttt{getPd} : Get interpolated dynamic pressure
+	
+	\hspace{1.0 cm} $\circ$ \texttt{getFlow} : Get flow information
+	
+	\hspace{1.0 cm} $\circ$ \texttt{destroy} : Class destroyer\\    
+	
+	\pagebreak
+	
+	\subsubsection{How to use}
+	
+	\hspace{0.5 cm} -- Initialise \texttt{Vol2Vol}
+	
+	\begin{lstlisting}[language={[95]Fortran}]
+	
+	Call hosV2V%initialize(hosType, filePath, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, iflag)
+	
+	!	hosV2V				: Vol2vol Class (Type)
+	!	hosType				: HOS Type (Ocean or NWT)
+	!	filePath			: HOS result file path (modes_HOS_SWENS.dat)
+	!	zMin, zMax 		: HOS grid z-minimum and z-maximul (vertical domain)
+	!	nZmin, nZmax 	: Number of z-directional Grid	
+	!
+	!	zMinRatio, zMaxRatio  (Optional)
+	!	: Ratio of maximum and minimum height of grid (default=3)
+	!
+	!	iflag : Wriging option (iflag = 1, write Grid2Grid information)
+	\end{lstlisting}
+	
+	\hspace{0.5 cm} -- Correct \texttt{Vol2Vol}
+	
+	\begin{lstlisting}[language={[95]Fortran}]
+	
+	Call hosV2V%correct(simulTime)
+	
+	!	hosV2V				: Vol2vol Class (Type)
+	!	simulTime			: Simulation time (real time value)
+	\end{lstlisting}	
+	
+	\hspace{0.5 cm} -- Get wave elevation from \texttt{Vol2Vol}
+	
+	\begin{lstlisting}[language={[95]Fortran}]
+	
+	eta = hosV2V%getEta(x, y, simulTime, iflag)
+	
+	!	hosV2V				: Vol2vol Class (Type)
+	!	x, y					: x and y position 
+	!	simulTime 		: Simulation time (real time value)
+	!
+	!	eta						: Wave elevation
+	!
+	!	iflag (Optional)	
+	!	: if iflag = 1, nondimensional x and y can be given (default = 0). 	
+	\end{lstlisting}		
+	
+	\pagebreak	
+	
+	\hspace{0.5 cm} -- Get wave velocity from \texttt{Vol2Vol}
+	
+	\begin{lstlisting}[language={[95]Fortran}]
+	
+	Call hosV2V%getU(x, y, z, simulTime, u, v, w, iflag)
+	
+	!	hosV2V				: Vol2vol Class (Type)
+	!	x, y, z				: x, y and z position 
+	!	simulTime 		: Simulation time (real time value)
+	!
+	!	u, v, z				: Wave velocity ( x, y, z )
+	!
+	!	iflag (Optional)	
+	!	: if iflag = 1, nondimensional x and y can be given (default = 0). 	
+	\end{lstlisting}	
+	
+	\hspace{0.5 cm} -- Get dynamic pressure from \texttt{Vol2Vol}
+	
+	\begin{lstlisting}[language={[95]Fortran}]
+	
+	pd = hosV2V%getPd(x, y, z, simulTime, iflag)
+	
+	!	hosV2V				: Vol2vol Class (Type)
+	!	x, y, z				: x, y and z position 
+	!	simulTime 		: Simulation time (real time value)
+	!
+	!	pd						: Dynamic velocity (pd = p - rho * g * z)
+	!
+	!	iflag (Optional)	
+	!	: if iflag = 1, nondimensional x and y can be given (default = 0). 	
+	\end{lstlisting}	
+
+	\hspace{0.5 cm} -- Get flow information from \texttt{Vol2Vol}
+	
+	\begin{lstlisting}[language={[95]Fortran}]
+	
+	Call hosV2V%getFlow(x, y, z, simulTime, eta, u, v, w, pd, iflag)
+	
+	!	hosV2V				: Vol2vol Class (Type)
+	!	x, y, z				: x, y and z position 
+	!	simulTime 		: Simulation time (real time value)
+	!
+	!	eta						: Wave elevation
+	!	u, v, z				: Wave velocity ( x, y, z )
+	!	pd						: Dynamic velocity (pd = p - rho * g * z)
+	!
+	!	iflag (Optional)	
+	!	: if iflag = 1, nondimensional x and y can be given (default = 0). 	
+	\end{lstlisting}	
+	
+	\hspace{0.5 cm} -- Destroy \texttt{Vol2Vol}
+	
+	\begin{lstlisting}[language={[95]Fortran}]
+
+	Call hosV2V%destroy()	
+	\end{lstlisting}	
