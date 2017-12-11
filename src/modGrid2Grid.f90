@@ -2,12 +2,26 @@
 Module modGrid2Grid
 !-----------------------------------------------------------------------
 !
-!   Grid2Grid Module to connect OpenFOAM (C++ code)
-!
+!   Grid2Grid Module to connect to other CFD solvers (fortran and C++ 'OpenFOAM')
+!   Reference should be made to: 
+!   "Grid2Grid : HOS Wrapper Program" YoungMyung Choi, Maite Gouin, Guillaume Ducrozet,
+!    Benjamin Bousscasse and Pierre Ferrant
 !-----------------------------------------------------------------------
 !
 !   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
+!   This program is free software: you can redistribute it and/or modify
+!   it under the terms of the GNU General Public License as published by
+!   the Free Software Foundation, either version 3 of the License, or
+!   (at your option) any later version.
+!
+!   This program is distributed in the hope that it will be useful,
+!   but WITHOUT ANY WARRANTY; without even the implied warranty of
+!   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!   GNU General Public License for more details.
+!
+!   You should have received a copy of the GNU General Public License
+!   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 !-----------------------------------------------------------------------
 use iso_c_binding
 use modGrid2GridType

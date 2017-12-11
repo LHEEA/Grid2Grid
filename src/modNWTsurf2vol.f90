@@ -8,7 +8,7 @@ Module  modNWTsurf2vol
 !       position, vol2vol module is needed.
 !
 !-----------------------------------------------------------------------
-!
+!   This program is part of the Grid2Grid project 
 !   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !   This program based on Post Processing Part of HOS.

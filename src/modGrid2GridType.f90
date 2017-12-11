@@ -1,6 +1,8 @@
 Module modGrid2GridType
-! definition de symboles pour les types reels (RP) et complexes (CP)
+! This program is part of the Grid2Grid project 
+!   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 
+! definition de symboles pour les types reels (RP) et complexes (CP)
 ! les reels, simple ou double precision
 INTEGER, PARAMETER :: SP = KIND(1.0)
 INTEGER, PARAMETER :: DP = KIND(1.0D0)

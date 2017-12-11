@@ -7,9 +7,8 @@ MODULE modFourier_r2c_FFTW3_ocean
 !
 !    Copyright (C) 2014 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
-!    This program is part of HOS-ocean
-!
-!    HOS-ocean is free software: you can redistribute it and/or modify
+!    This program is part of the Grid2Grid project and is
+!    based on HOS-ocean, which is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
 !    the Free Software Foundation, either version 3 of the License, or
 !    (at your option) any later version.
