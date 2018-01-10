@@ -8,7 +8,7 @@ Module  modNWTsurf2vol
 !       position, vol2vol module is needed.
 !
 !-----------------------------------------------------------------------
-!   This program is part of the Grid2Grid project 
+!   This program is part of the Grid2Grid project
 !   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !   This program based on Post Processing Part of HOS.
@@ -21,6 +21,7 @@ Module  modNWTsurf2vol
 !-----------------------------------------------------------------------
 use modGrid2GridType
 use modFourier_r2c_FFTW3_NWT
+use iso_fortran_env, only : error_unit
 
 Implicit none
 !!! module variables
@@ -146,6 +147,8 @@ Implicit none
 
         !!- initialize simulation parameter
         procedure, pass, private :: init_read_mod
+        procedure, pass, private :: init_ascii_read_mod
+        procedure, pass, private :: init_hdf5_read_mod
 
         !!- read HOS NWT mode
         procedure, pass, private :: read_mod
@@ -201,7 +204,7 @@ contains
             this%isAddedMode_ = .true.
         endif
 
-        ! Read and initalize HOS simulation parameter
+        ! Read and initalize HOS simulation parameter depending on file extension
         Call init_read_mod(this)
 
         ! Build HOS NWT mesh and Calculate wave number
@@ -273,6 +276,49 @@ contains
         implicit none
         class(typHOSNWT), intent(inout) :: this
         REAL(RP) :: x1, x2, x3
+        !!!......................................
+
+        if (index(trim(this%hosFile_%name), ".dat", .true.) /= 0) then
+          Call init_ascii_read_mod(this, x1, x2, x3)
+
+        else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
+          index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+          Call init_hdf5_read_mod(this, x1, x2, x3)
+
+        else
+          write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
+            trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
+          stop
+        endif
+
+        ! Set Simulation Parameters
+        this%nXmode_   = nint(x1)
+        this%nYmode_   = nint(x2)
+        this%nAddmode_ = nint(x3)
+        this%nHOSTime_ = nint(this%Tstop_ / this%dtOut_)
+
+        this%depth_ = this%nonDimdepth_
+        this%dimL_  = this%nonDimdepth_
+        this%dimT_  = real(dsqrt(this%depth_ / g ),RP)
+
+        this%Tstop_ = this%Tstop_ * this%dimT_
+        this%dtOut_ = this%dtOut_ * this%dimT_
+
+        this%xLen_ = this%nonDimxLen_ * this%dimL_
+        this%yLen_ = this%nonDimyLen_ * this%dimL_
+
+        ! Reading Time Index
+        this%iReadTimeIndex_ = -1
+
+        ! set size of HOS NWT mode array
+        Call this%hosMode_%allocNWTMode(this%nXmode_, this%nYmode_, this%nAddmode_)
+
+      end subroutine init_read_mod
+
+   subroutine init_ascii_read_mod(this, x1, x2, x3)
+        implicit none
+        class(typHOSNWT), intent(inout) :: this
+        REAL(RP), intent(inout) :: x1, x2, x3
         REAL(RP) :: dummyIndex
         !!!......................................
 
@@ -299,29 +345,17 @@ contains
             stop
         ENDIF
 
-        ! Set Simulation Parameters
-        this%nXmode_   = nint(x1)
-        this%nYmode_   = nint(x2)
-        this%nAddmode_ = nint(x3)
-        this%nHOSTime_ = nint(this%Tstop_ / this%dtOut_)
+    end subroutine init_ascii_read_mod
 
-        this%depth_ = this%nonDimdepth_
-        this%dimL_  = this%nonDimdepth_
-        this%dimT_  = real(dsqrt(this%depth_ / g ),RP)
+    subroutine init_hdf5_read_mod(this, x1, x2, x3)
+        implicit none
+        class(typHOSNWT), intent(inout) :: this
+        REAL(RP), intent(inout) :: x1, x2, x3
+        REAL(RP) :: dummyIndex
+        !!!......................................
 
-        this%Tstop_ = this%Tstop_ * this%dimT_
-        this%dtOut_ = this%dtOut_ * this%dimT_
 
-        this%xLen_ = this%nonDimxLen_ * this%dimL_
-        this%yLen_ = this%nonDimyLen_ * this%dimL_
-
-        ! Reading Time Index
-        this%iReadTimeIndex_ = -1
-
-        ! set size of HOS NWT mode array
-        Call this%hosMode_%allocNWTMode(this%nXmode_, this%nYmode_, this%nAddmode_)
-
-    end subroutine init_read_mod
+    end subroutine init_hdf5_read_mod
 
     Subroutine allocNWTMode(this, nXmode, nYmode, nAddmode)
         implicit none
