@@ -9,7 +9,11 @@ DEXE=./
 EXES=postG2G
 
 ### FFT library (later it should be fixed.)
-DTHRDLIB=/usr/local/lib/
+DTHRDLIB=/usr/lib/x86_64-linux-gnu/
+
+# HDF5 library include and library
+HDF5_INCLUDE=/usr/include/hdf5/serial/
+HDF5_LIB=/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/
 
 ### compiler (gfortran) --------------------------------------------------------
 FC=gfortran
@@ -17,7 +21,7 @@ FC=gfortran
 #CFLAGS = -fPIC -Wall -Wextra -O2 -g # C flags
 CFLAGS = -fPIC -O2 -g # C flags
 
-LDFLAGS = -shared  					# linking flags
+LDFLAGS = -shared					# linking flags
 
 FLAGMOD1= -J $(DOBJ) #Flag for writing modules in $(OBJ)
 FLAGMOD2= -I $(DOBJ) #Flag for reading modules in $(OBJ)
@@ -53,7 +57,7 @@ LITEXT  = "Assembling $@"
 
 postG2G: $(DOBJ)main.o
 	@echo $(COTEXT)
-	@$(FC) -o $@ $(DOBJ)*.o $(DTHRDLIB)libfftw3.a
+	@$(FC)  -o $@ $(DOBJ)*.o $(DTHRDLIB)libfftw3.a $(HDF5_LIB)libhdf5_fortran.a $(HDF5_LIB)libhdf5.a -ldl -pthread -lsz -lz
 EXES :=$(EXES) postG2G
 
 testspline: $(DOBJ)testspline.o
@@ -132,7 +136,7 @@ $(DOBJ)modNWTsurf2vol.o: $(DSRC)modNWTsurf2vol.f90 \
 	$(DOBJ)modFourier_r2c_FFTW3NWT.o \
 	$(DOBJ)modGrid2GridType.o
 	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
+	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@ -I$(HDF5_INCLUDE)
 
 $(DOBJ)modOceansurf2vol.o: $(DSRC)modOceansurf2vol.f90 \
 	$(DOBJ)modFourier_r2c_FFTW3_ocean.o \
