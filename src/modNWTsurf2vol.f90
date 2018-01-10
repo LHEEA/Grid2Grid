@@ -22,6 +22,7 @@ Module  modNWTsurf2vol
 use modGrid2GridType
 use modFourier_r2c_FFTW3_NWT
 use iso_fortran_env, only : error_unit
+use hdf5
 
 Implicit none
 !!! module variables
@@ -354,6 +355,55 @@ contains
         REAL(RP) :: dummyIndex
         !!!......................................
 
+        CHARACTER(len=6), parameter :: HEADER_DSET_NAME = "header"
+        INTEGER, parameter :: HEADER_SIZE = 9
+        INTEGER(hsize_t), dimension(1), parameter :: HEADER_DATA_DIMS = (/HEADER_SIZE/)
+
+        REAL(DP), dimension(HEADER_SIZE) :: header_dset_data
+        INTEGER(hid_t) :: file_id
+        INTEGER(hid_t) :: header_dset_id
+        INTEGER(hid_t) :: header_dataspace
+        INTEGER :: error
+
+        ! Open FORTRAN interface
+        Call h5open_f(error)
+
+        ! ! Open the file
+        Call h5fopen_f(this%hosFile_%name, H5F_ACC_RDONLY_F, file_id, error)
+
+        ! ! ! Open the header dataset
+        Call h5dopen_f(file_id, HEADER_DSET_NAME, header_dset_id, error)
+
+        ! ! ! ! Read the header dataset
+        Call h5dread_f(header_dset_id, H5T_NATIVE_DOUBLE, header_dset_data, HEADER_DATA_DIMS, error)
+
+        ! ! ! ! Unpack
+        x1 = header_dset_data(1)
+        x2 = header_dset_data(2)
+        x3 = header_dset_data(3)
+        this%dtOut_ = header_dset_data(4)
+        this%Tstop_ = header_dset_data(5)
+        this%nonDimxLen_ = header_dset_data(6)
+        this%nonDimyLen_ = header_dset_data(7)
+        this%nonDimdepth_ = header_dset_data(8)
+        dummyIndex = header_dset_data(9)
+
+        ! ! ! Close the header dataset
+        Call h5dclose_f(header_dset_id, error)
+
+        ! ! Close the file
+        Call h5fclose_f(file_id, error)
+
+        ! Close FORTRAN interface
+        Call h5close_f(error)
+
+        IF ( abs(dummyIndex-0.0_RP) > tiny ) then
+            write(*,*) "[ERROR] typHOSNWT::init_read_mod()"
+            write(*,*) " "
+            write(*,*) "    Input file is not HOS NWT Result File."
+            write(*,*) " "
+            stop
+        ENDIF
 
     end subroutine init_hdf5_read_mod
 
