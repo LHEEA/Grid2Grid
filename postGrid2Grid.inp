@@ -14,16 +14,16 @@
 #-------------------------------------------------------------------------- #
 
 ### Select Solver (Ocean or NWT) ------------------------------------------ #
-!solver 		Ocean
+!solver                 Ocean
 solver         NWT
 
 ### hosFile Path ---------------------------------------------------------- #
-hosFile		interface/modes_HOS_SWENSE.dat
+hosFile		interface/modes_HOS_SWENSE.hdf5
 
 ### Post Processing Time -------------------------------------------------- #
 startTime	0.0
 endTime		1.0
-dt	     	0.1
+dt              0.1
 
 ### Write 3D VTK File ----------------------------------------------------- #
 writeVTK        true
@@ -33,7 +33,7 @@ writeVTK        true
 # If airMesh is true or yes, mesh will be constructed up to zMax
 #           is false or no, mesh will be constructed up to wave elevation
 
-airMesh		    true
+airMesh             true
 !airMesh		false
 
 ### 3D Output Domain Size ------------------------------------------------- #
