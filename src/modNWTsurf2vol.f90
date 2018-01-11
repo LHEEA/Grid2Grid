@@ -390,8 +390,8 @@ contains
 
         ! ! ! ! Unpack header_data
         x1 = header_data(1)
-        x2 = header_data(2)
-        x3 = header_data(3)
+        x3 = header_data(2)
+        x2 = header_data(3)
         this%dtOut_ = header_data(4)
         this%Tstop_ = header_data(5)
         this%nonDimxLen_ = header_data(6)
