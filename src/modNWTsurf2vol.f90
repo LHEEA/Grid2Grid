@@ -351,7 +351,7 @@ contains
         CLOSE(this%hosFile_%unit) ! close HOS NWT file
 
         IF ( abs(dummyIndex-0.0_RP) > tiny ) then
-            write(*,*) "[ERROR] typHOSNWT::init_read_mod()"
+            write(*,*) "[ERROR] typHOSNWT::init_ascii_read_mod()"
             write(*,*) " "
             write(*,*) "    Input file is not HOS NWT Result File."
             write(*,*) " "
@@ -367,12 +367,17 @@ contains
         !!!......................................
 
         CHARACTER(len=6), parameter :: HEADER_DSET_NAME = "header"
+        CHARACTER(len=20), parameter :: HOS_TYPE_NAME_DSET_NAME = "HOS_result_file_type"
         INTEGER, parameter :: HEADER_SIZE = 8
         INTEGER(hsize_t), dimension(1), parameter :: HEADER_DATA_DIMS = (/HEADER_SIZE/)
-
+        INTEGER(8), parameter :: HOS_TYPE_NAME_SIZE = 10
+        INTEGER(hsize_t), dimension(1), parameter :: CHARACTER_DATA_DIMS = (/ 1 /)
+        CHARACTER(len=HOS_TYPE_NAME_SIZE) :: hos_type_name
+        CHARACTER(len=HOS_TYPE_NAME_SIZE), parameter :: NWT_HOS_TYPE = "HOS_NWT"
         REAL(DP), dimension(HEADER_SIZE) :: header_data
         INTEGER(hid_t) :: file_id
-        INTEGER(hid_t) :: header_dset_id
+        INTEGER(hid_t) :: header_dset_id, hos_type_name_dset_id
+        INTEGER(hid_t) :: character_type_id
         INTEGER :: error
 
         ! Open FORTRAN interface
@@ -380,6 +385,24 @@ contains
 
         ! ! Open the file
         Call h5fopen_f(this%hosFile_%name, H5F_ACC_RDONLY_F, file_id, error)
+
+        ! ! ! HOS type name
+        Call h5tcopy_f(H5T_NATIVE_CHARACTER, character_type_id, error)
+        Call h5tset_size_f(character_type_id, HOS_TYPE_NAME_SIZE, error)
+
+        Call h5dopen_f(file_id, HOS_TYPE_NAME_DSET_NAME,  hos_type_name_dset_id, error)
+
+        Call h5dread_f(hos_type_name_dset_id, character_type_id, hos_type_name, CHARACTER_DATA_DIMS, error)
+
+        Call h5dclose_f(hos_type_name_dset_id, error)
+
+        if (trim(hos_type_name) /= trim(NWT_HOS_TYPE)) then
+          write(*,*) "[ERROR] typHOSNWT::init_hdf5_read_mod()"
+          write(*,*) " "
+          write(*,*) "    Input file is not HOS NWT Result File but '", trim(hos_type_name),"'"
+          write(*,*) " "
+          stop
+        endif
 
         ! ! ! Open the header dataset
         Call h5dopen_f(file_id, HEADER_DSET_NAME, header_dset_id, error)
