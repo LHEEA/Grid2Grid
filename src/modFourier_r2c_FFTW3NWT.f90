@@ -262,8 +262,10 @@ CONTAINS
         if (this%isCptrAllocated) then
             CALL dfftw_destroy_plan(this%plan_CC)
             CALL dfftw_destroy_plan(this%plan_SC)
-            CALL dfftw_destroy_plan(this%plan_CS)
-            CALL dfftw_destroy_plan(this%plan_SS)
+            if (this%nY /= 1) then
+              CALL dfftw_destroy_plan(this%plan_CS)
+              CALL dfftw_destroy_plan(this%plan_SS)
+            endif
 
             CALL dfftw_destroy_plan(this%plan_Cy)
             CALL dfftw_destroy_plan(this%plan_Sy)
@@ -278,10 +280,17 @@ CONTAINS
             CALL dfftw_destroy_plan(this%plan_CS_add_I)
             CALL dfftw_destroy_plan(this%plan_SS_add_I)
 
-            CALL dfftw_destroy_plan(this%plan_CC_big)
-            CALL dfftw_destroy_plan(this%plan_SC_big)
-            CALL dfftw_destroy_plan(this%plan_CS_big)
-            CALL dfftw_destroy_plan(this%plan_SS_big)
+            IF (this%nY == 1) then
+              if (this%nd1 > 2) THEN
+                CALL dfftw_destroy_plan(this%plan_CC_big)
+                CALL dfftw_destroy_plan(this%plan_SC_big)
+              endif
+            else
+               IF ((this%nd1 > 2).AND.(this%nd2>2)) THEN
+                 CALL dfftw_destroy_plan(this%plan_CS_big)
+                 CALL dfftw_destroy_plan(this%plan_SS_big)
+               endif
+             endif
             this%isCptrAllocated = .FALSE.
         end if
 
