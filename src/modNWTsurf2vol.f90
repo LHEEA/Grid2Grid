@@ -124,6 +124,9 @@ Implicit none
         !!- Added Mode Computation Bool
         logical  :: isAddedMode_ = .true.
 
+        !! - Is HDF5 format
+        logical :: isHDF5Format_ = .false.
+
         !!- Correct time index
         integer  :: iReadTimeIndex_
 
@@ -153,6 +156,10 @@ Implicit none
 
         !!- read HOS NWT mode
         procedure, pass, private :: read_mod
+        procedure, pass, private :: read_ascii_mod
+        procedure, pass, private :: read_hdf5_mod
+        procedure, nopass, private :: read_hdf5_dataset_mod
+
 
         !!- build global mesh and wave numbers
         procedure, pass, private :: buildGlobalMesh
@@ -203,6 +210,19 @@ contains
             this%isAddedMode_ = isAddedMode
         else
             this%isAddedMode_ = .true.
+        endif
+
+        !! - Set output format
+        if (index(trim(this%hosFile_%name), ".dat", .true.) /= 0) then
+          this%isHDF5Format_ = .false.
+
+        else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
+          index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+          this%isHDF5Format_ = .true.
+        else
+          write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
+            trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
+          stop
         endif
 
         ! Read and initalize HOS simulation parameter depending on file extension
@@ -277,19 +297,12 @@ contains
         implicit none
         class(typHOSNWT), intent(inout) :: this
         REAL(RP) :: x1, x2, x3
-        !!!......................................
+!!!......................................
 
-        if (index(trim(this%hosFile_%name), ".dat", .true.) /= 0) then
-          Call init_ascii_read_mod(this, x1, x2, x3)
-
-        else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
-          index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+        if (this%isHDF5Format_) then
           Call init_hdf5_read_mod(this, x1, x2, x3)
-
         else
-          write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
-            trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
-          stop
+          Call init_ascii_read_mod(this, x1, x2, x3)
         endif
 
         ! Set Simulation Parameters
@@ -352,17 +365,15 @@ contains
         implicit none
         class(typHOSNWT), intent(inout) :: this
         REAL(RP), intent(inout) :: x1, x2, x3
-        REAL(RP) :: dummyIndex
         !!!......................................
 
         CHARACTER(len=6), parameter :: HEADER_DSET_NAME = "header"
-        INTEGER, parameter :: HEADER_SIZE = 9
+        INTEGER, parameter :: HEADER_SIZE = 8
         INTEGER(hsize_t), dimension(1), parameter :: HEADER_DATA_DIMS = (/HEADER_SIZE/)
 
-        REAL(DP), dimension(HEADER_SIZE) :: header_dset_data
+        REAL(DP), dimension(HEADER_SIZE) :: header_data
         INTEGER(hid_t) :: file_id
         INTEGER(hid_t) :: header_dset_id
-        INTEGER(hid_t) :: header_dataspace
         INTEGER :: error
 
         ! Open FORTRAN interface
@@ -375,18 +386,17 @@ contains
         Call h5dopen_f(file_id, HEADER_DSET_NAME, header_dset_id, error)
 
         ! ! ! ! Read the header dataset
-        Call h5dread_f(header_dset_id, H5T_NATIVE_DOUBLE, header_dset_data, HEADER_DATA_DIMS, error)
+        Call h5dread_f(header_dset_id, H5T_NATIVE_DOUBLE, header_data, HEADER_DATA_DIMS, error)
 
-        ! ! ! ! Unpack
-        x1 = header_dset_data(1)
-        x2 = header_dset_data(2)
-        x3 = header_dset_data(3)
-        this%dtOut_ = header_dset_data(4)
-        this%Tstop_ = header_dset_data(5)
-        this%nonDimxLen_ = header_dset_data(6)
-        this%nonDimyLen_ = header_dset_data(7)
-        this%nonDimdepth_ = header_dset_data(8)
-        dummyIndex = header_dset_data(9)
+        ! ! ! ! Unpack header_data
+        x1 = header_data(1)
+        x2 = header_data(2)
+        x3 = header_data(3)
+        this%dtOut_ = header_data(4)
+        this%Tstop_ = header_data(5)
+        this%nonDimxLen_ = header_data(6)
+        this%nonDimyLen_ = header_data(7)
+        this%nonDimdepth_ = header_data(8)
 
         ! ! ! Close the header dataset
         Call h5dclose_f(header_dset_id, error)
@@ -396,14 +406,6 @@ contains
 
         ! Close FORTRAN interface
         Call h5close_f(error)
-
-        IF ( abs(dummyIndex-0.0_RP) > tiny ) then
-            write(*,*) "[ERROR] typHOSNWT::init_read_mod()"
-            write(*,*) " "
-            write(*,*) "    Input file is not HOS NWT Result File."
-            write(*,*) " "
-            stop
-        ENDIF
 
     end subroutine init_hdf5_read_mod
 
@@ -470,7 +472,6 @@ contains
         implicit none
         class(typHOSNWT), intent(inout) :: this
         integer,intent(in) :: iTime
-        integer :: i1,i2, NRECL
         !!!......................................
 
         ! Time index check
@@ -481,6 +482,21 @@ contains
             write(*,*) " "
             stop
         endif
+
+        if (this%isHDF5Format_) then
+          Call read_hdf5_mod(this, iTime)
+        else
+          Call read_ascii_mod(this, iTime)
+        endif
+
+    end subroutine read_mod
+
+    subroutine read_ascii_mod(this, iTime)
+        implicit none
+        class(typHOSNWT), intent(inout) :: this
+        integer,intent(in) :: iTime
+        integer :: i1,i2, NRECL
+        !!!......................................
 
         ! HOS NWT file open
         OPEN(unit = this%hosFile_%unit, &
@@ -507,7 +523,86 @@ contains
 
         ! file reading format for HOS NWT
         1001 format((5000(ES17.10,1X)))
-    end subroutine read_mod
+    end subroutine read_ascii_mod
+
+    subroutine read_hdf5_dataset_mod(time_group_id, mode_name, mode_data_dims, mode)
+      implicit none
+      INTEGER(hid_t), intent(in) :: time_group_id
+      CHARACTER(len=*), intent(in) :: mode_name
+      INTEGER(hsize_t), dimension(2), intent(in) :: mode_data_dims
+      REAL(RP), dimension(:,:), intent(inout) :: mode
+      !!!.............................................
+
+      ! Size of one single NWT mode
+      INTEGER(hid_t) :: mode_dset_id
+      INTEGER :: error
+
+      ! Open data set
+      Call h5dopen_f(time_group_id, trim(mode_name), mode_dset_id, error)
+
+      ! Read data set
+      Call h5dread_f(mode_dset_id, H5T_NATIVE_DOUBLE, mode, mode_data_dims, error)
+
+      ! Close data set
+      Call h5dclose_f(mode_dset_id, error)
+
+    end subroutine read_hdf5_dataset_mod
+
+    subroutine read_hdf5_mod(this, iTime)
+        implicit none
+        class(typHOSNWT), intent(inout) :: this
+        integer,intent(in) :: iTime
+
+        ! Time group format
+        CHARACTER(len=6), parameter :: TIME_C_FORMAT = '(I0.6)' ! Increase .6) if necessary
+        CHARACTER(len=6) :: time_c ! Increase len=6 if necessary
+
+        INTEGER :: n
+        INTEGER(hid_t) :: file_id, time_group_id
+        INTEGER :: error
+
+        ! Dimensions of NWT mode
+        INTEGER(hsize_t), dimension(2) :: nwt_mode_data_dims
+        nwt_mode_data_dims(1) = this%nXmode_
+        nwt_mode_data_dims(2) = this%nYmode_
+
+
+        ! Open FORTRAN interface
+        Call h5open_f(error)
+
+        ! ! Open the file
+        Call h5fopen_f(this%hosFile_%name, H5F_ACC_RDONLY_F, file_id, error)
+
+        ! ! ! Open the iTime group
+        if (iTime > 999999) then
+          write(error_unit, '(2A)') "Implementation error in read_hdf5_mod: " // &
+            "Unexpected iTime value > 999999 ! Modify 'time_c' variable size and 'TIME_C_FORMAT'"
+          stop
+        endif
+        write(time_c,TIME_C_FORMAT) iTime
+        Call h5gopen_f(file_id, "/time_"//trim(time_c), time_group_id, error)
+
+        ! ! ! ! Read datasets
+        Call read_hdf5_dataset_mod(time_group_id, "modeX", nwt_mode_data_dims, this%hosMode_%modeX)
+        Call read_hdf5_dataset_mod(time_group_id, "modeY", nwt_mode_data_dims, this%hosMode_%modeY)
+        Call read_hdf5_dataset_mod(time_group_id, "modeZ", nwt_mode_data_dims, this%hosMode_%modeZ)
+        Call read_hdf5_dataset_mod(time_group_id, "modet", nwt_mode_data_dims, this%hosMode_%modet)
+        Call read_hdf5_dataset_mod(time_group_id, "modeFS", nwt_mode_data_dims, this%hosMode_%modeFS)
+        Call read_hdf5_dataset_mod(time_group_id, "modeFSt", nwt_mode_data_dims, this%hosMode_%modeFSt)
+        Call read_hdf5_dataset_mod(time_group_id, "modeAdd", nwt_mode_data_dims, this%hosMode_%modeAdd)
+        Call read_hdf5_dataset_mod(time_group_id, "modeAddt", nwt_mode_data_dims, this%hosMode_%modeAddt)
+
+        ! ! ! Close iTime group
+        Call h5gclose_f(time_group_id, error)
+
+        ! ! Close the file
+        Call h5fclose_f(file_id, error)
+
+        ! Close FORTRAN interface
+        Call h5close_f(error)
+
+    end subroutine read_hdf5_mod
+
 
     !!- Build HOS NWT Global Mesh & calculate Wave numbers and additional mode part
     subroutine buildGlobalMesh(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
