@@ -22,6 +22,7 @@ Module  modNWTsurf2vol
 use modGrid2GridType
 use modFourier_r2c_FFTW3_NWT
 use iso_fortran_env, only : error_unit
+use modHDF5interface
 use hdf5
 
 Implicit none
@@ -158,8 +159,6 @@ Implicit none
         procedure, pass, private :: read_mod
         procedure, pass, private :: read_ascii_mod
         procedure, pass, private :: read_hdf5_mod
-        procedure, nopass, private :: read_hdf5_dataset_mod
-
 
         !!- build global mesh and wave numbers
         procedure, pass, private :: buildGlobalMesh
@@ -524,29 +523,6 @@ contains
         ! file reading format for HOS NWT
         1001 format((5000(ES17.10,1X)))
     end subroutine read_ascii_mod
-
-    subroutine read_hdf5_dataset_mod(time_group_id, mode_name, mode_data_dims, mode)
-      implicit none
-      INTEGER(hid_t), intent(in) :: time_group_id
-      CHARACTER(len=*), intent(in) :: mode_name
-      INTEGER(hsize_t), dimension(2), intent(in) :: mode_data_dims
-      REAL(RP), dimension(:,:), intent(inout) :: mode
-      !!!.............................................
-
-      ! Size of one single NWT mode
-      INTEGER(hid_t) :: mode_dset_id
-      INTEGER :: error
-
-      ! Open data set
-      Call h5dopen_f(time_group_id, trim(mode_name), mode_dset_id, error)
-
-      ! Read data set
-      Call h5dread_f(mode_dset_id, H5T_NATIVE_DOUBLE, mode, mode_data_dims, error)
-
-      ! Close data set
-      Call h5dclose_f(mode_dset_id, error)
-
-    end subroutine read_hdf5_dataset_mod
 
     subroutine read_hdf5_mod(this, iTime)
         implicit none

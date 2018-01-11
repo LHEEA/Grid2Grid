@@ -132,9 +132,14 @@ $(DOBJ)modV2VSplineInterp.o: $(DSRC)modV2VSplineInterp.f90 \
 	$(MAKE) createlib -f ./auxiliary/bspline-fortran/makefile
 	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
 
+$(DOBJ)modHDF5Interface.o: $(DSRC)modHDF5Interface.f90
+	@echo $(COTEXT)
+	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@ -I$(HDF5_INCLUDE)
+
 $(DOBJ)modNWTsurf2vol.o: $(DSRC)modNWTsurf2vol.f90 \
 	$(DOBJ)modFourier_r2c_FFTW3NWT.o \
-	$(DOBJ)modGrid2GridType.o
+	$(DOBJ)modGrid2GridType.o \
+	$(DOBJ)modHDF5Interface.o
 	@echo $(COTEXT)
 	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@ -I$(HDF5_INCLUDE)
 
