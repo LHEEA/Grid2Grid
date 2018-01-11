@@ -563,9 +563,6 @@ contains
 
         ! Dimensions of NWT mode
         INTEGER(hsize_t), dimension(2) :: nwt_mode_data_dims
-        nwt_mode_data_dims(1) = this%nXmode_
-        nwt_mode_data_dims(2) = this%nYmode_
-
 
         ! Open FORTRAN interface
         Call h5open_f(error)
@@ -583,12 +580,18 @@ contains
         Call h5gopen_f(file_id, "/time_"//trim(time_c), time_group_id, error)
 
         ! ! ! ! Read datasets
+        ! ! ! ! nXmode_ x nYmode_
+        nwt_mode_data_dims(1) = this%nXmode_
+        nwt_mode_data_dims(2) = this%nYmode_
         Call read_hdf5_dataset_mod(time_group_id, "modeX", nwt_mode_data_dims, this%hosMode_%modeX)
         Call read_hdf5_dataset_mod(time_group_id, "modeY", nwt_mode_data_dims, this%hosMode_%modeY)
         Call read_hdf5_dataset_mod(time_group_id, "modeZ", nwt_mode_data_dims, this%hosMode_%modeZ)
         Call read_hdf5_dataset_mod(time_group_id, "modet", nwt_mode_data_dims, this%hosMode_%modet)
         Call read_hdf5_dataset_mod(time_group_id, "modeFS", nwt_mode_data_dims, this%hosMode_%modeFS)
         Call read_hdf5_dataset_mod(time_group_id, "modeFSt", nwt_mode_data_dims, this%hosMode_%modeFSt)
+
+        ! ! ! ! nAddmode_ x nYmode_
+        nwt_mode_data_dims(1) = this%nAddmode_
         Call read_hdf5_dataset_mod(time_group_id, "modeAdd", nwt_mode_data_dims, this%hosMode_%modeAdd)
         Call read_hdf5_dataset_mod(time_group_id, "modeAddt", nwt_mode_data_dims, this%hosMode_%modeAddt)
 
