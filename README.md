@@ -10,7 +10,7 @@ It needs FFTW third party library. You can download FFTW library from
 
 http://www.fftw.org/download.html
 
-It requires HDF5 third party library. You can:
+It requires HDF5 third party library (version >= 1.8.16). You can:
 
 * either download HDF5 library from
   https://support.hdfgroup.org/HDF5/
