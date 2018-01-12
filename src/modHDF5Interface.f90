@@ -18,10 +18,15 @@ Module  modHDF5interface
 !-----------------------------------------------------------------------
 use iso_fortran_env, only : error_unit
 use hdf5
+use modGrid2GridType
 
 Implicit none
 
   INTEGER(8), parameter :: HOS_TYPE_NAME_SIZE = 10
+
+  interface read_hdf5_dataset_mod
+    module procedure read_hdf5_double_dataset_mod, read_hdf5_complex_dataset_mod
+  end interface
 
 contains
 
@@ -49,16 +54,15 @@ contains
 
   end function read_hos_type_name_mod
 
-  !!- Read a mode from a HDF5 file using its group id and its name
-  subroutine read_hdf5_dataset_mod(time_group_id, mode_name, mode_data_dims, mode)
+  !!- Read a double mode from a HDF5 file using its group id and its name
+  subroutine read_hdf5_double_dataset_mod(time_group_id, mode_name, mode_data_dims, mode)
     implicit none
     INTEGER(hid_t), intent(in) :: time_group_id
     CHARACTER(len=*), intent(in) :: mode_name
     INTEGER(hsize_t), dimension(2), intent(in) :: mode_data_dims
-    DOUBLE PRECISION, dimension(:,:), intent(inout) :: mode
+    REAL(DP), dimension(:,:), intent(inout) :: mode
     !!!.............................................
 
-    ! Size of one single NWT mode
     INTEGER(hid_t) :: mode_dset_id
     INTEGER :: error
 
@@ -71,7 +75,40 @@ contains
     ! Close data set
     Call h5dclose_f(mode_dset_id, error)
 
-  end subroutine read_hdf5_dataset_mod
+  end subroutine read_hdf5_double_dataset_mod
+
+  !!- Read a complex mode from a HDF5 file using its group id and its name
+  subroutine read_hdf5_complex_dataset_mod(time_group_id, mode_name, mode_data_dims, mode)
+    implicit none
+    INTEGER(hid_t), intent(in) :: time_group_id
+    CHARACTER(len=*), intent(in) :: mode_name
+    INTEGER(hsize_t), dimension(2), intent(in) :: mode_data_dims
+    COMPLEX(CP), dimension(:,:), intent(inout) :: mode
+    !!!.............................................
+
+    INTEGER(hid_t) :: mode_dset_id
+    INTEGER :: error
+
+    ! Temporary array to pack complex type
+    REAL(DP), allocatable, dimension(:,:) :: tmpRe, tmpIm
+    INTEGER :: sizeX, sizeY
+    sizeX = size(mode,1)
+    sizeY = size(mode,2)
+
+    allocate(tmpRe(sizeX,sizeY))
+    allocate(tmpIm(sizeX,sizeY))
+
+    ! Read each component
+    call read_hdf5_double_dataset_mod(time_group_id, trim(mode_name)//".re", mode_data_dims, tmpRe)
+    call read_hdf5_double_dataset_mod(time_group_id, trim(mode_name)//".im", mode_data_dims, tmpIm)
+
+    ! Pack into a complex
+    mode = cmplx(tmpRe, tmpIm)
+
+    deallocate(tmpRe)
+    deallocate(tmpIm)
+
+  end subroutine read_hdf5_complex_dataset_mod
 
 !-----------------------------------------------------------------------
 End Module

@@ -21,6 +21,10 @@ Module  modOceansurf2vol
 !-----------------------------------------------------------------------
 use modGrid2GridType
 use modFourier_r2c_FFTW3_ocean
+use iso_fortran_env, only : error_unit
+use modHDF5interface
+use hdf5
+
 Implicit none
 !!! module variables
 
@@ -103,6 +107,10 @@ private
         integer         :: nHOSTime_
         real(rp)        :: gravi, dimL_, dimT_
 
+
+        !! - Is HDF5 format
+        logical :: isHDF5Format_ = .false.
+
         !!- Correct time index
         integer  :: iReadTimeIndex_
 
@@ -123,9 +131,13 @@ private
 
         !!- initialize simulation parameter
         procedure, pass, private :: init_read_mod
+        procedure, pass, private :: init_ascii_read_mod
+        procedure, pass, private :: init_hdf5_read_mod
 
         !!- read HOS Ocean mode
         procedure, pass, private :: read_mod
+        procedure, pass, private :: read_ascii_mod
+        procedure, pass, private :: read_hdf5_mod
 
         !!- build global mesh and wave numbers
         procedure, pass, private :: buildGlobalMesh
@@ -175,6 +187,19 @@ contains
         !! - Set file name and file unit
         this%hosFile_%name = fileName
         this%hosFile_%unit = callFileUnit()
+
+        !! - Set output format
+        if (index(trim(this%hosFile_%name), ".dat", .true.) /= 0) then
+          this%isHDF5Format_ = .false.
+
+        else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
+          index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+          this%isHDF5Format_ = .true.
+        else
+          write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
+            trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
+          stop
+        endif
 
         ! Read and initalize HOS simulation parameter
         Call init_read_mod(this)
@@ -229,29 +254,12 @@ contains
         class(typHOSOcean), intent(inout) :: this
         REAL(RP) :: x1, x2
         !!!......................................
-        ! We will look at first ten variables written on 18 characters
-        OPEN(unit = this%hosFile_%unit, &
-             file = this%hosFile_%name, &
-             status='OLD', &
-             form='FORMATTED', &
-             access='DIRECT', &
-             recl=18*10)
 
-        ! Read HOS Ocean simulation parameters
-        READ(this%hosFile_%unit,'(10(ES17.10,1X))',rec=1) x1, x2, &
-                                                    this%dtOut_, this%Tstop_, &
-                                                    this%nonDimxLen_, this%nonDimyLen_, this%nonDimDepth_, &
-                                                    this%gravi, this%dimL_, this%dimT_
-
-        CLOSE(this%hosFile_%unit) ! close HOS Ocean file
-
-        IF ( abs(this%dimT_ - 0.0_RP) < tiny ) then
-            write(*,*) "[ERROR] typHOSOcean::init_read_mod()"
-            write(*,*) " "
-            write(*,*) "    Input file is not HOS Ocean Result File."
-            write(*,*) " "
-            stop
-        ENDIF
+        if (this%isHDF5Format_) then
+          Call init_hdf5_read_mod(this, x1, x2)
+        else
+          Call init_ascii_read_mod(this, x1, x2)
+        endif
 
         ! Set Simulation Parameters
         this%nXmode_   = nint(x1)
@@ -277,7 +285,99 @@ contains
         ! set size of HOS Ocean mode array
         Call this%hosMode_%allocOceanMode(this%nXo2p1_, this%nYmode_)
 
+  end subroutine
+
+  subroutine init_ascii_read_mod(this, x1, x2)
+        implicit none
+        class(typHOSOcean), intent(inout) :: this
+        REAL(RP), intent(inout) :: x1, x2
+
+        !!!......................................
+        ! We will look at first ten variables written on 18 characters
+        OPEN(unit = this%hosFile_%unit, &
+             file = this%hosFile_%name, &
+             status='OLD', &
+             form='FORMATTED', &
+             access='DIRECT', &
+             recl=18*10)
+
+        ! Read HOS Ocean simulation parameters
+        READ(this%hosFile_%unit,'(10(ES17.10,1X))',rec=1) x1, x2, &
+                                                    this%dtOut_, this%Tstop_, &
+                                                    this%nonDimxLen_, this%nonDimyLen_, this%nonDimDepth_, &
+                                                    this%gravi, this%dimL_, this%dimT_
+
+        CLOSE(this%hosFile_%unit) ! close HOS Ocean file
+
+        IF ( abs(this%dimT_ - 0.0_RP) < tiny ) then
+            write(*,*) "[ERROR] typHOSOcean::init_read_mod()"
+            write(*,*) " "
+            write(*,*) "    Input file is not HOS Ocean Result File."
+            write(*,*) " "
+            stop
+        ENDIF
+
     end subroutine
+
+   subroutine init_hdf5_read_mod(this, x1, x2)
+        implicit none
+        class(typHOSOcean), intent(inout) :: this
+        REAL(RP), intent(inout) :: x1, x2
+        !!!......................................
+
+        CHARACTER(len=6), parameter :: HEADER_DSET_NAME = "header"
+        INTEGER, parameter :: HEADER_SIZE = 10
+        INTEGER(hsize_t), dimension(1), parameter :: HEADER_DATA_DIMS = (/HEADER_SIZE/)
+        REAL(DP), dimension(HEADER_SIZE) :: header_data
+        INTEGER(hid_t) :: file_id
+        INTEGER(hid_t) :: header_dset_id
+        INTEGER :: error
+        CHARACTER(len=HOS_TYPE_NAME_SIZE) :: hos_type_name
+
+        ! Open FORTRAN interface
+        Call h5open_f(error)
+
+        ! ! Open the file
+        Call h5fopen_f(this%hosFile_%name, H5F_ACC_RDONLY_F, file_id, error)
+
+        hos_type_name = trim(read_hos_type_name_mod(file_id))
+        if (hos_type_name /= "HOS_Ocean") then
+          write(*,*) "[ERROR] typHOSOcean::init_hdf5_read_mod()"
+          write(*,*) " "
+          write(*,*) "    Input file is not HOS Ocean Result File but '", trim(hos_type_name),"'"
+          write(*,*) " "
+          stop
+        endif
+
+        ! ! ! Open the header dataset
+        Call h5dopen_f(file_id, HEADER_DSET_NAME, header_dset_id, error)
+
+        ! ! ! ! Read the header dataset
+        Call h5dread_f(header_dset_id, H5T_NATIVE_DOUBLE, header_data, HEADER_DATA_DIMS, error)
+
+        ! ! ! ! Unpack header_data
+        x1 = header_data(1)
+        x2 = header_data(2)
+        this%dtOut_ = header_data(3)
+        this%Tstop_ = header_data(4)
+        this%nonDimxLen_ = header_data(5)
+        this%nonDimyLen_ = header_data(6)
+        this%nonDimdepth_ = header_data(7)
+        this%gravi = header_data(8)
+        this%dimL_ = header_data(9)
+        this%dimT_ = header_data(10)
+
+        ! ! ! Close the header dataset
+        Call h5dclose_f(header_dset_id, error)
+
+        ! ! Close the file
+        Call h5fclose_f(file_id, error)
+
+        ! Close FORTRAN interface
+        Call h5close_f(error)
+
+    end subroutine init_hdf5_read_mod
+
 
     subroutine allocOceanMode(this, nXo2p1, nYmode)
         class(typHOSOceanMode), intent(inout) :: this
@@ -344,38 +444,105 @@ contains
 
         ! Time index check
         if (iTime < 0 .or. iTime > this%nHOSTime_) then
-            write(*,*) "[ERROR] modGrid2GridType::read_mod(iTime)"
-            write(*,*) " "
-            write(*,*) "    iTime exceeds total number of simulation step"
-            write(*,*) " "
-            stop
+          write(*,*) "[ERROR] modGrid2GridType::read_mod(iTime)"
+          write(*,*) " "
+          write(*,*) "    iTime exceeds total number of simulation step"
+          write(*,*) " "
+          stop
         endif
+
+        if (this%isHDF5Format_) then
+          Call read_hdf5_mod(this, iTime)
+        else
+          Call read_ascii_mod(this, iTime)
+        endif
+
+      end subroutine read_mod
+
+      subroutine read_ascii_mod(this, iTime)
+        implicit none
+        class(typHOSOcean), intent(inout) :: this
+        integer,intent(in) :: iTime
+        integer :: i1,i2, NRECL
 
         ! HOS Ocean file open
         OPEN(unit = this%hosFile_%unit, &
-             file = this%hosFile_%name, &
-             status='OLD', &
-             form='FORMATTED', &
-             access='DIRECT', &
-             recl=18*(2 * this%nXo2p1_))
+          file = this%hosFile_%name, &
+          status='OLD', &
+          form='FORMATTED', &
+          access='DIRECT', &
+          recl=18*(2 * this%nXo2p1_))
 
         ! HOS Ocean mode file read
         NRECL = (iTime + 1)*this%nYmode_*6
         do i2=1,this%nYmode_
-            READ(this%hosFile_%unit,1001,REC=NRECL+1+6*(i2-1)) (this%hosMode_%modeX(i1,i2), i1=1,this%nXo2p1_)
-            READ(this%hosFile_%unit,1001,REC=NRECL+2+6*(i2-1)) (this%hosMode_%modeY(i1,i2), i1=1,this%nXo2p1_)
-            READ(this%hosFile_%unit,1001,REC=NRECL+3+6*(i2-1)) (this%hosMode_%modeZ(i1,i2), i1=1,this%nXo2p1_)
-            READ(this%hosFile_%unit,1001,REC=NRECL+4+6*(i2-1)) (this%hosMode_%modet(i1,i2), i1=1,this%nXo2p1_)
-            READ(this%hosFile_%unit,1001,REC=NRECL+5+6*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1_)
-            READ(this%hosFile_%unit,1001,REC=NRECL+6+6*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1_)
+          READ(this%hosFile_%unit,1001,REC=NRECL+1+6*(i2-1)) (this%hosMode_%modeX(i1,i2), i1=1,this%nXo2p1_)
+          READ(this%hosFile_%unit,1001,REC=NRECL+2+6*(i2-1)) (this%hosMode_%modeY(i1,i2), i1=1,this%nXo2p1_)
+          READ(this%hosFile_%unit,1001,REC=NRECL+3+6*(i2-1)) (this%hosMode_%modeZ(i1,i2), i1=1,this%nXo2p1_)
+          READ(this%hosFile_%unit,1001,REC=NRECL+4+6*(i2-1)) (this%hosMode_%modet(i1,i2), i1=1,this%nXo2p1_)
+          READ(this%hosFile_%unit,1001,REC=NRECL+5+6*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1_)
+          READ(this%hosFile_%unit,1001,REC=NRECL+6+6*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1_)
         end do
 
         CLOSE(this%hosFile_%unit)    ! file close
 
-        ! file reading format for HOS NWT
-        1001 format((5000(ES17.10,1X)))
-    end subroutine read_mod
+        ! file reading format for HOS Ocean
+1001    format((5000(ES17.10,1X)))
+      end subroutine read_ascii_mod
 
+    subroutine read_hdf5_mod(this, iTime)
+        implicit none
+        class(typHOSOcean), intent(inout) :: this
+        integer,intent(in) :: iTime
+
+        ! Time group format
+        CHARACTER(len=6), parameter :: TIME_C_FORMAT = '(I0.6)' ! Increase .6) if necessary
+        CHARACTER(len=6) :: time_c ! Increase len=6 if necessary
+
+        INTEGER :: n
+        INTEGER(hid_t) :: file_id, time_group_id
+        INTEGER :: error
+        INTEGER(hsize_t), dimension(2) :: ocean_mode_data_dims
+
+        ! Open FORTRAN interface
+        Call h5open_f(error)
+
+        ! ! Open the file
+        Call h5fopen_f(this%hosFile_%name, H5F_ACC_RDONLY_F, file_id, error)
+
+        ! ! ! Open the iTime group
+        if (iTime > 999999) then
+          write(error_unit, '(2A)') "Implementation error in read_hdf5_mod: " // &
+            "Unexpected iTime value > 999999 ! Modify 'time_c' variable size and 'TIME_C_FORMAT'"
+          stop
+        endif
+        write(time_c,TIME_C_FORMAT) iTime
+        Call h5gopen_f(file_id, "/time_"//trim(time_c), time_group_id, error)
+
+        ! ! ! ! Read datasets
+        ! ! ! ! nXmode_ x nYmode_
+        ocean_mode_data_dims(1) = this%nXo2p1_
+        ocean_mode_data_dims(2) = this%nYmode_
+        Call read_hdf5_dataset_mod(time_group_id, "modeX", ocean_mode_data_dims, this%hosMode_%modeX)
+        Call read_hdf5_dataset_mod(time_group_id, "modeY", ocean_mode_data_dims, this%hosMode_%modeY)
+        Call read_hdf5_dataset_mod(time_group_id, "modeZ", ocean_mode_data_dims, this%hosMode_%modeZ)
+        Call read_hdf5_dataset_mod(time_group_id, "modet", ocean_mode_data_dims, this%hosMode_%modet)
+        Call read_hdf5_dataset_mod(time_group_id, "modeFS", ocean_mode_data_dims, this%hosMode_%modeFS)
+        Call read_hdf5_dataset_mod(time_group_id, "modeFSt", ocean_mode_data_dims, this%hosMode_%modeFSt)
+
+        ! ! ! Close iTime group
+        Call h5gclose_f(time_group_id, error)
+
+        ! ! Close the file
+        Call h5fclose_f(file_id, error)
+
+        ! Close FORTRAN interface
+        Call h5close_f(error)
+
+    end subroutine read_hdf5_mod
+
+
+    !!- Build HOS NWT Global Mesh & calculate Wave numbers and additional mode part
     subroutine buildGlobalMesh(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
         Implicit none
         class(typHOSOcean), intent(inout) :: this

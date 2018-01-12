@@ -145,9 +145,10 @@ $(DOBJ)modNWTsurf2vol.o: $(DSRC)modNWTsurf2vol.f90 \
 
 $(DOBJ)modOceansurf2vol.o: $(DSRC)modOceansurf2vol.f90 \
 	$(DOBJ)modFourier_r2c_FFTW3_ocean.o \
-	$(DOBJ)modGrid2GridType.o
+	$(DOBJ)modGrid2GridType.o \
+	$(DOBJ)modHDF5Interface.o
 	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
+	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@ -I$(HDF5_INCLUDE)
 
 $(DOBJ)modFourier_r2c_FFTW3NWT.o: $(DSRC)modFourier_r2c_FFTW3NWT.f90 \
 	$(DOBJ)modGrid2GridType.o
