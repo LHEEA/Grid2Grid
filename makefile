@@ -9,7 +9,7 @@ DEXE=./
 EXES=postG2G
 
 ### FFT library (later it should be fixed.)
-DTHRDLIB=/usr/lib/x86_64-linux-gnu/
+DTHRDLIB=/usr/lib
 
 # HDF5 library include and library
 HDF5_INCLUDE=/usr/include/hdf5/serial/
