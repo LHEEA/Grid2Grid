@@ -262,23 +262,26 @@ CONTAINS
         if (this%isCptrAllocated) then
             CALL dfftw_destroy_plan(this%plan_CC)
             CALL dfftw_destroy_plan(this%plan_SC)
-            if (this%nY /= 1) then
-              CALL dfftw_destroy_plan(this%plan_CS)
-              CALL dfftw_destroy_plan(this%plan_SS)
-            endif
-
-            CALL dfftw_destroy_plan(this%plan_Cy)
-            CALL dfftw_destroy_plan(this%plan_Sy)
 
             CALL dfftw_destroy_plan(this%plan_CC_add)
-            CALL dfftw_destroy_plan(this%plan_SC_add)
-            CALL dfftw_destroy_plan(this%plan_CS_add)
-            CALL dfftw_destroy_plan(this%plan_SS_add)
-
             CALL dfftw_destroy_plan(this%plan_CC_add_I)
+
+            CALL dfftw_destroy_plan(this%plan_SC_add)
             CALL dfftw_destroy_plan(this%plan_SC_add_I)
-            CALL dfftw_destroy_plan(this%plan_CS_add_I)
-            CALL dfftw_destroy_plan(this%plan_SS_add_I)
+
+            if (this%nY /= 1) then
+                CALL dfftw_destroy_plan(this%plan_CS)
+                CALL dfftw_destroy_plan(this%plan_SS)
+
+                CALL dfftw_destroy_plan(this%plan_Cy)
+                CALL dfftw_destroy_plan(this%plan_Sy)
+
+                CALL dfftw_destroy_plan(this%plan_CS_add)
+                CALL dfftw_destroy_plan(this%plan_SS_add)
+
+                CALL dfftw_destroy_plan(this%plan_CS_add_I)
+                CALL dfftw_destroy_plan(this%plan_SS_add_I)
+            endif
 
             IF (this%nY == 1) then
               if (this%nd1 > 2) THEN
