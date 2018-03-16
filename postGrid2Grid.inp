@@ -18,7 +18,7 @@
 solver         NWT
 
 ### hosFile Path ---------------------------------------------------------- #
-hosFile		interface/modes_HOS_SWENSE.dat
+hosFile		example/modes_HOS_SWENSE.dat
 
 ### Post Processing Time -------------------------------------------------- #
 startTime	0.0

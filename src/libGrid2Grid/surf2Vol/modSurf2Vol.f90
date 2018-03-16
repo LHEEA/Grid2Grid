@@ -77,10 +77,7 @@ Private
 !-----------------------------------------------------------------------
 contains
 
-!!... Module Function
-
-    !!... Auxiliary function to build z-directional meshes (surf mesh to vol mesh)
-    Include "../auxiliary/zMesh.inc"
+!!... Module Function    
 
     !!... HOS Surf2Vol Base Mesh Class Member Function
     Include "HOSMesh/hosMesh.inc"

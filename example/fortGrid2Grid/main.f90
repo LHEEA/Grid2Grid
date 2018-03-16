@@ -30,7 +30,7 @@
 	!!!... Set libGrid2Grid.so path.
 	!!!    It is recommended to use absolute path
 	! grid2gridPath = "/usr/lib/libGrid2Grid.so"	(if soft link is made)
-	grid2gridPath = "../../obj/libGrid2Grid.so"
+	grid2gridPath = "../../lib/libGrid2Grid.so"
 
 	!!!... Load libGrid2Grid.so and connect subroutines
 	Call callGrid2Grid(grid2gridPath)

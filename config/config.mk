@@ -1,5 +1,7 @@
 ### Path -----------------------------------------------------------------------
 
+export PROJECT_NAME=Grid2Grid
+
 export PROJECT_DIR:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))../
 
 export DIR_SRC=$(PROJECT_DIR)src/
@@ -15,13 +17,16 @@ MKDIRS = $(DIR_OBJ) $(DIR_LIB)
 
 ### Third Party Library ---------------------------------------------------
 
-export HDF5_LIB=/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/libhdf5.a
+export FFTW_LIB=/usr/local/lib/
+THIRD_LIB_LINK+=$(FFTW_LIB)libfftw3.a
+
+export HDF5_LIB=/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/
 export HDF5_INCLUDE=/usr/include/hdf5/serial/
 export HDF5_LDFLAG=-I$(HDF5_INCLUDE)
 
 THIRD_INCLUDE+=-I$(HDF5_INCLUDE)
-
-THIRD_LIB_LINK+=$(HDF5_LIB)
+THIRD_LIB_LINK+=$(HDF5_LIB)libhdf5_fortran.a
+THIRD_LIB_LINK+=$(HDF5_LIB)libhdf5.a -ldl -pthread -lz
 
 ### compiling Rule --------------------------------------------------------
 
@@ -62,4 +67,13 @@ export COMPILE_SHARED_LIB_RULE=@$(FC) $(LDFLAGS) -o
 
 export LIBRARY_LINK=$(THIRD_LIB_LINK)
 
-### compiling Rule --------------------------------------------------------
+### Make Folder -----------------------------------------------------------
+
+cmd = $(shell mkdir -p $(DIR_OBJ) $(DIR_LIB) )
+$(info ${cmd})
+
+### Auto Compile Rule
+
+export MAKE_SUB_CREATEOBJ = $(MAKE) createObj -f
+export MAKE_SUB_CLEAN 	  = $(MAKE) clean -f
+export MAKE_SUB_CLEANALL  = $(MAKE) cleanall -f

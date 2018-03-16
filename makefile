@@ -2,54 +2,60 @@
 
 ### Compiler and Compiling Rule ------------------------------------------------
 
-DIR_CURRENT:= $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
-DIR_CURRENT_SRC=$(DIR_CURRENT)src/
+#... Get Current makefile path
+DIR_CURRENT=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 
-ifndef $(PROJECT_DIR)
-	#... Read Configuration File
-	include $(DIR_CURRENT)config/config.mk
-endif
+#... Extract Project directory path
+PROJECT_NAME=Grid2Grid
+PROJECT_DIR:=$(shell echo $(DIR_CURRENT) | awk '{sub(/$(PROJECT_NAME).*/,x)}1')$(PROJECT_NAME)/
+#... Project Configuration directory
+PROJECT_CONFIG_DIR:=$(PROJECT_DIR)config/
+
+#... Manual setting for directory path
+# ifndef $(PROJECT_DIR)
+# 	PROJECT_CONFIG_DIR = $(DIR_CURRENT)config/
+# endif
+
+#... Read make configuration setting
+include $(PROJECT_CONFIG_DIR)config.mk
 
 ### Compile Order --------------------------------------------------------------
 
-Release: createlib
+DIR_CURRENT_SRC=$(DIR_CURRENT)src/
 
-createlib:
-	$(MAKE) createObj -f $(DIR_CURRENT_SRC)libBspline/makefile
-	$(MAKE) createObj -f $(DIR_CURRENT_SRC)libFyMc/makefile
-	$(MAKE) createObj -f $(DIR_CURRENT_SRC)libGrid2Grid/makefile
+SUB_CREATEOBJ_LIST= $(DIR_CURRENT_SRC)libBspline 	\
+				    $(DIR_CURRENT_SRC)libFyMc 		\
+				    $(DIR_CURRENT_SRC)libGrid2Grid
 
-#createOFlib:
+Release: createObj
+Release: postG2G
+
+makelib: createObj
+
+createObj:
+	$(foreach subMakeObj, $(SUB_CREATEOBJ_LIST), 		\
+		$(MAKE_SUB_CREATEOBJ) $(subMakeObj)/makefile;)
+
+postG2G: $(DIR_OBJ)main.o
+	@$(FC) -o $@ $(DIR_OBJ)*.o $(LIBRARY_LINK)
+EXES :=$(EXES) postG2G
+
+### Compile Rule ---------------------------------------------------------------
+
+$(DIR_OBJ)main.o: $(DIR_SRC)main.f90
+	$(COMPILE_OBJECT_RULE) $< -o $@ 
 
 ### Clean Rule -----------------------------------------------------------------
 
-.PHONY : cleanSub
-cleanSub:
-	$(MAKE) clean -f $(DIR_CURRENT_SRC)libBspline/makefile
-	$(MAKE) clean -f $(DIR_CURRENT_SRC)libFyMc/makefile
-	$(MAKE) clean -f $(DIR_CURRENT_SRC)libGrid2Grid/makefile
-
-.PHONY : cleanSubAll
-cleanSubAll:
-	$(MAKE) cleanall -f $(DIR_CURRENT_SRC)libBspline/makefile
-	$(MAKE) cleanall -f $(DIR_CURRENT_SRC)libFyMc/makefile
-	$(MAKE) cleanall -f $(DIR_CURRENT_SRC)libGrid2Grid/makefile
-
+#... delete object file
 .PHONY : cleanObj
 cleanObj:
 	@rm -rf obj
 
+#... delete library and headers
 .PHONY : cleanlib
 cleanlib:
 	@rm -rf lib
 
-.PHONY : clean
-clean: \
-	cleanSub \
-	cleanObj
-
-.PHONY : cleanall
-cleanall: \
-	cleanSubAll \
-	cleanObj \
-	cleanlib
+#... Read recursive clean setting
+include $(PROJECT_CONFIG_DIR)cleanTool.mk

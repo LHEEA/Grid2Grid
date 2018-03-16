@@ -1,4 +1,4 @@
-Type :: typPostGrid2Grid
+Type, public :: typPostGrid2Grid
 
     private
 

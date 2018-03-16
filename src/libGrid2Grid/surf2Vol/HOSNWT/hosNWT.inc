@@ -41,16 +41,16 @@ SUBROUTINE initHOSNWT(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxR
     endif
 
     ! Read and initalize HOS simulation parameter depending on file extension
-    Call init_read_mod(this)
+    Call this%init_read_mod()
 
     ! Build HOS NWT mesh and Calculate wave number
-    Call buildGlobalMesh(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+    Call this%buildGlobalMesh(zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
 
     ! Initialize Fourier transforms (FFTW)
     Call this%hosNWTFFTW_%initialize(this%nXmode_, this%nYmode_, this%nAddmode_)
 
     ! Read HOS NWT mode for first time step
-    Call correctHOSNWT(this, 0)
+    Call this%correct(0)
 
     this%isInitialized_ = .TRUE.
 
@@ -68,15 +68,15 @@ SUBROUTINE correctHOSNWT(this, iTime)
     this%iReadTimeIndex_ = iTime
 
     !! - Read HOS NWT mode for given time index
-    Call read_mod(this,iTime)
+    Call this%read_mod(iTime)
 
     !! - Construct General Mode Flow quantities by FFT
-    Call reconstructionFFTs(this)
+    Call this%reconstructionFFTs()
 
     !! - Added Mode Computation
     if (this%isAddedMode_) then
         !! - Construct Added Mode Flow quantities by FFT
-        Call reconstructionAddFFTs(this)
+        Call this%reconstructionAddFFTs()
 
         !! - Add Added mode components
         this%hosMesh_%nonDimPhiX = this%hosMesh_%nonDimPhiX + this%hosMesh_%nonDimAddPhiX
@@ -115,9 +115,9 @@ subroutine init_read_mod_HOSNWT(this)
 !!!......................................
 
     if (this%isHDF5Format_) then
-      Call init_hdf5_read_mod(this, x1, x2, x3)
+      Call this%init_hdf5_read_mod(x1, x2, x3)
     else
-      Call init_ascii_read_mod(this, x1, x2, x3)
+      Call this%init_ascii_read_mod(x1, x2, x3)
     endif
 
     ! Set Simulation Parameters
@@ -257,9 +257,9 @@ subroutine read_mod_HOSNWT(this, iTime)
     endif
 
     if (this%isHDF5Format_) then
-      Call read_hdf5_mod(this, iTime)
+      Call this%read_hdf5_mod(iTime)
     else
-      Call read_ascii_mod(this, iTime)
+      Call this%read_ascii_mod(iTime)
     endif
 
 end subroutine

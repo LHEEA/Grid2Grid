@@ -36,16 +36,16 @@ SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     endif
 
     ! Read and initalize HOS simulation parameter
-    Call init_read_mod(this)
+    Call this%init_read_mod()
 
     ! Build Mesh and Calculate Wave Numbers
-    Call buildGlobalMesh(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+    Call this%buildGlobalMesh(zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
 
     ! Initialize Fourier transforms (FFTW)
     Call this%hosOceanFFTW_%initialize(this%nXmode_, this%nYmode_)
 
     ! Read HOS Ocean mode for first time step
-    Call correctHOSOcean(this,0)
+    Call this%correct(0)
 
     this%isInitialized_ = .TRUE.
 
@@ -64,10 +64,10 @@ SUBROUTINE correctHOSOcean(this, iTime)
     this%iReadTimeIndex_ = iTime
 
     !! - Read HOS NWT mode for given time index
-    Call read_mod(this,iTime)
+    Call this%read_mod(iTime)
 
     !! - Construct General Mode Flow quantities by FFT
-    Call reconstructionFFTs(this)
+    Call this%reconstructionFFTs()
 
     Call this%hosMesh_%calculDimValue()
 
@@ -90,9 +90,9 @@ subroutine init_read_mod_HOSOcean(this)
     !!!......................................
 
     if (this%isHDF5Format_) then
-      Call init_hdf5_read_mod(this, x1, x2)
+      Call this%init_hdf5_read_mod(x1, x2)
     else
-      Call init_ascii_read_mod(this, x1, x2)
+      Call this%init_ascii_read_mod(x1, x2)
     endif
 
     ! Set Simulation Parameters
@@ -236,9 +236,9 @@ subroutine read_mod_HOSOcean(this, iTime)
     endif
 
     if (this%isHDF5Format_) then
-      Call read_hdf5_mod(this, iTime)
+      Call this%read_hdf5_mod(iTime)
     else
-      Call read_ascii_mod(this, iTime)
+      Call this%read_ascii_mod(iTime)
     endif
 
   end subroutine

@@ -6,7 +6,7 @@
         Integer,parameter :: procNChar = 1000
 
         !! Shared Object Path
-        Character(len=procNChar) :: libGrid2GridPath = "../../obj/libGrid2Grid.so"
+        Character(len=procNChar) :: libGrid2GridPath = "../../lib/libGrid2Grid.so"
 
         !! Is Shared Library is loaded
         logical :: isGrid2GridLoad = .FALSE.
