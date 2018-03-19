@@ -13,7 +13,7 @@
 #
 #-------------------------------------------------------------------------- #
 
-type                NWT;
+postGrid2Grid       HOSNWT;
 
 writeVTK            true;
 writeWaveProbe      true;
@@ -28,29 +28,42 @@ zMeshInfo
 
     zMesh
     {
-        type            uniform;
+        //type            uniform;
+        type            meshRatio;
         //   uniform   : uniform mesh
         //   sine      : sine mesh
 
 
-        zMinRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z<0)
-        zMaxRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z>0)
+        zMinRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z<0)
+        zMaxRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z>0)
         // dz_min locates near to the free surface
     }
 }
 
 HOSOcean
 {
+    type            Ocean;
+
     filePath        example/modes_HOS_SWENSE.dat;
 
+    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+
     $zMeshInfo
+
+    writeLog        TRUE;
 }
 
 HOSNWT
 {
+    type            NWT;
+
     filePath        example/modes_HOS_SWENSE.dat;
 
+    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+
     $zMeshInfo
+
+    writeLog        TRUE;
 }
 
 simulation
@@ -71,7 +84,7 @@ vtkMesh
     yMin            0.0;
     yMax            0.1;
 
-    nX              500;
+    nX              10;
     nY              2;
 
     $zMeshInfo

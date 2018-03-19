@@ -1,4 +1,148 @@
-SUBROUTINE initialize(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, iflag)
+Subroutine initilizeVol2VolDict(this, HOSdict)
+    use mfpGeneral, only : isStringEqual
+    Implicit None
+    class(typHOSVol2Vol), intent(inout) :: this
+    Type(typDictionaryPtr)              :: HOSdict
+
+    integer :: it
+    real(RP),allocatable :: interpX(:), interpY(:), interpZ(:)
+
+    Character(len=CHAR_LEN) :: zMeshType
+    Type(typDictionaryPtr)  :: zMeshDict
+    real(rp) :: zMinRatio, zMaxRatio
+
+    if (this%isInitialized_) return
+
+    this%dict_ = HOSdict
+
+    this%nInterp_ = HOSdict%getIntOrDefault("interpolationOrder", 3) + 1
+    this%nSaveT_  = this%nInterp_ + 2
+
+    allocate(this%HOSs2v_(this%nSaveT_))
+    allocate(this%hosCorrectIdx_(this%nSaveT_))
+    allocate(this%hosPointerIdx_(this%nSaveT_))
+    allocate(this%hosUpdate_(this%nSaveT_))
+
+    this%HOSSolver_     = HOSdict%getChar("type")
+    this%hosCorrectIdx_ = -1
+    this%hosPointerIdx_ = -1
+    this%hosUpdate_     = .TRUE.
+
+    if ( (.not.(isStringEqual(this%HOSSolver_, "nwt"))).and.&
+         (.not.(isStringEqual(this%HOSSolver_, "ocean"))) ) then
+        write(*,*) "    [ERROR] Grid2Grid, readPostG2GInputFile(fileName) "
+        write(*,*) "        Wrong solver is given when HOS post initilize"
+        write(*,*) "        given solver : ", this%HOSSolver_
+        stop
+    end if
+
+    do it = 1, this%nSaveT_
+        Call this%HOSs2v_(it)%initialize(HOSdict)
+        this%hosCorrectIdx_(it) = this%HOSs2v_(it)%correctIdx_
+    enddo
+
+    this%correctTime_ = -1e6
+    this%correctIdx_  = -1
+
+    this%dt_          = this%HOSs2v_(1)%dt
+    this%endTime_     = this%HOSs2v_(1)%endTime
+    this%nTime_       = int(this%endTime_ / this%dt_) + 1
+    this%waterDepth_  = this%HOSs2v_(1)%waterDepth_
+    this%nBand_       = floor(this%nSaveT_ / 2.0)
+    this%dimL_        = this%HOSs2v_(1)%ptrHOSMesh_%dimL
+
+    this%nX_   = this%HOSs2v_(1)%ptrHOSMesh_%nX
+    this%nY_   = this%HOSs2v_(1)%ptrHOSMesh_%nY
+
+    this%Lx_   = this%HOSs2v_(1)%ptrHOSMesh_%Lx
+    this%Ly_   = this%HOSs2v_(1)%ptrHOSMesh_%Ly
+
+    this%nonDimLx_   = this%HOSs2v_(1)%ptrHOSMesh_%nonDimLx
+    this%nonDimLy_   = this%HOSs2v_(1)%ptrHOSMesh_%nonDimLy
+
+    this%zMin_       = HOSdict%getReal("zMin")
+    this%zMax_       = HOSdict%getReal("zMax")
+
+    this%nonDimZMin_ = this%HOSs2v_(1)%ptrHOSMesh_%nonDimZmin
+    this%nonDimZMax_ = this%HOSs2v_(1)%ptrHOSMesh_%nonDimZmax
+
+    if (this%HOSs2v_(1)%ptrHOSMesh_%nY.eq.1) then
+        this%isHOS2D_ = .TRUE.
+    else
+        this%isHOS2D_ = .FALSE.
+    endif
+
+    if ( isStringEqual(this%HOSSolver_,"ocean") ) then
+        !! Allocate Interpolation Data Array
+        if (this%isHOS2D_) then
+            allocate(interpX(this%HOSs2v_(1)%ptrHOSMesh_%nX + 1))
+            interpX(1:this%HOSs2v_(1)%ptrHOSMesh_%nX) = this%HOSs2v_(1)%ptrHOSMesh_%nonDimX
+            interpX(1+this%HOSs2v_(1)%ptrHOSMesh_%nX) = this%nonDimLx_
+
+            Call this%itp2D_%allocArray(this%HOSs2v_(1)%ptrHOSMesh_%nX + 1, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nZ, &
+                                        this%nSaveT_, &
+                                        interpX, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nonDimZ)
+        else
+            allocate(interpX(this%HOSs2v_(1)%ptrHOSMesh_%nX + 1))
+            allocate(interpY(this%HOSs2v_(1)%ptrHOSMesh_%nY + 1))
+            interpX(1:this%HOSs2v_(1)%ptrHOSMesh_%nY) = this%HOSs2v_(1)%ptrHOSMesh_%nonDimX
+            interpX(1+this%HOSs2v_(1)%ptrHOSMesh_%nX) = this%nonDimLx_
+
+            interpY(1:this%HOSs2v_(1)%ptrHOSMesh_%nY) = this%HOSs2v_(1)%ptrHOSMesh_%nonDimY
+            interpY(1+this%HOSs2v_(1)%ptrHOSMesh_%nY) = this%nonDimLy_
+
+            Call this%itp3D_%allocArray(this%HOSs2v_(1)%ptrHOSMesh_%nX + 1, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nY + 1, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nZ, &
+                                        this%nSaveT_, &
+                                        interpX, &
+                                        interpY, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nonDimZ)
+        end if
+    else
+        !! Allocate Interpolation Data Array
+        if (this%isHOS2D_) then
+            Call this%itp2D_%allocArray(this%HOSs2v_(1)%ptrHOSMesh_%nX, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nZ, &
+                                        this%nSaveT_, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nonDimX, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nonDimZ)
+        else
+            Call this%itp3D_%allocArray(this%HOSs2v_(1)%ptrHOSMesh_%nX, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nY, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nZ, &
+                                        this%nSaveT_, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nonDimX, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nonDimY, &
+                                        this%HOSs2v_(1)%ptrHOSMesh_%nonDimZ)
+        end if
+    end if
+
+    Call this%correct(0.0_RP)
+
+    if ( HOSdict%getLogicalOrDefault("writeLog", .FALSE.) ) then
+        write(*,"(a)") ""
+        write(*,"(a)") "HOS Wrapper Program GRID2GRID Vol2Vol is initialized."
+        write(*,"(a)") ""
+        write(*,"(a,a)") " HOS Solver      : ", trim(this%HOSSolver_)
+        write(*,"(a,a)") " HOS Result File : ", trim(HOSdict%getChar("filePath"))
+        write(*,"(a)") ""
+        write(*,"(a,2f15.6)") " HOS Grid   zMin , zMax        : ", this%zMin_, this%zMax_
+        write(*,"(a,2i15)") " HOS Grid   nZmin, nZmax       : ", &
+                                                            HOSdict%getInt("nZmin"), &
+                                                            HOSdict%getInt("nZMax")
+        write(*,"(a,2f15.6)") " HOS Grid zMinRatio, zMaxRatio : ", this%HOSs2v_(1)%ptrHOSMesh_%zMinRatio, &
+                                                                   this%HOSs2v_(1)%ptrHOSMesh_%zMaxRatio
+        write(*,"(a)") ""
+    end if
+
+    this%isInitialized_ = .TRUE.
+
+End Subroutine
+
+SUBROUTINE initializeVol2VolArgument(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, iflag)
     implicit none
     class(typHOSVol2Vol), intent(inout) :: this
     character(len=*), intent(in)     :: solver, fileName
@@ -133,7 +277,7 @@ SUBROUTINE initialize(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRati
 
 END SUBROUTINE
 
-SUBROUTINE correct(this, simulTime)
+SUBROUTINE correctVo2Vol(this, simulTime)
     implicit none
     class(typHOSVol2Vol), intent(inout) :: this
     real(RP),intent(in)                 :: simulTime

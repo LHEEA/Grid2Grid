@@ -2,6 +2,9 @@ type, public :: typHOSSurf2Vol
 
     !!! - Variables
 
+    !!- HOS Input Dictionary
+    Type(typDictionaryPtr)      :: dict_
+
     !!- Solver Name (NWT or Ocean)
     character(len=StringLength) :: HOSSolver_
 
@@ -30,15 +33,22 @@ type, public :: typHOSSurf2Vol
 
     !!! - Subroutine
 
-    !!- Initialize HOS surf2Vol
-    procedure, public :: initialize => initHOS
+    !!- Initialize HOS surf2Vol with arguments (v.1.0)
+    procedure, pass, public :: initHOS
+
+    !!- Initialize HOS surf2Vol with dictionary (v.1.0)
+    procedure, pass, public :: initHOSSurf2VolDict
 
     !!- Correct HOS surf2vol and Point HOS Mesh
-    procedure, public :: correct => correctHOS
+    procedure, pass, public :: correct => correctHOS
 
     !!- Destroy HOS surf2vol
-    procedure, public :: destroy => destroySurfVol
+    procedure, pass, public :: destroy => destroySurfVol
 
+    !!- Initializer
+    generic, public :: initialize => initHOS, initHOSSurf2VolDict
+
+    !!- Destructor
     final :: finalSurf2Vol
 
 end type

@@ -1,3 +1,66 @@
+subroutine initHOSSurf2VolDict(this, HOSdict)
+    use mfpGeneral, only : isStringEqual
+    implicit none
+    class(typHOSSurf2Vol),intent(inout) :: this
+    Type(typDictionaryPtr)              :: HOSdict
+    Real(RP)                            :: zMin, zMax
+
+    if (this%isInitialized_) return
+
+    this%dict_      = HOSdict
+    this%HOSSolver_ = HOSdict%getChar("type")
+
+    if ( (.not.(isStringEqual(this%HOSSolver_, "nwt"))).and.&
+         (.not.(isStringEqual(this%HOSSolver_, "ocean"))) ) then
+        write(*,*) "    [ERROR] Grid2Grid, readPostG2GInputFile(fileName) "
+        write(*,*) "        Wrong solver is given when HOS post initilize"
+        write(*,*) "        given solver : ", this%HOSSolver_
+        stop
+    end if
+
+    zMin =  HOSdict%getReal("zMin")
+    zMax =  HOSdict%getReal("zMax")
+
+    if (zMin.ge.0.0_RP) then
+        write(*,*) "    [ERROR] Grid2Grid, initHOSSurf2VolDict(dict) "
+        write(*,*) "        zMin should be negative !"
+        write(*,*) "        given zMin : ", zMin
+        stop
+    end if
+
+    if (zMax.le.0.0_RP) then
+        write(*,*) "    [ERROR] Grid2Grid, initHOSSurf2VolDict(dict) "
+        write(*,*) "        zMax should be positive !"
+        write(*,*) "        given zMax : ", zMax
+        stop
+    end if
+
+    !!- Initialize Solver Class
+    if ( isStringEqual(this%HOSSolver_, "nwt") ) then
+        Call this%hosNWTSurf2Vol_%initialize(HOSdict)
+    else if ( isStringEqual(this%HOSSolver_, "ocean") ) then
+        Call this%hosOceanSurf2Vol_%initialize(HOSdict)
+    endif
+
+    !!- Set Simulation Time Variables
+    if ( isStringEqual(this%HOSSolver_, "nwt") ) then
+        this%dt      = this%hosNWTSurf2Vol_%dtOut_
+        this%endTime = this%hosNWTSurf2Vol_%Tstop_
+        this%waterDepth_ = this%hosNWTSurf2Vol_%depth_
+    else if ( isStringEqual(this%HOSSolver_, "ocean") ) then
+        this%dt      = this%hosOceanSurf2Vol_%dtOut_
+        this%endTime = this%hosOceanSurf2Vol_%Tstop_
+        this%waterDepth_ = this%hosOceanSurf2Vol_%depth_
+    end if
+
+    Call this%correct(0)
+
+    this%isInitialized_ = .TRUE.
+
+    Call writeSurf2VolMeshVTK(this)
+
+End Subroutine
+
 !!- Initialize HOS surf2Vol
 subroutine initHOS(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     implicit none

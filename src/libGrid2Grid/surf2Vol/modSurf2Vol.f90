@@ -41,6 +41,9 @@ Module  modSurf2vol
     use modHDF5interface
     use hdf5
 
+    use mfpGlobal, only : CHAR_LEN
+    use mfpGeneral, only : typDictionaryPtr
+
 !-----------------------------------------------------------------------
 Implicit none
 
@@ -77,7 +80,7 @@ Private
 !-----------------------------------------------------------------------
 contains
 
-!!... Module Function    
+!!... Module Function
 
     !!... HOS Surf2Vol Base Mesh Class Member Function
     Include "HOSMesh/hosMesh.inc"

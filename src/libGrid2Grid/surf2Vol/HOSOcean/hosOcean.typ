@@ -4,6 +4,9 @@ type, public :: typHOSOcean
 !!! Private -------------------------------------------------------
 private
 
+    !!- HOS Input Dictionary
+    Type(typDictionaryPtr)      :: dict_
+
     !!- HOS Ocean file IO
     type(typFileIO) :: hosFile_
 
@@ -69,13 +72,19 @@ contains
 
     !!! Public  -------------------------------------------------------
 
-    !!- initialize HOS NWT Wrapper
-    procedure :: initialize => initHOSOcean
+    !!- initialize HOS Ocean Wrapper with argument (v.1.0)
+    procedure, pass, public :: initHOSOcean
+
+    !!- initialize HOS Ocean Wrapper with dictionary (v.2.0)
+    procedure, pass, public :: initHOSOceanSurf2VolDict
 
     !!- read and compute flow
     procedure :: correct    => correctHOSOcean
 
     !!- Destroy HOS Ocean Surf2Vol
     procedure :: destroy    => destroyHOSOcean
+
+    !!- Initializer
+    generic, public :: initialize => initHOSOcean, initHOSOceanSurf2VolDict
 
 end type

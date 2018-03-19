@@ -2,6 +2,9 @@ type, public :: typHOSVol2Vol
 
     private
 
+        !!- HOS Input Dictionary
+        Type(typDictionaryPtr)      :: dict_
+
         !!- Solver Name (NWT or Ocean)
         character(len=StringLength) :: HOSSolver_
 
@@ -84,11 +87,14 @@ contains
     !!- Check non-dimensional Z position
     procedure, pass, private :: checkHOSZ
 
-    !!- Initialize HOS Vol2Vol
-    procedure, pass, public :: initialize
+    !!- Initialize HOS Vol2Vol with argument (v.1.0)
+    procedure, pass, public :: initializeVol2VolArgument
+
+    !!- Initialize HOS Vol2Vol with dictionary (v.2.0)
+    procedure, pass, public :: initilizeVol2VolDict
 
     !!- Correct HOS Vol2Vol
-    procedure, pass, public :: correct
+    procedure, pass, public :: correct => correctVo2Vol
 
     !!- Get interpolated Eta
     procedure, pass, public :: getEta
@@ -104,6 +110,9 @@ contains
 
     !!- Destroy Vol2Vol
     procedure, pass, public :: destroy => destroyVol2Vol
+
+    generic, public :: initialize => initializeVol2VolArgument, &
+                                     initilizeVol2VolDict
 
     !!- Destroyer (Disabled. gfortran is unstable. YM. 2018/03/16)
     !final                   :: finalVol2Vol

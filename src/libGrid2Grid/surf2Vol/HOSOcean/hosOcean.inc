@@ -1,3 +1,67 @@
+Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
+    use mfpGeneral, only : isStringEqual
+    implicit none
+    class(typHOSOcean),intent(inout) :: this
+    Type(typDictionaryPtr), intent(in)  :: HOSdict
+
+    real(rp) :: zMin, zMax, zMinRatio, zMaxRatio
+    integer  :: nZmin, nZmax
+
+    Character(len=CHAR_LEN) :: zMeshType
+    Type(typDictionaryPtr)  :: zMeshDict
+
+    if (this%isInitialized_) return
+
+    this%dict_ = HOSDict
+
+    !! - Set file name and file unit
+    this%hosFile_%name = HOSdict%getChar("filePath")
+    this%hosFile_%unit = callFileUnit()
+
+    !! - Set output format
+    if (index(trim(this%hosFile_%name), ".dat", .true.) /= 0) then
+      this%isHDF5Format_ = .false.
+    else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
+      index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+      this%isHDF5Format_ = .true.
+    else
+      write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
+        trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
+      stop
+    endif
+
+    zMin    = HOSdict%getReal("zMin")
+    zMax    = HOSdict%getReal("zMax")
+
+    nZmin    = HOSdict%getInt("nZMin")
+    nZmax    = HOSdict%getInt("nZMax")
+
+    zMeshDict = HOSdict%subDict("zMesh")
+    zMeshType = zMeshDict%getChar("type")
+
+    zMinRatio = 3.0_RP
+    zMaxRatio = 3.0_RP
+    if (isStringEqual(zMeshType, "meshRatio")) then
+        zMinRatio    = zMeshDict%getRealOrDefault("zMinRatio", 3.0_RP)
+        zMaxRatio    = zMeshDict%getRealOrDefault("zMaxRatio", 3.0_RP)
+    end if
+
+    ! Read and initalize HOS simulation parameter
+    Call this%init_read_mod()
+
+    ! Build Mesh and Calculate Wave Numbers
+    Call this%buildGlobalMesh(zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+
+    ! Initialize Fourier transforms (FFTW)
+    Call this%hosOceanFFTW_%initialize(this%nXmode_, this%nYmode_)
+
+    ! Read HOS Ocean mode for first time step
+    Call this%correct(0)
+
+    this%isInitialized_ = .TRUE.
+
+End Subroutine
+
 !!!- initialize HOS Ocean reading Module
 SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     !---------------------------------------------------------

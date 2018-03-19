@@ -44,6 +44,9 @@ Module  modVol2Vol
     Use bspline_module
     use,intrinsic :: iso_fortran_env, only: wp => real64
 
+    use mfpGlobal, only : CHAR_LEN
+    use mfpGeneral, only : typDictionaryPtr
+
 Implicit none
 
 Private

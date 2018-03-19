@@ -1,8 +1,10 @@
 subroutine initializePostG2G(this, inputFileName)
+    use mfpGlobal, only : CHAR_LEN
     implicit none
     class(typPostGrid2Grid), intent(inout) :: this
     character(len=*), intent(in)           :: inputFileName
     real(rp)    :: zMinus
+    Character(len = CHAR_LEN) :: hosTypeName
     !------------------------------------------------------------------
 
     if (this%isInitialized_) return
@@ -10,15 +12,20 @@ subroutine initializePostG2G(this, inputFileName)
     !! Read Post Program Input File
     ! Call readPostG2GInputFile(this, inputFileName)
 
+    !- Initialize HOS Vol2Vol Class
+    ! Call this%hosVol2Vol_%initialize(this%hosSolver_, &
+    !                                  this%hosFileName_, &
+    !                                  this%rectLGrid_%zMin_, &
+    !                                  this%rectLGrid_%zMax_, &
+    !                                  this%rectLGrid_%nZmin_, &
+    !                                  this%rectLGrid_%nZmax_)
+
+    ! ReadPost Program Input File (Dictionary Format)
     Call readPostG2GInputFileDict(this, inputFileName)
 
-    !!- Initialize HOS Vol2Vol Class
-    Call this%hosVol2Vol_%initialize(this%hosSolver_, &
-                                     this%hosFileName_, &
-                                     this%rectLGrid_%zMin_, &
-                                     this%rectLGrid_%zMax_, &
-                                     this%rectLGrid_%nZmin_, &
-                                     this%rectLGrid_%nZmax_)
+    ! initialize HOS Vol2Vol with Dictionary
+    hosTypeName = this%dict_%getChar("postGrid2Grid")
+    Call this%hosVol2Vol_%initialize(this%dict_%subDict(hosTypeName))
 
     !! Check Input Parameters
     Call checkPostG2GParameter(this)
@@ -265,13 +272,19 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
 
     !!!... Subroutine Start
 
+    this%postInputFile_%name = inputFilePath
+
     Call separateFilePath(inputFilePath, fileDir, fileName, fileExt)
 
     Call this%dict_%initialize(fileDir, fileName, fileExt)
 
     dict = this%dict_
+    hosTypeName = dict%getChar("postGrid2Grid")
 
-    this%hosSolver_ = dict%getChar("type")
+    !!... HOS Dictionary -------------------------------------------------------
+
+    HOSdict     = dict%subDict(hosTypeName)
+    this%hosSolver_ = HOSdict%getChar("type")
 
     if ( (.not.(isStringEqual(this%hosSolver_, "nwt"))).and.&
          (.not.(isStringEqual(this%hosSolver_, "ocean"))) ) then
@@ -280,11 +293,6 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
         write(*,*) "        given solver : ", this%hosSolver_
         stop
     end if
-
-    !!... HOS Dictionary -------------------------------------------------------
-
-    HOSdict     = dict%subDict("HOS"//trim(this%hosSolver_))
-    HOSdict     = dict%subDict("HOS"//trim(this%hosSolver_))
 
     !!... HOS Re-Construction Information
     this%hosFileName_ = HOSdict%getChar("filePath")

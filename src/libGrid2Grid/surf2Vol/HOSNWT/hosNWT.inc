@@ -1,3 +1,70 @@
+Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
+    use mfpGeneral, only : isStringEqual
+    implicit none
+    class(typHOSNWT),intent(inout) :: this
+    Type(typDictionaryPtr), intent(in)  :: HOSdict
+    Type(typDictionaryPtr)  :: zMeshDict
+    Character(len=CHAR_LEN) :: zMeshType
+    real(rp) :: zMin, zMax, zMinRatio, zMaxRatio
+    integer  :: nZmin, nZmax
+
+    if (this%isInitialized_) return
+    this%dict_ = HOSdict
+
+    !! - Set file name and file unit
+    this%hosFile_%name = HOSdict%getChar("filePath")
+    this%hosFile_%unit = callFileUnit()
+
+    !! - Set Added Mode Computation Bool Type
+    this%isAddedMode_ = HOSdict%getLogicalOrDefault("addedMode", .TRUE.)
+
+    !! - Set output format
+    if (index(trim(this%hosFile_%name), ".dat", .true.) /= 0) then
+      this%isHDF5Format_ = .false.
+
+    else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
+      index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+      this%isHDF5Format_ = .true.
+    else
+      write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
+        trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
+      stop
+    endif
+
+    zMin    = HOSdict%getReal("zMin")
+    zMax    = HOSdict%getReal("zMax")
+
+    nZmin    = HOSdict%getInt("nZMin")
+    nZmax    = HOSdict%getInt("nZMax")
+
+    zMeshDict = HOSdict%subDict("zMesh")
+
+    zMeshType = zMeshDict%getChar("type")
+
+    zMinRatio = 3.0_RP
+    zMaxRatio = 3.0_RP
+
+    if (isStringEqual(zMeshType, "meshRatio")) then
+        zMinRatio    = zMeshDict%getRealOrDefault("zMinRatio", 3.0_RP)
+        zMaxRatio    = zMeshDict%getRealOrDefault("zMaxRatio", 3.0_RP)
+    end if
+
+    ! Read and initalize HOS simulation parameter depending on file extension
+    Call this%init_read_mod()
+
+    ! Build HOS NWT mesh and Calculate wave number
+    Call this%buildGlobalMesh(zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+
+    ! Initialize Fourier transforms (FFTW)
+    Call this%hosNWTFFTW_%initialize(this%nXmode_, this%nYmode_, this%nAddmode_)
+
+    ! Read HOS NWT mode for first time step
+    Call this%correct(0)
+
+    this%isInitialized_ = .TRUE.
+
+End Subroutine
+
 !!!- initialize HOS NWT reading Module
 SUBROUTINE initHOSNWT(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, isAddedMode)
     !---------------------------------------------------------
