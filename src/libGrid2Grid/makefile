@@ -45,11 +45,11 @@ $(DIR_OBJ)modFourier_r2c_FFTW3.o: $(DIR_CURRENT)fftw3/modFourier_r2c_FFTW3.f90
 
 $(DIR_OBJ)modHDF5Interface.o: $(DIR_CURRENT)HDF5/modHDF5Interface.f90
 	@echo $(OBJPRINT)
-	$(COMPILE_OBJECT_RULE) $< -o $@ $(HDF5_LDFLAG)
+	$(COMPILE_OBJECT_RULE) $< -o $@ -I$(HDF5_INCLUDE)
 
 $(DIR_OBJ)modSurf2Vol.o: $(DIR_CURRENT)surf2Vol/modSurf2Vol.f90
 	@echo $(OBJPRINT)
-	$(COMPILE_OBJECT_RULE) $< -o $@ $(HDF5_LDFLAG)
+	$(COMPILE_OBJECT_RULE) $< -o $@ -I$(HDF5_INCLUDE)
 
 $(DIR_OBJ)modVol2Vol.o: $(DIR_CURRENT)vol2Vol/modVol2Vol.f90
 	@echo $(OBJPRINT)
@@ -57,7 +57,7 @@ $(DIR_OBJ)modVol2Vol.o: $(DIR_CURRENT)vol2Vol/modVol2Vol.f90
 
 $(DIR_OBJ)modPostGrid2Grid.o: $(DIR_CURRENT)postGrid2Grid/modPostGrid2Grid.f90
 	@echo $(OBJPRINT)
-	$(COMPILE_OBJECT_RULE) $< -o $@
+	$(COMPILE_OBJECT_RULE) $< -o $@ $(FYMC)
 
 $(DIR_OBJ)modGrid2Grid.o: $(DIR_CURRENT)modGrid2Grid.f90
 	@echo $(OBJPRINT)

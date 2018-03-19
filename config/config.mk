@@ -26,11 +26,16 @@ THIRD_LIB_LINK+=$(FFTW_LIB)libfftw3.a
 
 export HDF5_LIB=/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/
 export HDF5_INCLUDE=/usr/include/hdf5/serial/
-export HDF5_LDFLAG=-I$(HDF5_INCLUDE)
 
 THIRD_INCLUDE+=-I$(HDF5_INCLUDE)
 THIRD_LIB_LINK+=$(HDF5_LIB)libhdf5_fortran.a
 THIRD_LIB_LINK+=$(HDF5_LIB)libhdf5.a -ldl -pthread -lz
+
+export FYMC_LIB=$(DIR_LIB)
+export FYMC_INCLUDE=$(DIR_LIB)
+
+THIRD_INCLUDE+=-I$(FYMC_INCLUDE)
+THIRD_LIB_LINK+=$(FYMC_LIB)libfymc.a
 
 ### compiling Rule --------------------------------------------------------
 

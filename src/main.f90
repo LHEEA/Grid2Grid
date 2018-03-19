@@ -16,7 +16,7 @@ Program main
 
     Implicit None
     Character(Len =100) :: inputFileName
-    inputFileName = "postGrid2Grid.inp"
+    inputFileName = "postGrid2Grid.dict"
 
     Call testPost(inputFileName)
 

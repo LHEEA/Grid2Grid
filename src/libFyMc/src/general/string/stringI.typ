@@ -1,3 +1,5 @@
+public :: separateFilePath
+
 public :: isStringEqual
 
     !! Compare String & Character

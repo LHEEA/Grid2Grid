@@ -104,11 +104,19 @@ Recursive Subroutine initDictDB_NameCharArray(dictName, charArray, dictID, paren
     character(len = CHAR_LEN), allocatable :: tmpKeyCArg(:)
     real(RP), allocatable                  :: tmpKeyRArg(:)
     integer :: tmpParentDictID
+    integer :: nArr
+
+    Real(RP), allocatable :: tempRealField(:)
+    character(len=CHAR_LEN), allocatable :: tempCharField(:)
+
+    Character(len=fileLineLength),dimension(size(charArray)) :: removedCharArray
     !! Subroutine Start -------------------------------------------------------
 
     Call initializeDictDataBase(dictName, dictID, parentDictID)
 
-    nLine = size(charArray)
+    Call removeCommentBlock(charArray, removedCharArray)
+
+    nLine = size(removedCharArray)
 
     isKeyActive   = .FALSE.
     isDictActive  = .FALSE.
@@ -120,7 +128,7 @@ Recursive Subroutine initDictDB_NameCharArray(dictName, charArray, dictID, paren
         if (iLine.gt.nLine) exit
 
         !! Get Line
-        tmpLine = charArray(iLine)
+        tmpLine = removedCharArray(iLine)
 
         !! Modify Line to be separated correctly
         modLine = insertSpaceSpecialCharacter(tmpLine)
@@ -232,25 +240,78 @@ Recursive Subroutine initDictDB_NameCharArray(dictName, charArray, dictID, paren
                         !! Key, Array, End in One Line
                         !!   - format : key  ( val1 val2 ... valN ) ;
                         else
-                            if ((nArgValid.ge.5).and.isWord(scFlag(3:nArgValid-2))) then
-                                if (isAllTrue(numFlag(3:nArgValid-2))) then
-                                    !! Push Number Value
-                                    Call dictDB(dictID)%sLTable%push(keySaved, rArg(3:nArgValid-2))
+                            if (nArgValid.ge.5) then
+
+                                if ( numFlag(2).AND.(scFlag(nArgValid).EQ.0) ) then
+
+                                    !! key nArray ( val1 val2 ... valN );
+                                    if ((scFlag(3).eq.1201).or.(scFlag(nArgValid-1).eq.1202)) then
+
+                                        if (isAllTrue(numFlag(4:nArgValid-2))) then
+                                            !! Push Number Value
+                                            Call dictDB(dictID)%sLTable%push(keySaved, rArg(4:nArgValid-2))
+                                        else
+                                            !! Push Char Value
+                                            Call dictDB(dictID)%sLTable%push(keySaved, cArg(4:nArgValid-2))
+                                        end if
+                                        keySaved = "";              isKeyActive = .FALSE.
+
+                                    !! key nArray { val };
+                                    elseif ( (scFlag(3).eq.1101).or.(scFlag(5).eq.1102) ) then
+
+                                        nArr = iArg(2)
+
+                                        if (nArr.ge.1) then
+
+                                            if ( numFlag(4) ) then
+                                                allocate(tempRealField(nArr))
+                                                tempRealField(1:nArr) = rArg(4)
+                                                !! Push Number Value
+                                                Call dictDB(dictID)%sLTable%push(keySaved, tempRealField )
+                                                deallocate(tempRealField)
+                                            else
+                                                allocate(tempCharField(nArr))
+                                                tempCharField(1:nArr) = cArg(4)
+                                                !! Push Char Value
+                                                Call dictDB(dictID)%sLTable%push(keySaved, tempCharField)
+                                                deallocate(tempCharField)
+                                            end if
+
+                                            keySaved = "";              isKeyActive = .FALSE.
+
+                                        else
+                                            Call writeErrorFileDict("Wrong contents in array.", tmpLine)
+                                        end if
+
+                                    else
+
+                                         Call writeErrorFileDict("Wrong contents in array.", tmpLine)
+
+                                    end if
+
+                                else if ( isWord(scFlag(3:nArgValid-2)) ) then
+                                    if (isAllTrue(numFlag(3:nArgValid-2))) then
+                                        !! Push Number Value
+                                        Call dictDB(dictID)%sLTable%push(keySaved, rArg(3:nArgValid-2))
+                                    else
+                                        !! Push Char Value
+                                        Call dictDB(dictID)%sLTable%push(keySaved, cArg(3:nArgValid-2))
+                                    end if
+                                    keySaved = "";              isKeyActive = .FALSE.
                                 else
-                                    !! Push Char Value
-                                    Call dictDB(dictID)%sLTable%push(keySaved, cArg(3:nArgValid-2))
+                                    Call writeErrorFileDict("Wrong contents in array.", tmpLine)
                                 end if
-                                keySaved = "";              isKeyActive = .FALSE.
+
                             else
                                 Call writeErrorFileDict("Wrong contents in array.", tmpLine)
                             end if
+
                         end if
 
                     !! If Keyword exist, but end not exist
                     else
 
-                        !! If Argument is larger than 2.
-                        if (nArgValid.ge.2) then
+                        if (nArgValid.ge.3) then
 
                             if (isWord(scFlag(2:2))) then
 
@@ -270,8 +331,17 @@ Recursive Subroutine initDictDB_NameCharArray(dictName, charArray, dictID, paren
                                     Call writeErrorFileDict("Wrong Format. ; should be located after the value.", tmpLine)
                                 end if
 
+                            else
+                                Call writeErrorFileDict("Wrong contents in array. ", tmpLine)
+                            end if
+
+                        end if
+
+                        !! If Argument is larger than 2.
+                        if (nArgValid.ge.2) then
+
                             !! Dictionary Start
-                            elseif (scFlag(2).eq.1101) then
+                            if (scFlag(2).eq.1101) then
 
                                 Call writeErrorFileDict(" Dictionary character { should be separated.", tmpLine)
 

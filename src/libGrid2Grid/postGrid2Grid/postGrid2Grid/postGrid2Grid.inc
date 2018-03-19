@@ -8,7 +8,9 @@ subroutine initializePostG2G(this, inputFileName)
     if (this%isInitialized_) return
 
     !! Read Post Program Input File
-    Call readPostG2GInputFile(this, inputFileName)
+    ! Call readPostG2GInputFile(this, inputFileName)
+
+    Call readPostG2GInputFileDict(this, inputFileName)
 
     !!- Initialize HOS Vol2Vol Class
     Call this%hosVol2Vol_%initialize(this%hosSolver_, &
@@ -242,6 +244,234 @@ SUBROUTINE writeWaveProbe(this, simulTime)
     1101 format(5000(e15.7))
 
 END SUBROUTINE
+
+subroutine readPostG2GInputFileDict(this, inputFilePath)
+    use mfpGlobal, only : CHAR_LEN
+    implicit none
+    class(typPostGrid2Grid), intent(inout)  :: this
+    character(len=*), intent(in)            :: inputFilePath
+    !!!... Local Variables
+    Character(len=CHAR_LEN)                 :: fileDir
+    Character(len=CHAR_LEN)                 :: fileName
+    Character(len=CHAR_LEN)                 :: fileExt
+
+    Character(len=CHAR_LEN)  :: hosTypeName
+    Type(typDictionaryPtr)   :: dict, HOSdict, &
+                                simulDict, vtkDict, &
+                                zMeshDict
+    Character(len=CHAR_LEN)  :: zMeshType
+    Type(typDictionaryPtr)   :: waveProbeDict, probesDict, probeDict
+    integer :: iprobe
+
+    !!!... Subroutine Start
+
+    Call separateFilePath(inputFilePath, fileDir, fileName, fileExt)
+
+    Call this%dict_%initialize(fileDir, fileName, fileExt)
+
+    dict = this%dict_
+
+    this%hosSolver_ = dict%getChar("type")
+
+    if ( (.not.(isStringEqual(this%hosSolver_, "nwt"))).and.&
+         (.not.(isStringEqual(this%hosSolver_, "ocean"))) ) then
+        write(*,*) "    [ERROR] Grid2Grid, readPostG2GInputFile(fileName) "
+        write(*,*) "        Wrong solver is given when HOS post initilize"
+        write(*,*) "        given solver : ", this%hosSolver_
+        stop
+    end if
+
+    !!... HOS Dictionary -------------------------------------------------------
+
+    HOSdict     = dict%subDict("HOS"//trim(this%hosSolver_))
+    HOSdict     = dict%subDict("HOS"//trim(this%hosSolver_))
+
+    !!... HOS Re-Construction Information
+    this%hosFileName_ = HOSdict%getChar("filePath")
+
+    !!... Simulation  Dictionary -----------------------------------------------
+
+    simulDict   = dict%subDict("simulation")
+
+    this%startTime_ = simulDict%getReal("startTime")
+    if (this%startTime_.lt.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        startTime should be positive"
+        write(*,*) "        given startTime :", this%startTime_
+        stop
+    end if
+
+    this%endTime_   = simulDict%getReal("endTime")
+    if (this%endTime_.lt.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        endTime should be positive"
+        write(*,*) "        given endTime :", this%endTime_
+        stop
+    end if
+
+    this%dt_        = simulDict%getReal("dt")
+    if (this%dt_.le.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        dt should be positive"
+        write(*,*) "        given dt :", this%dt_
+        stop
+    end if
+
+    !!... VTK Mesh Dictionary --------------------------------------------------
+
+    this%isWriteVTK_  = dict%getLogical("writeVTK")
+
+    if (this%isWriteVTK_) then
+        vtkDict = dict%subDict("vtkMesh")
+    end if
+
+    this%isBuildAirMesh_ = vtkDict%getLogicalOrDefault("airMesh", .false.)
+
+    this%rectLGrid_%xMin_ = vtkDict%getReal("xMin")
+    if (this%rectLGrid_%xMin_.lt.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong xMin is given, xMin should be positive or zero"
+        write(*,*) "        given origin xMin :", this%rectLGrid_%xMin_
+        stop
+    end if
+
+    this%rectLGrid_%xMax_ = vtkDict%getReal("xMax")
+    if (this%rectLGrid_%xMax_.lt.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong xMax is given, xMax should be positive or zero"
+        write(*,*) "        given origin xMax :", this%rectLGrid_%xMax_
+        stop
+    end if
+
+    this%rectLGrid_%yMin_ = vtkDict%getReal("yMin")
+    if (this%rectLGrid_%yMin_.lt.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong yMin is given, yMin should be positive or zero"
+        write(*,*) "        given origin xMin :", this%rectLGrid_%yMin_
+        stop
+    end if
+
+    this%rectLGrid_%yMax_ = vtkDict%getReal("yMax")
+    if (this%rectLGrid_%yMax_.lt.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong yMax is given, yMax should be positive or zero"
+        write(*,*) "        given origin yMax :", this%rectLGrid_%yMax_
+        stop
+    end if
+
+    this%rectLGrid_%zMin_ = vtkDict%getReal("zMin")
+    if (this%rectLGrid_%zMin_.ge.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong zMin is given, zMin should be negative"
+        write(*,*) "        given origin zMin :", this%rectLGrid_%zMin_
+        stop
+    end if
+
+    this%rectLGrid_%zMax_ = vtkDict%getReal("zMax")
+    if (this%rectLGrid_%zMax_.lt.0.0) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong zMax is given, zMax should be positive"
+        write(*,*) "        given origin zMax :", this%rectLGrid_%zMax_
+        stop
+    end if
+
+    this%rectLGrid_%nX_    = vtkDict%getInt("nX")
+    if (this%rectLGrid_%nX_.le.1) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong nX is given, nX should be larger than 1"
+        write(*,*) "        given origin nX :", this%rectLGrid_%nX_
+        stop
+    end if
+
+    this%rectLGrid_%nY_    = vtkDict%getInt("nY")
+    if (this%rectLGrid_%nY_.le.1) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong nY is given, nY should be larger than 1"
+        write(*,*) "        given origin nY :", this%rectLGrid_%nY_
+        stop
+    end if
+
+    this%rectLGrid_%nZmin_ = vtkDict%getInt("nZMin")
+    if (this%rectLGrid_%nZmin_.le.3) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong nZmin is given, nZ should be larger than 3"
+        write(*,*) "        given origin nZmin :", this%rectLGrid_%nZmin_
+        stop
+    end if
+
+    this%rectLGrid_%nZmax_ = vtkDict%getInt("nZMax")
+    if (this%rectLGrid_%nZmax_.le.3) then
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong nZmax is given, nZ should be larger than 3"
+        write(*,*) "        given origin nZmax :", this%rectLGrid_%nZmax_
+        stop
+    end if
+
+    zMeshDict = vtkDict%subDict("zMesh")
+    zMeshType = zMeshDict%getChar("type")
+
+    if (isStringEqual(zMeshType, "uniform")) then
+        this%zflag_ = INDEX_UNIFORM_MESH    ! Uniform Mesh
+    else if (isStringEqual(zMeshType, "sine")) then
+        this%zflag_ = INDEX_SINE_MESH       ! Sine Distributed Mesh
+    else if (isStringEqual(zMeshType, "meshratio")) then
+        this%zflag_ = INDEX_GEOMETRICRATIO_MESH   ! GEOMETRIC RATIO Mesh
+
+        this%rectLGrid_%zMinRatio_ = zMeshDict%getRealOrDefault("zMinRatio", 1.0_RP)
+        this%rectLGrid_%zMaxRatio_ = zMeshDict%getRealOrDefault("zMaxRatio", 1.0_RP)
+
+        if (this%rectLGrid_%zMinRatio_.le.0.0) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        zMinRatio should be larger than 0.0"
+            write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
+            stop
+        end if
+
+        if (this%rectLGrid_%zMaxRatio_.le.0.0) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        zMaxRatio should be larger than 0.0"
+            write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
+            stop
+        end if
+    else
+        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+        write(*,*) "        Wrong input file format is given. Input file should have following form :"
+        write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
+        write(*,*) "        Default mesh configuration will be used."
+        this%zflag_ = INDEX_UNIFORM_MESH
+    end if
+
+    !!... Wave Probe Dictionary ------------------------------------------------
+
+    this%isWriteWaveProbe_ = dict%getLogicalOrDefault("writeWaveProbe",.false.)
+
+    if (this%isWriteWaveProbe_) then
+        waveProbeDict = dict%subDict("waveProbe")
+        this%waveFile_%name = waveProbeDict%getCharOrDefault("waveProbeFile", "waveElevation.dat")
+
+        probesDict = waveProbeDict%subDict("waveProbes")
+        this%nWaveProbe_ = probesDict%nSubDict()
+
+        if (this%nWaveProbe_.ge.1) then
+            allocate(this%waveProbe_(this%nWaveProbe_))
+            do iprobe = 1, this%nWaveProbe_
+                this%waveProbe_(iprobe)%name_ = probesDict%getSubDictName(iprobe)
+                probeDict = probesDict%subDict(this%waveProbe_(iprobe)%name_)
+
+                this%waveProbe_(iprobe)%xPos_ = probeDict%getReal("position", 1)
+                this%waveProbe_(iprobe)%yPos_ = probeDict%getReal("position", 2)
+            enddo
+        else
+            write(*,*) "    [WARNING] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Given nWaveProbe is less than 1"
+            write(*,*) "        No wave gauge will be used "
+            this%nWaveProbe_ = 0
+        end if
+    else
+        this%nWaveProbe_ = 0
+    end if
+
+end Subroutine
 
 subroutine readPostG2GInputFile(this, inputFileName)
     implicit none

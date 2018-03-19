@@ -39,6 +39,8 @@ Module modPostGrid2Grid
 
 !!... Modules to use
 
+    use mfpGeneral, only : typDictionaryPtr, isStringEqual, separateFilePath
+
     use modGrid2GridGlobal
     use modVol2Vol
 

@@ -117,6 +117,12 @@ contains
                        pushSLTableChar, pushSLTableCharArray, &
                        pushSLTableLogical, pushSLTableLogicalArray
 
+    !!... Get data array
+    !!
+    !! Call getDataArray(this, ikey)
+    !!
+    procedure, pass, public :: getDataArray => getSLTableDataArray
+
     !!... Get key character for given keyIndex
     !!
     !! Call getReal(this, "key", real)

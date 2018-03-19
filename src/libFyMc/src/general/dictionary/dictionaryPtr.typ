@@ -39,6 +39,18 @@ Contains
     !!... Return SubDictionary
     procedure, pass, public :: subDict => subDictionaryPtr
 
+    !!... nData
+    procedure, pass, public :: nData => nData_Dict
+
+    !!... nSubDict
+    procedure, pass, public :: nSubDict => nSubDict_Dict
+
+    !!... Get Key Name
+    procedure, pass, public :: getKey => getDictKey
+
+    !!... Get Sub Dict Name
+    procedure, pass, public :: getSubDictName => getDictSubDictName
+
     !!... Get Real Values
     procedure, pass, public :: getReal => getDictReal
 
@@ -99,5 +111,46 @@ Contains
     !!... Get Logical Array or set value with given value if key is not exist
     procedure, pass, public :: getLogicalArrayOrDefault => getDictLogicalArrayOrDefault
 
+    !!... Set integer Values as a dictionary member
+    procedure, pass, private :: setInt => setDictInt
+
+    !!... Set integer array se be a dictionary member
+    procedure, pass, private :: setIntArray => setDictIntArray
+
+    !!... Set real Values to be a dictionary member
+    procedure, pass, private :: setReal => setDictReal,     &
+                                           setDictRealRP,   &
+                                           setDictDble
+
+    !!... Set real array to be a dictionary member
+    procedure, pass, private :: setRealArray => setDictRealArray,   &
+                                                setDictRealRPArray, &
+                                                setDictDbleArray
+
+    !!... Set character to be a dictionary member
+    procedure, pass, private :: setChar => setDictChar
+
+    !!... Set character array to be a dictionary member
+    procedure, pass, private :: setCharArray => setDictCharArray
+
+    !!... Set character to be a dictionary member
+    procedure, pass, private :: setLogical => setDictLogical
+
+    !!... Set character array to be a dictionary member
+    procedure, pass, private :: setLogicalArray => setDictLogicalArray
+
+    !!... Set sub-dictionary
+    procedure, pass, public  :: setSubDict => setDictDict
+
+    !!... Add dictionary
+    procedure, pass, public  :: addDict => addDictDict
+
+    !!... Generic procedure
+    generic :: set => setInt, setIntArray, &
+                      setReal, setRealArray, &
+                      setChar, setCharArray, &
+                      setLogical, setLogicalArray
+
+    procedure, pass, public :: writeFile => writeDict2File
 
 End Type

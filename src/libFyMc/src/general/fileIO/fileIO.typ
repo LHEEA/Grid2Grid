@@ -1,4 +1,4 @@
-type, public :: typFileIO
+type, private :: typFileIO
 
     Character(len=1000)     :: fileDir
 

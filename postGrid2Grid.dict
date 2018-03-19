@@ -1,0 +1,103 @@
+#-------------------------------------------------------------------------- #
+#
+#                  Grid2Grid Post Processing Input File
+#
+#-------------------------------------------------------------------------- #
+#
+#   Grid2Grid Post Processing Program Input File
+#
+#   The information written in this file is recognized by first keyword.
+#   Keyword involves small and large letter.
+#
+#   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
+#
+#-------------------------------------------------------------------------- #
+
+type                NWT;
+
+writeVTK            true;
+writeWaveProbe      true;
+
+zMeshInfo
+{
+    zMin           -0.6;
+    zMax            0.4;
+
+    nZMin           30;
+    nZMax           30;
+
+    zMesh
+    {
+        type            uniform;
+        //   uniform   : uniform mesh
+        //   sine      : sine mesh
+
+
+        zMinRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z<0)
+        zMaxRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z>0)
+        // dz_min locates near to the free surface
+    }
+}
+
+HOSOcean
+{
+    filePath        example/modes_HOS_SWENSE.dat;
+
+    $zMeshInfo
+}
+
+HOSNWT
+{
+    filePath        example/modes_HOS_SWENSE.dat;
+
+    $zMeshInfo
+}
+
+simulation
+{
+    startTime       0.0;
+    endTime		    1.0;
+    dt              0.1;
+}
+
+vtkMesh
+{
+    writeVTK        true;
+    airMesh         true;
+
+    xMin            0.0;
+    xMax            5.65730522;
+
+    yMin            0.0;
+    yMax            0.1;
+
+    nX              500;
+    nY              2;
+
+    $zMeshInfo
+}
+
+waveProbe
+{
+    waveProbeFile   waveElevation.dat;
+
+    waveProbes
+    {
+        waveProbes1
+        {
+            position    ( 0.0     0.0 );
+        }
+        waveProbes2
+        {
+            position    ( 1.0     2.0 );
+        }
+        waveProbes3
+        {
+            position    ( 2.0     3.0 );
+        }
+    }
+}
+
+/* ------------------------------------------------------------------------- *\
+#                                END OF FILE
+\* ------------------------------------------------------------------------- */

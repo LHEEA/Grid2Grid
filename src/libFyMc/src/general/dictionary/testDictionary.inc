@@ -20,7 +20,7 @@ end subroutine
 
 Subroutine testDictPointer()
     Implicit None
-    type(typDictionaryPtr) :: dictPtr, subDict
+    type(typDictionaryPtr) :: dictPtr, subDict, dict2
 
     type(typSLookUpTable) :: SLTable
 
@@ -38,9 +38,30 @@ Subroutine testDictPointer()
 
     real(rp), allocatable :: realArr(:)
 
-    ! Call dictPtr%initialize("abc")
-    ! write(*,*) dictPtr%ptrDict%dictID
-    !
+    Call dictPtr%initialize("abc")
+
+    Call dict2%initialize("asqf")
+
+    write(*,*) dictPtr%ptrDict%dictID
+
+    Call dict2%set("here", "qsjkldjq")
+
+    Call dictPtr%set("abc", 1.0)
+
+    Call dictPtr%set("def", (/1.0, 2.0, 3.0/))
+
+    Call dictPtr%set("ghf", 1)
+
+    Call dictPtr%set("ghfe", (/1, 2, 5/))
+
+    Call dictPtr%set("ghfeada", "abd")
+
+    Call dictPtr%addDict(dict2)
+
+    Call dictPtr%print()
+
+    ! Call subDict%print()
+
     ! Call dictPtr%ptrDict%sLTable%print()
     !
     ! Call dictDB(1)%SLTable%print()
@@ -55,28 +76,30 @@ Subroutine testDictPointer()
     ! Call dictDB(2)%SLTable%print()
 
     fileDir  = "./"
-    fileName = "testDict"
+    fileName = "dict"
     fileExt  = ""
 
     Call dictPtr%initialize(fileDir, fileName, fileExt)
 
     Call dictPtr%print()
 
-    write(*,*) dictPtr%getReal("varR")
+    Call dictPtr%writeFile("./dict.dict")
 
+    ! write(*,*) dictPtr%getReal("varR")
+    !
+    ! ! realArr = dictPtr%getRealArray("arrR")
+    !
     ! realArr = dictPtr%getRealArray("arrR")
-
-    realArr = dictPtr%getRealArray("arrR")
-
-    write(*,*) realArr
-
-    subDict = dictPtr%subDict("dict1")
-
-    Call subDict%print()
-
-    realArr = dictPtr%getRealOrDefault("arrR1", 3.0_RP)
-
-    write(*,*) realArr
+    !
+    ! write(*,*) realArr
+    !
+    ! subDict = dictPtr%subDict("dict1")
+    !
+    ! Call subDict%print()
+    !
+    ! realArr = dictPtr%getRealOrDefault("arrR1", 3.0_RP)
+    !
+    ! write(*,*) realArr
 
     ! fileDir  = ""
     ! fileName = "testDict"

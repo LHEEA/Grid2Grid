@@ -264,6 +264,33 @@ subroutine pushSLTableLogicalArray(this, key, value)
 
 end subroutine
 
+function getSLTableDataArray(this, keyIndex, isStop) result(dataArray)
+    Implicit None
+    class(typSLookUpTable), intent(in)    :: this
+    integer, intent(in)                   :: keyIndex
+    type(typDataArray)                    :: dataArray
+    logical,optional                      :: isStop
+    logical                               :: isExist
+    logical :: isErr
+
+    isErr = .TRUE.
+    if (present(isStop)) isErr = isStop
+
+    if (keyIndex.le.this%nKey) then
+        if (this%isKeyActive(keyIndex)) then
+            dataArray = this%dataArray(keyIndex)
+        else
+            write(*,*) "No key exist for given key Index. keyIndex : ", keyIndex
+            if (isErr) stop
+        end if
+    else
+        write(*,*) "Given keyIndex is over than sLookTable Size. keyIndex : ", keyIndex
+        if (isErr) stop
+    end if
+
+end function
+
+
 function getSLTableKey(this, keyIndex, isStop) result(key)
     Implicit None
     class(typSLookUpTable), intent(in)    :: this
@@ -1149,13 +1176,20 @@ subroutine reallocateSLTable(this, tableSize)
 
 end subroutine
 
-subroutine printSLTable(this)
+subroutine printSLTable(this, tabSize)
     Implicit None
     class(typSLookUpTable), intent(in) :: this
     integer :: ikey, idata, nData
+    Integer,optional :: tabSize
+    integer :: iblk
 
-    write(*,*) "LookUpTable : ", trim(this%name)
-    write(*,*) "{"
+    ! write(*,*) "LookUpTable : ", trim(this%name)
+
+    if (present(tabSize)) then
+        iblk = tabSize
+    else
+        iblk = DEFAULT_TAB_SIZE
+    end if
 
     if (this%nKey.ge.1) then
         do ikey = 1, this%nKey
@@ -1168,27 +1202,27 @@ subroutine printSLTable(this)
             if (this%dataArray(ikey)%isNum) then
                 if(this%dataArray(ikey)%isInt) then
                     if (nData.eq.1) then
-                        write(*,1021) trim(this%keys(ikey)%get()), &
+                        write(*,1021) blankSpace(iblk),trim(this%keys(ikey)%get()), &
                                       this%dataArray(ikey)%arrI(1)
                     else
-                        write(*,1020) trim(this%keys(ikey)%get()), nData
-                        write(*,*) "    ("
+                        write(*,1020) blankSpace(iblk),trim(this%keys(ikey)%get()), nData
+                        write(*,"(a,a)") blankSpace(iblk),"("
                         do idata = 1,nData
-                            write(*,1022) this%dataArray(ikey)%arrI(idata)
+                            write(*,1022) blankSpace(iblk),this%dataArray(ikey)%arrI(idata)
                         enddo
-                        write(*,*) "    )"
+                        write(*,"(a,a)") blankSpace(iblk),")"
                     end if
                 else
                     if (nData.eq.1) then
-                        write(*,1011) trim(this%keys(ikey)%get()), &
+                        write(*,1011) blankSpace(iblk),trim(this%keys(ikey)%get()), &
                                       this%dataArray(ikey)%arrR(1)
                     else
-                        write(*,1010) trim(this%keys(ikey)%get()), nData
-                        write(*,*) "    ("
+                        write(*,1010) blankSpace(iblk),trim(this%keys(ikey)%get()), nData
+                        write(*,"(a,a)") blankSpace(iblk),"("
                         do idata = 1,nData
-                            write(*,1012) this%dataArray(ikey)%arrR(idata)
+                            write(*,1012) blankSpace(iblk),this%dataArray(ikey)%arrR(idata)
                         enddo
-                        write(*,*) "    )"
+                        write(*,"(a,a)") blankSpace(iblk),")"
                     end if
                 endif
             end if
@@ -1196,30 +1230,30 @@ subroutine printSLTable(this)
             !!... Write Character
             if (this%dataArray(ikey)%isStr) then
                 if (nData.eq.1) then
-                    write(*,1111) trim(this%keys(ikey)%get()), &
+                    write(*,1111) blankSpace(iblk),trim(this%keys(ikey)%get()), &
                                   trim(this%dataArray(ikey)%arrS(1)%get())
                 else
-                    write(*,1110) trim(this%keys(ikey)%get()), nData
-                    write(*,*) "    ("
+                    write(*,1110) blankSpace(iblk),trim(this%keys(ikey)%get()), nData
+                    write(*,"(a,a)") blankSpace(iblk),"("
                     do idata = 1,nData
-                        write(*,1112) trim(this%dataArray(ikey)%arrS(idata)%get())
+                        write(*,1112) blankSpace(iblk),trim(this%dataArray(ikey)%arrS(idata)%get())
                     enddo
-                    write(*,*) "    )"
+                    write(*,"(a,a)") blankSpace(iblk),")"
                 end if
             end if
 
             !!... Write Logical
             if (this%dataArray(ikey)%isLog) then
                 if (nData.eq.1) then
-                    write(*,1211) trim(this%keys(ikey)%get()), &
+                    write(*,1211) blankSpace(iblk),trim(this%keys(ikey)%get()), &
                                   this%dataArray(ikey)%arrL(1)
                 else
                     write(*,1210) trim(this%keys(ikey)%get()), nData
-                    write(*,*) "    ("
+                    write(*,"(a,a)") blankSpace(iblk),"("
                     do idata = 1,nData
                         write(*,1212) this%dataArray(ikey)%arrL(idata)
                     enddo
-                    write(*,*) "    )"
+                    write(*,"(a,a)") blankSpace(iblk),")"
                 end if
             end if
 
@@ -1227,25 +1261,25 @@ subroutine printSLTable(this)
 
         end do
     else
-        write(*,*) "    empty."
+        write(*,"(a,a)") blankSpace(iblk),"    empty."
     end if
-    write(*,*) "}"
 
-    1010 format(5x,a,3x,"numVector",3x,i6)
-    1011 format(5x,a,3x,"num",f15.6)
-    1012 format(7x,f15.6)
 
-    1020 format(5x,a,3x,"intVector",3x,i6)
-    1021 format(5x,a,3x,"int",i15)
-    1022 format(7x,i15)
+    1010 format(a,a,3x,"numVector",3x,i6)
+    1011 format(a,a,3x,"num",f15.6)
+    1012 format(a,f15.6)
 
-    1110 format(5x,a,3x,"charVector",3x,a)
-    1111 format(5x,a,3x,"char",3x,"[ ",a," ]")
-    1112 format(10x,5x,"[ ",a," ]")
+    1020 format(a,a,3x,"intVector",3x,i6)
+    1021 format(a,a,3x,"int",i15)
+    1022 format(a,i15)
 
-    1210 format(5x,a,3x,"logVector",3x,l2)
-    1211 format(5x,a,3x,"log",3x,l2)
-    1212 format(10x,5x,l2)
+    1110 format(a,a,3x,"charVector",3x,a)
+    1111 format(a,a,3x,"char",3x,"[ ",a," ]")
+    1112 format(a,5x,"[ ",a," ]")
+
+    1210 format(a,a,3x,"logVector",3x,l2)
+    1211 format(a,a,3x,"log",3x,l2)
+    1212 format(a,5x,l2)
 
 end subroutine
 

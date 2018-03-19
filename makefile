@@ -27,7 +27,7 @@ SUB_CREATEOBJ_LIST= $(DIR_CURRENT_SRC)libBspline 	\
 				    $(DIR_CURRENT_SRC)libFyMc 		\
 				    $(DIR_CURRENT_SRC)libGrid2Grid
 
-Release: createObj
+Release: createLib
 Release: postG2G
 
 createLib: cleanObj cleanlib

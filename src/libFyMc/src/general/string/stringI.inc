@@ -826,6 +826,98 @@ Subroutine readMakeCharArrayFromFile(fileIndex, subCharArray, nLine, charStart, 
 
 End Subroutine
 
+Subroutine removeCommentBlock(charArray, removedCharArray)
+    Implicit None
+    Character(len=fileLineLength),dimension(:), intent(in)  :: charArray
+    Character(len=fileLineLength),dimension(:), intent(out) :: removedCharArray
+    Character(len=fileLineLength) :: tmpLine, ttmpLine
+    integer :: nLine, iLine
+    logical :: isBlockStart, isBlockEnd, isBlock
+    integer :: iBlock, jBlock
+
+    isBlock = .FALSE.
+
+    nLine = size(charArray)
+    do iLine = 1, nLine
+        tmpLine = charArray(iLine)
+
+        if (isBlock.EQV..FALSE.) then
+            Call findCommentBlockStart(tmpLine, isBlockStart, iBlock)
+            if (isBlockStart) then
+                isBlock = .TRUE.
+            end if
+        end if
+
+        if (isBlock.EQV..TRUE.) then
+            Call findCommentBlockEnd(tmpLine, isBlockEnd, jBlock)
+            if (isBlockEnd) then
+                isBlock     = .FALSE.
+            end if
+        end if
+
+        if (isBlock) then
+            if (isBlockStart.EQV..TRUE.) then
+                ttmpLine = tmpLine
+                tmpLine  = ""
+                tmpLine  = ttmpLine(1:iBlock)
+            else
+                tmpLine  = ""
+            end if
+            isBlockStart = .FALSE.
+        end if
+
+        if ((isBlock.EQV..FALSE.).AND.(isBlockEnd.EQV..TRUE.)) then
+            ttmpLine = tmpLine
+            tmpLine  = ""
+            tmpLine  = ttmpLine(jBlock:)
+            isBlockEnd = .FALSE.
+        end if
+
+        removedCharArray(iLine) = ""
+        removedCharArray(iLine) = tmpLine
+
+    enddo
+
+End Subroutine
+
+Subroutine findCommentBlockStart(charLine, isBlockStart, nLineBlock)
+    Implicit None
+    character(len=*),intent(in) :: charLine
+    logical, intent(out) :: isBlockStart
+    integer, intent(out) :: nLineBlock
+    integer :: ichar
+    nLineBlock     = len(charLine)
+    isBlockStart = .FALSE.
+    if (nLineBlock.ge.2) then
+        do ichar =1, nLineBlock-1
+            if (charLine(ichar:ichar+1).EQ.commentBlockStart) then
+                nLineBlock = ichar - 1
+                isBlockStart = .TRUE.
+                exit
+            endif
+        enddo
+    end if
+end subroutine
+
+Subroutine findCommentBlockEnd(charLine, isBlockEnd, nLineBlock)
+    Implicit None
+    character(len=*),intent(in) :: charLine
+    logical, intent(out) :: isBlockEnd
+    integer, intent(out) :: nLineBlock
+    integer :: ichar
+    nLineBlock = len(charLine)
+    isBlockEnd = .FALSE.
+    if (nLineBlock.ge.2) then
+        do ichar =1, nLineBlock-1
+            if (charLine(ichar:ichar+1).EQ.commentBlockEnd) then
+                nLineBlock = ichar + 1
+                isBlockEnd = .TRUE.
+                exit
+            endif
+        enddo
+    end if
+end subroutine
+
 function stringHeader(this) result(value)
     class(typString), intent(in) :: this
     integer                      :: value
@@ -836,3 +928,85 @@ function stringHeader(this) result(value)
     value = charHeader(tmpChar)
 
 end function
+
+Subroutine separateFilePath(filePath, fileDir, fileName, fileExt)
+    Implicit None
+    Character(len=*), intent(in)  :: filePath
+    Character(len=*), intent(out) :: fileDir
+    Character(len=*), intent(out) :: fileName
+    Character(len=*), intent(out) :: fileExt
+    integer :: ichar, nchar, dirPoint,extPoint
+
+    fileDir = ""
+    fileName = ""
+    fileExt = ""
+
+    nchar = len(filePath)
+
+    if (nchar.ge.1) then
+        dirPoint = 0
+        extPoint = 0
+        do ichar = 1, nchar
+            if ((filePath(ichar:ichar).eq."/").OR.(filePath(ichar:ichar).eq."\")) then
+                dirPoint = ichar
+            end if
+
+            if ((ichar.ge.2).and.(ichar.le.nchar-1)) then
+                if (filePath(ichar:ichar).eq.".") then
+                    if       (filePath(ichar-1:ichar).eq."..") then
+                    else if  (filePath(ichar-1:ichar).eq."/.") then
+                    else if  (filePath(ichar-1:ichar).eq."\.") then
+                    else
+                        extPoint = ichar
+                    end if
+                end if
+            end if
+        enddo
+
+        if (dirPoint.ge.1) then
+
+            fileDir = filePath(1:dirPoint)
+
+            if (extPoint.gt.dirPoint) then
+                fileExt  = filePath(extPoint:)
+                fileName = filePath(dirPoint+1:extPoint-1)
+            else
+                fileName = filePath(dirPoint+1:)
+            end if
+        else
+
+            if (extPoint.ge.2) then
+                fileName = filePath(1:extPoint-1)
+                fileExt  = filePath(extPoint:)
+            else
+                fileName = filePath
+            end if
+
+        end if
+
+    end if
+
+End Subroutine
+
+Function blankSpace(nSpace) result(val)
+    integer, intent(in) :: nSpace
+    Character(len=nSpace) :: val
+    val(1:nSpace) = " "
+End Function
+
+Subroutine writeDictFileHeader(fileIndex)
+    Implicit None
+    Integer, intent(in) :: fileIndex
+
+    write(fileIndex, "(a)") "/*----------------------------------------------------------------------*\"
+    write(fileIndex, "(a)") "|                                                                        |"
+    write(fileIndex, "(a)") "|                          Dictionary File                               |"
+    write(fileIndex, "(a)") "|                                                                        |"
+    write(fileIndex, "(a)") "|                This file is generated by FyMcPack.                     |"
+    write(fileIndex, "(a)") "|                                                                        |"
+    write(fileIndex, "(a)") "|                   Ecole Centrale de Nantes, LHEEA                      |"
+    write(fileIndex, "(a)") "|                            YoungMyung Choi                             |"
+    write(fileIndex, "(a)") "|                                                                        |"
+    write(fileIndex, "(a)") "\*----------------------------------------------------------------------*/"
+
+End Subroutine

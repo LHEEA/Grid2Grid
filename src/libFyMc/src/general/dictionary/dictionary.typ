@@ -4,9 +4,9 @@ private
 
     character(len=CHAR_LEN), public  :: dictName
 
-    integer                          :: dictID
+    integer, public                  :: dictID
 
-    integer                          :: parentDictID
+    integer, public                  :: parentDictID
 
     type(typSLookUpTable), public    :: sLTable
 

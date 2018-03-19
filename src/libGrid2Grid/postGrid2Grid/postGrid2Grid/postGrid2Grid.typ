@@ -5,6 +5,8 @@ Type, public :: typPostGrid2Grid
         !!- HOS NWT file IO
         type(typFileIO) :: postInputFile_
 
+        type(typDictionaryPtr)      :: dict_
+
         !!- Initialization logical Value
         Logical :: isInitialized_ = .FALSE.
 
