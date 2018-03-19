@@ -21,29 +21,37 @@ include $(PROJECT_CONFIG_DIR)config.mk
 
 ### Compile Order --------------------------------------------------------------
 
-DIR_CURRENT_SRC=$(DIR_CURRENT)src/
-
-#... Set sub directory to run sub makefile
-SUB_CREATEOBJ_LIST= $(DIR_CURRENT_SRC)general \
-				    $(DIR_CURRENT_SRC)geometry
-
+createObj: cleanObj cleanlib
 createObj: $(DIR_OBJ)mfpGlobal.o
-createObj: createSub
-createObj: createLib
+createObj: $(DIR_OBJ)mfpGeneral.o
+createObj: $(DIR_OBJ)mfpGeometry.o
 
-#... Run sub-make file
-createSub:
-	$(foreach subMakeObj, $(SUB_CREATEOBJ_LIST), 		\
-		$(MAKE_SUB_CREATEOBJ) $(subMakeObj)/makefile;)
-
+createLib: createObj
 createLib: $(DIR_LIB)libfymc.a
+
+createExe: createObj
+createExe: $(DIR_EXE)fymcMain
 
 ### compiling rules ------------------------------------------------------------
 
-$(DIR_LIB)libfymc.a:
+$(DIR_EXE)fymcMain:$(DIR_CURRENT)src/main.f90
+	@echo $(EXEPRINT)
+	@$(FC) -o $@ $(DIR_OBJ)mfpGlobal.o $(DIR_OBJ)mfpGeneral.o $(DIR_OBJ)mfpGeometry.o
+
+$(DIR_LIB)libfymc.a: 
+	@echo $(LIBPRINT)
 	@ar cr $(DIR_LIB)libfymc.a $(DIR_OBJ)*.o
 
-$(DIR_OBJ)mfpGlobal.o: $(DIR_CURRENT_SRC)mfpGlobal.f90
+$(DIR_OBJ)mfpGlobal.o: $(DIR_CURRENT)src/mfpGlobal.f90
+	@echo $(OBJPRINT)
+	$(COMPILE_OBJECT_RULE) $< -o $@
+
+$(DIR_OBJ)mfpGeneral.o: $(DIR_CURRENT)src/general/mfpGeneral.f90
+	@echo $(OBJPRINT)
+	$(COMPILE_OBJECT_RULE) $< -o $@
+
+$(DIR_OBJ)mfpGeometry.o: $(DIR_CURRENT)src/geometry/mfpGeometry.f90
+	@echo $(OBJPRINT)
 	$(COMPILE_OBJECT_RULE) $< -o $@
 
 ### Clean Rule -----------------------------------------------------------------
@@ -52,11 +60,15 @@ $(DIR_OBJ)mfpGlobal.o: $(DIR_CURRENT_SRC)mfpGlobal.f90
 .PHONY : cleanObj
 cleanObj:
 	@rm -rf $(DIR_OBJ)mfpGlobal.o
+	@rm -rf $(DIR_OBJ)mfpGeneral.o
+	@rm -rf $(DIR_OBJ)mfpGeometry.o
 
 #... delete library and headers
 .PHONY : cleanlib
 cleanlib:
 	@rm -rf $(DIR_LIB)mfpglobal.mod
+	@rm -rf $(DIR_LIB)mfpgeneral.mod
+	@rm -rf $(DIR_LIB)mfpgeometry.mod
 	@rm -rf $(DIR_LIB)libfymc.a
 
 #... Read recursive clean setting

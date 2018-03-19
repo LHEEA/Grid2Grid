@@ -15,6 +15,10 @@ export EXES=$(PROJECT_DIR)main
 
 MKDIRS = $(DIR_OBJ) $(DIR_LIB)
 
+OBJPRINT = "Compiling object ... $@ $(<F)"
+LIBPRINT = "Making library   ... $@"
+EXEPRINT = "Making execution ... $@"
+
 ### Third Party Library ---------------------------------------------------
 
 export FFTW_LIB=/usr/local/lib/
@@ -75,5 +79,6 @@ $(info ${cmd})
 ### Auto Compile Rule
 
 export MAKE_SUB_CREATEOBJ = $(MAKE) createObj -f
+export MAKE_SUB_CREATELIB = $(MAKE) createLib -f
 export MAKE_SUB_CLEAN 	  = $(MAKE) clean -f
 export MAKE_SUB_CLEANALL  = $(MAKE) cleanall -f

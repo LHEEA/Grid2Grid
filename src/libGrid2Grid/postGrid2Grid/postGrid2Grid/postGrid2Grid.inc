@@ -537,21 +537,28 @@ subroutine readPostG2GInputFile(this, inputFileName)
                         do i = 1, this%nWaveProbe_
                             read(this%postinputfile_%unit, "(a)" , IOSTAT=io) tLine
                             if (io<0) exit
+
                             !!... Split Line to Argument
                             Call splitLine(tLine, nArg, cArg, scArg, lcArg, iArg, rArg, numFlag, iflag)
+
                             if (iflag.EQV..FALSE.) exit
 
-                            if ((nArg.ge.3).and.isAllTrue(numFlag(2:3))) then
-                                j = j + 1
-                                this%waveProbe_(j)%name_ = cArg(1)
-                                this%waveProbe_(j)%xPos_ = rArg(2)
-                                this%waveProbe_(j)%yPos_ = rArg(3)
-                            else if ((nArg.ge.2).and.isAllTrue(numFlag(1:2))) then
-                                j = j + 1
-                                this%waveProbe_(j)%name_ = "wp"//adjustl(int2str(j))
-                                this%waveProbe_(j)%xPos_ = rArg(1)
-                                this%waveProbe_(j)%yPos_ = rArg(2)
+                            if (nArg.ge.3) then
+                                if ( isAllTrue(numFlag(2:3)) ) then
+                                    j = j + 1
+                                    this%waveProbe_(j)%name_ = cArg(1)
+                                    this%waveProbe_(j)%xPos_ = rArg(2)
+                                    this%waveProbe_(j)%yPos_ = rArg(3)
+                                end if
+                            else if (nArg.ge.2) then
+                                if ( isAllTrue(numFlag(1:2)) ) then
+                                    j = j + 1
+                                    this%waveProbe_(j)%name_ = "waveProbe"//adjustl(int2str(j))
+                                    this%waveProbe_(j)%xPos_ = rArg(1)
+                                    this%waveProbe_(j)%yPos_ = rArg(2)
+                                end if
                             end if
+
                         end do
                         this%nWaveProbe_ = j
                     end if

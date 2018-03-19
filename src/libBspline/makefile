@@ -21,6 +21,7 @@ include $(PROJECT_CONFIG_DIR)config.mk
 
 ### Compile Order --------------------------------------------------------------
 
+createObj: cleanObj cleanlib
 createObj: $(DIR_OBJ)bspline_module.o
 
 ### Compiling Rules ------------------------------------------------------------
@@ -28,13 +29,16 @@ createObj: $(DIR_OBJ)bspline_module.o
 $(DIR_OBJ)bspline_module.o: $(DIR_CURRENT)src/bspline_module.f90 \
 	$(DIR_OBJ)bspline_oo_module.o \
 	$(DIR_OBJ)bspline_sub_module.o
+	@echo $(OBJPRINT)
 	$(COMPILE_OBJECT_RULE) $< -o $@
 
 $(DIR_OBJ)bspline_oo_module.o: $(DIR_CURRENT)src/bspline_oo_module.f90 \
 	$(DIR_OBJ)bspline_sub_module.o
+	@echo $(OBJPRINT)
 	$(COMPILE_OBJECT_RULE) $< -o $@
 
 $(DIR_OBJ)bspline_sub_module.o: $(DIR_CURRENT)src/bspline_sub_module.f90
+	@echo $(OBJPRINT)
 	$(COMPILE_OBJECT_RULE) $< -o $@
 
 ### Clean Rule -----------------------------------------------------------------

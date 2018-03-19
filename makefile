@@ -30,20 +30,26 @@ SUB_CREATEOBJ_LIST= $(DIR_CURRENT_SRC)libBspline 	\
 Release: createObj
 Release: postG2G
 
-makelib: createObj
+createLib: cleanObj cleanlib
+createLib:
+	$(MAKE_SUB_CREATEOBJ) $(DIR_CURRENT_SRC)libBspline/makefile
+	$(MAKE_SUB_CREATELIB) $(DIR_CURRENT_SRC)libFyMc/makefile
+	$(MAKE_SUB_CREATELIB) $(DIR_CURRENT_SRC)libGrid2Grid/makefile
 
+createObj: cleanObj cleanlib
 createObj:
 	$(foreach subMakeObj, $(SUB_CREATEOBJ_LIST), 		\
 		$(MAKE_SUB_CREATEOBJ) $(subMakeObj)/makefile;)
 
 postG2G: $(DIR_OBJ)main.o
+	@echo $(EXEPRINT)
 	@$(FC) -o $@ $(DIR_OBJ)*.o $(LIBRARY_LINK)
 EXES :=$(EXES) postG2G
 
 ### Compile Rule ---------------------------------------------------------------
 
 $(DIR_OBJ)main.o: $(DIR_SRC)main.f90
-	$(COMPILE_OBJECT_RULE) $< -o $@ 
+	$(COMPILE_OBJECT_RULE) $< -o $@
 
 ### Clean Rule -----------------------------------------------------------------
 
@@ -56,6 +62,7 @@ cleanObj:
 .PHONY : cleanlib
 cleanlib:
 	@rm -rf lib
+	@rm -rf postG2G
 
 #... Read recursive clean setting
 include $(PROJECT_CONFIG_DIR)cleanTool.mk
