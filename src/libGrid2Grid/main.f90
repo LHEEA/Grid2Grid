@@ -16,15 +16,15 @@ Program main
 
     Implicit None
     Character(Len =100) :: inputFileName
-    inputFileName = "postGrid2Grid.inp"
+    inputFileName = "postGrid2Grid.dict"
 
-    ! Call testPost(inputFileName)
+    Call testPost(inputFileName)
 
     ! Call testSurf2Vol()
 
     ! Call testVol2Vol()
 
-    Call testDict()
+    ! Call testDict()
 
 End Program
 
@@ -60,7 +60,7 @@ end Subroutine
 
 !! - Test HOS Vol2VOL
 Subroutine testVol2Vol
-    Use modGrid2GridType
+    Use modGrid2GridGlobal
     Use modVol2Vol
     Implicit None
     Type(typHOSVol2Vol) :: hosV2V
@@ -163,6 +163,7 @@ End Subroutine
 
 !! - Test HOS surf2vol
 subroutine testSurf2Vol
+    use modGrid2GridGlobal
     use modSurf2vol
     Implicit none
     character(len=100)   :: fileName1, fileName2    !! HOS Result File Name

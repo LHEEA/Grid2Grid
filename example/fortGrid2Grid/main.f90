@@ -42,7 +42,8 @@
 	hosSolver = "NWT"
 
 	!!!... Set HOS Result file Path
-	hosFileName = "../modes_HOS_SWENSE.dat"
+	!hosFileName = "../modes_HOS_SWENSE.dat"
+	hosFileName = "../modes_HOS_SWENSE.hdf5"
 
 	!!!... Set HOS Surf2Vol Domain and Vertical Grid
 	zMin = -0.6d0; 				zMax =  0.6d0

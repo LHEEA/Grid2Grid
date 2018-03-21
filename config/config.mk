@@ -24,12 +24,16 @@ EXEPRINT = "Making execution ... $@"
 export FFTW_LIB=/usr/local/lib/
 THIRD_LIB_LINK+=$(FFTW_LIB)libfftw3.a
 
-export HDF5_LIB=/usr/lib/x86_64-linux-gnu/hdf5/serial/lib/
-export HDF5_INCLUDE=/usr/include/hdf5/serial/
+export HDF5_LIB=/usr/local/lib/hdf5/build/bin/
+export HDF5_INCLUDE=$(HDF5_LIB)static/
 
 THIRD_INCLUDE+=-I$(HDF5_INCLUDE)
 THIRD_LIB_LINK+=$(HDF5_LIB)libhdf5_fortran.a
-THIRD_LIB_LINK+=$(HDF5_LIB)libhdf5.a -ldl -pthread -lz
+THIRD_LIB_LINK+=$(HDF5_LIB)libhdf5_f90cstub.a
+THIRD_LIB_LINK+=$(HDF5_LIB)libhdf5.a -ldl -pthread
+THIRD_LIB_LINK+=$(HDF5_LIB)libszip.a
+THIRD_LIB_LINK+=$(HDF5_LIB)libz.a
+
 
 export FYMC_LIB=$(DIR_LIB)
 export FYMC_INCLUDE=$(DIR_LIB)
