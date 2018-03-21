@@ -31,8 +31,17 @@ set(GRID2GRID_FLAG
 target_include_directories(Grid2Grid PRIVATE ${GRID2GRID_INCLUDE} )
 target_link_libraries(Grid2Grid ${GRID2GRID_FLAG} )
 
+set_target_properties(Grid2Grid
+    PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${GRID2GRID_LIB_OUT}
+)
+
 target_include_directories(postG2G PRIVATE ${GRID2GRID_INCLUDE} )
 target_link_libraries(postG2G ${GRID2GRID_FLAG} )
 
-install(TARGETS Grid2Grid DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-install(TARGETS postG2G DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+install(TARGETS postG2G
+        RUNTIME DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)
+
+install(TARGETS Grid2Grid
+        LIBRARY DESTINATION ${GRID2GRID_LIB_OUT}
+)
