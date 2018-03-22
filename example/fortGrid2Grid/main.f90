@@ -12,6 +12,8 @@
 	Character(len = nChar) :: hosSolver				!! HOS Solver (Ocean or NWT)
 	Character(len = nChar) :: hosFileName			!! HOS Result File Path
 
+	Character(len = nChar) :: dictFilePath   		!! HOS Solver (Ocean or NWT)
+
 	Double precision       :: zMin, zMax			!! Surf2Vol Domain
 	integer                :: nZmin, nZmax		!! Number of vertical grid
 	Double precision       :: zMinRatio, zMaxRatio	!! Grading ratio (=3)
@@ -42,8 +44,10 @@
 	hosSolver = "NWT"
 
 	!!!... Set HOS Result file Path
-	!hosFileName = "../modes_HOS_SWENSE.dat"
-	hosFileName = "../modes_HOS_SWENSE.hdf5"
+	hosFileName = "../modes_HOS_SWENSE.dat"
+	!hosFileName = "../modes_HOS_SWENSE.hdf5"
+
+	dictFilePath = "Grid2Grid.dict"
 
 	!!!... Set HOS Surf2Vol Domain and Vertical Grid
 	zMin = -0.6d0; 				zMax =  0.6d0
@@ -51,7 +55,9 @@
 	zMinRatio = 3.d0; 		zMaxRatio = 3.d0
 
 	!!... Initialize Grid2Grid and Get HOS Index
-	Call initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, hosIndex)
+	! Call initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, hosIndex)
+
+	Call initializeGrid2GridDict(dictFilePath, hosIndex)
 
 	!! Time Information
 	t  = 0.0d0; 		dt = 0.1d0

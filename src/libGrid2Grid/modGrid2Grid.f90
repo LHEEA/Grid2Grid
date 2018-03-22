@@ -26,6 +26,8 @@ Module modGrid2Grid
 use iso_c_binding
 use modGrid2GridGlobal
 use modVol2Vol
+
+use mfpGeneral, only : typDictionaryPtr
 !-----------------------------------------------------------------------
 Implicit None
 !-----------------------------------------------------------------------
@@ -35,6 +37,10 @@ Integer, parameter :: nMaxVol2Vol = 100
 Type typinpVol2Vol
 
     Logical                       :: isActive = .FALSE.
+
+    Logical                       :: isDictInput = .FALSE.
+
+    Type(typDictionaryPtr)        :: dict_
 
     character(len=StringLength)   :: solver_
 
@@ -138,14 +144,24 @@ contains
         inpVol2Vol(idx)%zMinRatio  = this%zMinRatio
         inpVol2Vol(idx)%zMaxRatio  = this%zMaxRatio
 
-        Call vol2vol_(idx)%initialize(inpVol2Vol(idx)%solver_, &
-                                      inpVol2Vol(idx)%fileName_, &
-                                      inpVol2Vol(idx)%zMin, &
-                                      inpVol2Vol(idx)%zMax, &
-                                      inpVol2Vol(idx)%nZmin, &
-                                      inpVol2Vol(idx)%nZmax, &
-                                      inpVol2Vol(idx)%zMinRatio, &
-                                      inpVol2Vol(idx)%zMaxRatio)
+        inpVol2Vol(idx)%isDictInput  = this%isDictInput
+        inpVol2Vol(idx)%dict_  = this%dict_        
+
+        if (inpVol2Vol(idx)%isDictInput) then
+
+            Call vol2vol_(idx)%initialize(inpVol2Vol(idx)%dict_)
+
+        else
+
+            Call vol2vol_(idx)%initialize(inpVol2Vol(idx)%solver_, &
+                                          inpVol2Vol(idx)%fileName_, &
+                                          inpVol2Vol(idx)%zMin, &
+                                          inpVol2Vol(idx)%zMax, &
+                                          inpVol2Vol(idx)%nZmin, &
+                                          inpVol2Vol(idx)%nZmax, &
+                                          inpVol2Vol(idx)%zMinRatio, &
+                                          inpVol2Vol(idx)%zMaxRatio)
+        end if
 
     end subroutine
 
@@ -172,7 +188,63 @@ contains
 
     end subroutine
 
+    subroutine initializeGrid2GridDict(dictFilePath, v2vIndex) &
+        bind(c, name='__modgrid2grid_MOD_initializegrid2griddict')
 
+        use mfpGlobal, only : CHAR_LEN
+        use mfpGeneral, only : isStringEqual, separateFilePath
+
+        implicit None
+        character(kind=c_char, len=1), dimension(StringLength),intent(in) :: dictFilePath
+        integer, intent(out)           :: v2vIndex
+        Type(typinpVol2Vol)            :: tmpInpVol2Vol
+        character(len=StringLength)    :: charF_dictFilePath
+        integer :: i
+        Type(typDictionaryPtr)         :: fileDict, subDict
+        Character(len=CHAR_LEN)        :: HOSType, zMeshType
+        Character(len=CHAR_LEN)        :: fileDir, fileName, fileExt
+
+        charF_dictFilePath = ''
+        do i = 1, StringLength
+            if (dictFilePath(i) == c_null_char ) then
+                exit
+            else
+                charF_dictFilePath(i:i) = dictFilePath(i)
+            end if
+        enddo
+
+        Call separateFilePath(charF_dictFilePath, fileDir, fileName, fileExt)
+
+        Call fileDict%initialize(fileDir, fileName, fileExt)
+
+        HOSType = fileDict%getChar("Grid2Grid")
+        tmpInpVol2Vol%dict_ = fileDict%subDict(HOSType)
+
+        tmpInpVol2Vol%solver_    = tmpInpVol2Vol%dict_%getChar("type")
+        tmpInpVol2Vol%fileName_  = tmpInpVol2Vol%dict_%getChar("filePath")
+        tmpInpVol2Vol%zMin       = tmpInpVol2Vol%dict_%getReal("zMin")
+        tmpInpVol2Vol%zMax       = tmpInpVol2Vol%dict_%getReal("zMax")
+        tmpInpVol2Vol%nZmin      = tmpInpVol2Vol%dict_%getInt("nZMin")
+        tmpInpVol2Vol%nZmax      = tmpInpVol2Vol%dict_%getInt("nZMax")
+
+        subDict = tmpInpVol2Vol%dict_%subDict("zMesh")
+
+        zMeshType = subDict%getChar("type")
+
+        if (isStringEqual(zMeshType,"meshRatio") )then
+            tmpInpVol2Vol%zMinRatio  = subDict%getReal("zMinRatio")
+            tmpInpVol2Vol%zMaxRatio  = subDict%getReal("zMaxRatio")
+        else
+            tmpInpVol2Vol%zMinRatio  = 1.0_RP
+            tmpInpVol2Vol%zMaxRatio  = 1.0_RP
+        end if
+
+        tmpInpVol2Vol%isDictInput = .TRUE.
+
+        !! Call HOS Vol2VOL initialize
+        Call checkAndIntialize(tmpInpVol2Vol, v2vIndex)
+
+    End Subroutine
 
     subroutine initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, v2vIndex) &
         bind(c, name='__modgrid2grid_MOD_initializegrid2grid')

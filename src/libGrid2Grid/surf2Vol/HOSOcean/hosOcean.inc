@@ -7,7 +7,7 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
     real(rp) :: zMin, zMax, zMinRatio, zMaxRatio
     integer  :: nZmin, nZmax
 
-    Character(len=CHAR_LEN) :: zMeshType
+    Character(len=CHAR_LEN) :: zMeshType, HOSfileType
     Type(typDictionaryPtr)  :: zMeshDict
 
     if (this%isInitialized_) return
@@ -18,17 +18,34 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
     this%hosFile_%name = HOSdict%getChar("filePath")
     this%hosFile_%unit = callFileUnit()
 
-    !! - Set output format
-    if (index(trim(this%hosFile_%name), ".dat", .true.) /= 0) then
-      this%isHDF5Format_ = .false.
-    else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
-      index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
-      this%isHDF5Format_ = .true.
+    HOSfileType = HOSdict%getCharOrDefault("fileType", "NONE")    
+
+    if (isStringEqual(HOSfileType,"NONE")) then
+        !! - Set output format
+        if (index(trim(this%hosFile_%name), ".dat", .true.) /= 0) then
+          this%isHDF5Format_ = .false.
+        else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
+          index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+          this%isHDF5Format_ = .true.
+        else
+          write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
+            trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
+          stop
+        endif
     else
-      write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
-        trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
-      stop
-    endif
+
+        if (isStringEqual(HOSfileType, "ASCII")) then
+            this%isHDF5Format_ = .false.
+        else if (isStringEqual(HOSfileType, "HDF5")) then
+            this%isHDF5Format_ = .true.
+        else
+            write(*,*) "    [ERROR] HOS Dictionary : wrong fileType is given."
+            write(*,*) "    fileType : ", trim(HOSfileType)
+            write(*,*) " "
+            stop
+        end if
+
+    end if
 
     zMin    = HOSdict%getReal("zMin")
     zMax    = HOSdict%getReal("zMax")

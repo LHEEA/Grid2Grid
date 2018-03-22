@@ -24,7 +24,7 @@ subroutine initializePostG2G(this, inputFileName)
     Call readPostG2GInputFileDict(this, inputFileName)
 
     ! initialize HOS Vol2Vol with Dictionary
-    hosTypeName = this%dict_%getChar("postGrid2Grid")
+    hosTypeName = this%dict_%getChar("Grid2Grid")
     Call this%hosVol2Vol_%initialize(this%dict_%subDict(hosTypeName))
 
     !! Check Input Parameters
@@ -279,7 +279,7 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
     Call this%dict_%initialize(fileDir, fileName, fileExt)
 
     dict = this%dict_
-    hosTypeName = dict%getChar("postGrid2Grid")
+    hosTypeName = dict%getChar("Grid2Grid")
 
     !!... HOS Dictionary -------------------------------------------------------
 

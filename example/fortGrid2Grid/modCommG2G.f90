@@ -21,6 +21,7 @@
         end type
 
         type(commSub) :: comm_init
+        type(commSub) :: comm_initDict
         type(commSub) :: comm_correct
         type(commSub) :: comm_getEta
         type(commSub) :: comm_getU
@@ -76,6 +77,15 @@
                 Double precision, intent(in)   :: zMinRatio, zMaxRatio
                 integer, intent(out)           :: hosIndex
             end subroutine proc_init
+
+            subroutine proc_initDict(dictFilePath, hosIndex) &
+                bind(c)
+                use, intrinsic :: iso_c_binding
+                implicit none
+                integer, parameter :: nChar = 300
+                character(kind=c_char, len=1), dimension(nChar),intent(in) :: dictFilePath
+                integer, intent(out)           :: hosIndex
+            end subroutine proc_initDict
 
             subroutine proc_correct(hosIndex, simulTime) bind(c)
                 use, intrinsic :: iso_c_binding
@@ -141,6 +151,7 @@
 
         type(c_ptr) :: handle
         procedure(proc_init), bind(c), pointer       :: subG2G_init
+        procedure(proc_initDict), bind(c), pointer   :: subG2G_initDict
         procedure(proc_correct), bind(c), pointer    :: subG2G_correct
         procedure(proc_getHOSEta), bind(c), pointer  :: subG2G_getHOSEta
         procedure(proc_getHOSU), bind(c), pointer    :: subG2G_getHOSU
@@ -172,6 +183,10 @@
                 subroutineName = trim(headerG2G)//"initializegrid2grid"
                 Call linkG2GSubroutine(comm_init, subroutineName)
                 call c_f_procpointer(comm_init%proc_addr, subG2G_init)
+
+                subroutineName = trim(headerG2G)//"initializegrid2griddict"
+                Call linkG2GSubroutine(comm_initDict, subroutineName)
+                call c_f_procpointer(comm_initDict%proc_addr, subG2G_initDict)
 
                 subroutineName = trim(headerG2G)//"correctgrid2grid"
                 Call linkG2GSubroutine(comm_correct, subroutineName)
@@ -221,7 +236,7 @@
                     stop
                 end if
             else
-                write(*,*) "libGrid2Grid.so is not loaded. Please run callGrid2Grid first"
+                write(*,*) "libGrid2Grid.so is not loaded. Please run CalllGrid2Grid first"
                 stop
             end if
         End Subroutine
@@ -258,6 +273,27 @@
                 end if
             enddo
             call subG2G_init(charC_hosSolver, charC_hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, hosIndex)
+        end subroutine
+
+        ! Subroutine
+        subroutine initializeGrid2GridDict(dictFilePath, hosIndex)
+            implicit None
+            integer, parameter              :: nChar = 300
+            character(len=nChar),intent(in) :: dictFilePath
+            integer, intent(out)            :: hosIndex
+            !! ----------------------------------------------
+            character(kind=c_char, len=1), dimension(nChar) :: charC_dictFilePath
+            integer :: i
+            !! C Character and Fortran Character is Different !!!
+            charC_dictFilePath = ''
+            do i = 1, nChar
+                if (dictFilePath(i:i) == '' ) then
+                    exit
+                else
+                    charC_dictFilePath(i) = dictFilePath(i:i)
+                end if
+            enddo
+            call subG2G_initDict(charC_dictFilePath, hosIndex)
         end subroutine
 
         subroutine correctGrid2Grid(hosIndex, simulTime)
