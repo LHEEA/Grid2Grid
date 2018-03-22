@@ -6,14 +6,11 @@
 #
 #   Grid2Grid Dictionary Input
 #
-#   The information written in this file is recognized by first keyword.
-#   Keyword involves small and large letter.
-#
 #   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 #
 #-------------------------------------------------------------------------- #
 
-Grid2Grid       HOSNWT;
+Grid2Grid       HOSOcean;
 
 zMesh
 {
@@ -40,9 +37,14 @@ HOSOcean
 {
     type            Ocean;
 
-    fileType        ASCII;      // ASCII or HDF5
+    // fileType        ASCII;      // ASCII or HDF5
+    // filePath        ../modes_HOS_SWENSE.dat;
 
-    filePath        ../modes_HOS_SWENSE.dat;
+    // fileType        HDF5;      // ASCII or HDF5
+    // filePath        /home/cyoungmy/Project/HOS/HOS-Ocean-LHEEA/bin/Results/modes_HOS_SWENSE.hdf5;
+
+    fileType        ASCII;      // ASCII or HDF5
+    filePath        /home/cyoungmy/Project/HOS/temp/HOS-Ocean-LHEEA/bin/Results/modes_HOS_SWENSE.dat;
 
     interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 

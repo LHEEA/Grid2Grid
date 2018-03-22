@@ -1,13 +1,10 @@
 #-------------------------------------------------------------------------- #
 #
-#                  Grid2Grid Post Processing Input File
+#                  Grid2Grid Dictionary Input File
 #
 #-------------------------------------------------------------------------- #
 #
-#   Grid2Grid Post Processing Program Input File
-#
-#   The information written in this file is recognized by first keyword.
-#   Keyword involves small and large letter.
+#   Grid2Grid Dictionary Input
 #
 #   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 #

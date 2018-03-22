@@ -86,7 +86,7 @@ Subroutine initilizeVol2VolDict(this, HOSdict)
         else
             allocate(interpX(this%HOSs2v_(1)%ptrHOSMesh_%nX + 1))
             allocate(interpY(this%HOSs2v_(1)%ptrHOSMesh_%nY + 1))
-            interpX(1:this%HOSs2v_(1)%ptrHOSMesh_%nY) = this%HOSs2v_(1)%ptrHOSMesh_%nonDimX
+            interpX(1:this%HOSs2v_(1)%ptrHOSMesh_%nX) = this%HOSs2v_(1)%ptrHOSMesh_%nonDimX
             interpX(1+this%HOSs2v_(1)%ptrHOSMesh_%nX) = this%nonDimLx_
 
             interpY(1:this%HOSs2v_(1)%ptrHOSMesh_%nY) = this%HOSs2v_(1)%ptrHOSMesh_%nonDimY

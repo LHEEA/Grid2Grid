@@ -136,9 +136,6 @@ Recursive Subroutine initDictDB_NameCharArray(dictName, charArray, dictID, paren
         !! Split Line
         Call splitLine(modLine, nArg, cArg, scArg, lcArg, iArg, rArg, numFlag, scFlag, iflag)
 
-        write(*,*) "line : " , trim(modLine), nArg
-        write(*,*) numFlag
-
         nArgValid = nArg
         !! No blank line
         if (nArg.ge.1) then
