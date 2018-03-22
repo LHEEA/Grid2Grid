@@ -3,7 +3,6 @@ Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
     implicit none
     class(typHOSNWT),intent(inout) :: this
     Type(typDictionaryPtr), intent(in)  :: HOSdict
-    Type(typDictionaryPtr)  :: zMeshDict
     Character(len=CHAR_LEN) :: zMeshType, HOSfileType
     real(rp) :: zMin, zMax, zMinRatio, zMaxRatio
     integer  :: nZmin, nZmax
@@ -54,16 +53,14 @@ Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
     nZmin    = HOSdict%getInt("nZMin")
     nZmax    = HOSdict%getInt("nZMax")
 
-    zMeshDict = HOSdict%subDict("zMesh")
+    zMeshType = HOSdict%getChar("zMeshType")
 
-    zMeshType = zMeshDict%getChar("type")
-
-    zMinRatio = 3.0_RP
-    zMaxRatio = 3.0_RP
+    zMinRatio = 1.0_RP
+    zMaxRatio = 1.0_RP
 
     if (isStringEqual(zMeshType, "meshRatio")) then
-        zMinRatio    = zMeshDict%getRealOrDefault("zMinRatio", 3.0_RP)
-        zMaxRatio    = zMeshDict%getRealOrDefault("zMaxRatio", 3.0_RP)
+        zMinRatio    = HOSdict%getRealOrDefault("zMinRatio", 3.0_RP)
+        zMaxRatio    = HOSdict%getRealOrDefault("zMaxRatio", 3.0_RP)
     end if
 
     ! Read and initalize HOS simulation parameter depending on file extension

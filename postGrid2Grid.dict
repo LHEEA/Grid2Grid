@@ -18,7 +18,7 @@ Grid2Grid       HOSNWT;
 writeVTK            true;
 writeWaveProbe      true;
 
-zMeshInfo
+zMesh
 {
     zMin           -0.6;
     zMax            0.4;
@@ -26,18 +26,14 @@ zMeshInfo
     nZMin           30;
     nZMax           30;
 
-    zMesh
-    {
-        //type            uniform;
-        type            meshRatio;
-        //   uniform   : uniform mesh
-        //   sine      : sine mesh
+    //type            uniform;
+    zMeshType         meshRatio;
+    //   uniform   : uniform mesh
+    //   sine      : sine mesh
 
-
-        zMinRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z<0)
-        zMaxRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z>0)
-        // dz_min locates near to the free surface
-    }
+    zMinRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z<0)
+    zMaxRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z>0)
+    // dz_min locates near to the free surface
 }
 
 HOSOcean
@@ -48,7 +44,7 @@ HOSOcean
 
     interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 
-    $zMeshInfo
+    $zMesh
 
     writeLog        TRUE;
 }
@@ -61,7 +57,7 @@ HOSNWT
 
     interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 
-    $zMeshInfo
+    $zMesh
 
     writeLog        TRUE;
 }
@@ -87,7 +83,7 @@ vtkMesh
     nX              10;
     nY              2;
 
-    $zMeshInfo
+    $zMesh
 }
 
 waveProbe

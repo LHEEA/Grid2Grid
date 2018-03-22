@@ -8,7 +8,6 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
     integer  :: nZmin, nZmax
 
     Character(len=CHAR_LEN) :: zMeshType, HOSfileType
-    Type(typDictionaryPtr)  :: zMeshDict
 
     if (this%isInitialized_) return
 
@@ -18,7 +17,7 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
     this%hosFile_%name = HOSdict%getChar("filePath")
     this%hosFile_%unit = callFileUnit()
 
-    HOSfileType = HOSdict%getCharOrDefault("fileType", "NONE")    
+    HOSfileType = HOSdict%getCharOrDefault("fileType", "NONE")
 
     if (isStringEqual(HOSfileType,"NONE")) then
         !! - Set output format
@@ -53,14 +52,13 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
     nZmin    = HOSdict%getInt("nZMin")
     nZmax    = HOSdict%getInt("nZMax")
 
-    zMeshDict = HOSdict%subDict("zMesh")
-    zMeshType = zMeshDict%getChar("type")
+    zMeshType = HOSdict%getChar("zMeshType")
 
-    zMinRatio = 3.0_RP
-    zMaxRatio = 3.0_RP
+    zMinRatio = 1.0_RP
+    zMaxRatio = 1.0_RP
     if (isStringEqual(zMeshType, "meshRatio")) then
-        zMinRatio    = zMeshDict%getRealOrDefault("zMinRatio", 3.0_RP)
-        zMaxRatio    = zMeshDict%getRealOrDefault("zMaxRatio", 3.0_RP)
+        zMinRatio    = HOSdict%getRealOrDefault("zMinRatio", 3.0_RP)
+        zMaxRatio    = HOSdict%getRealOrDefault("zMaxRatio", 3.0_RP)
     end if
 
     ! Read and initalize HOS simulation parameter

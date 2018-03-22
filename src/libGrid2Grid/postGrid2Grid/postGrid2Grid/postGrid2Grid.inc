@@ -264,8 +264,7 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
 
     Character(len=CHAR_LEN)  :: hosTypeName
     Type(typDictionaryPtr)   :: dict, HOSdict, &
-                                simulDict, vtkDict, &
-                                zMeshDict
+                                simulDict, vtkDict
     Character(len=CHAR_LEN)  :: zMeshType
     Type(typDictionaryPtr)   :: waveProbeDict, probesDict, probeDict
     integer :: iprobe
@@ -415,8 +414,7 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
         stop
     end if
 
-    zMeshDict = vtkDict%subDict("zMesh")
-    zMeshType = zMeshDict%getChar("type")
+    zMeshType = vtkDict%getChar("zMeshType")
 
     if (isStringEqual(zMeshType, "uniform")) then
         this%zflag_ = INDEX_UNIFORM_MESH    ! Uniform Mesh
@@ -425,8 +423,8 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
     else if (isStringEqual(zMeshType, "meshratio")) then
         this%zflag_ = INDEX_GEOMETRICRATIO_MESH   ! GEOMETRIC RATIO Mesh
 
-        this%rectLGrid_%zMinRatio_ = zMeshDict%getRealOrDefault("zMinRatio", 1.0_RP)
-        this%rectLGrid_%zMaxRatio_ = zMeshDict%getRealOrDefault("zMaxRatio", 1.0_RP)
+        this%rectLGrid_%zMinRatio_ = vtkDict%getRealOrDefault("zMinRatio", 1.0_RP)
+        this%rectLGrid_%zMaxRatio_ = vtkDict%getRealOrDefault("zMaxRatio", 1.0_RP)
 
         if (this%rectLGrid_%zMinRatio_.le.0.0) then
             write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"

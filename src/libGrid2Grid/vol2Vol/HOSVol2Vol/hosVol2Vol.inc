@@ -8,7 +8,6 @@ Subroutine initilizeVol2VolDict(this, HOSdict)
     real(RP),allocatable :: interpX(:), interpY(:), interpZ(:)
 
     Character(len=CHAR_LEN) :: zMeshType
-    Type(typDictionaryPtr)  :: zMeshDict
     real(rp) :: zMinRatio, zMaxRatio
 
     if (this%isInitialized_) return

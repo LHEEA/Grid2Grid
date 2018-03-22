@@ -829,7 +829,7 @@ End Subroutine
 Subroutine removeCommentBlock(charArray, removedCharArray)
     Implicit None
     Character(len=fileLineLength),dimension(:), intent(in)  :: charArray
-    Character(len=fileLineLength),dimension(:), intent(out) :: removedCharArray
+    Character(len=fileLineLength),dimension(size(charArray)), intent(out) :: removedCharArray
     Character(len=fileLineLength) :: tmpLine, ttmpLine
     integer :: nLine, iLine
     logical :: isBlockStart, isBlockEnd, isBlock
@@ -837,46 +837,47 @@ Subroutine removeCommentBlock(charArray, removedCharArray)
 
     isBlock = .FALSE.
 
+    isBlockStart = .FALSE.
+    isBlockEnd   = .FALSE.
+
     nLine = size(charArray)
-    do iLine = 1, nLine
-        tmpLine = charArray(iLine)
+    if (nLine.ge.1) then
+        do iLine = 1, nLine
+            tmpLine = charArray(iLine)
 
-        if (isBlock.EQV..FALSE.) then
-            Call findCommentBlockStart(tmpLine, isBlockStart, iBlock)
-            if (isBlockStart) then
-                isBlock = .TRUE.
+            if (isBlock.EQV..FALSE.) then
+                Call findCommentBlockStart(tmpLine, isBlockStart, iBlock)
+                if (isBlockStart) isBlock = .TRUE.
             end if
-        end if
 
-        if (isBlock.EQV..TRUE.) then
-            Call findCommentBlockEnd(tmpLine, isBlockEnd, jBlock)
-            if (isBlockEnd) then
-                isBlock     = .FALSE.
+            if (isBlock.EQV..TRUE.) then
+                Call findCommentBlockEnd(tmpLine, isBlockEnd, jBlock)
+                if (isBlockEnd) isBlock     = .FALSE.
             end if
-        end if
 
-        if (isBlock) then
-            if (isBlockStart.EQV..TRUE.) then
+            if (isBlock) then
+                if (isBlockStart.EQV..TRUE.) then
+                    ttmpLine = tmpLine
+                    tmpLine  = ""
+                    tmpLine  = ttmpLine(1:iBlock)
+                else
+                    tmpLine  = ""
+                end if
+                isBlockStart = .FALSE.
+            end if
+
+            if ((isBlock.EQV..FALSE.).AND.(isBlockEnd.EQV..TRUE.)) then
                 ttmpLine = tmpLine
                 tmpLine  = ""
-                tmpLine  = ttmpLine(1:iBlock)
-            else
-                tmpLine  = ""
+                tmpLine  = ttmpLine(jBlock:)
+                isBlockEnd = .FALSE.
             end if
-            isBlockStart = .FALSE.
-        end if
 
-        if ((isBlock.EQV..FALSE.).AND.(isBlockEnd.EQV..TRUE.)) then
-            ttmpLine = tmpLine
-            tmpLine  = ""
-            tmpLine  = ttmpLine(jBlock:)
-            isBlockEnd = .FALSE.
-        end if
+            removedCharArray(iLine) = ""
+            removedCharArray(iLine) = tmpLine
 
-        removedCharArray(iLine) = ""
-        removedCharArray(iLine) = tmpLine
-
-    enddo
+        enddo
+    endif
 
 End Subroutine
 

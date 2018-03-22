@@ -15,7 +15,7 @@
 
 Grid2Grid       HOSNWT;
 
-zMeshInfo
+zMesh
 {
     zMin           -0.6;
     zMax            0.6;
@@ -23,20 +23,18 @@ zMeshInfo
     nZMin           50;
     nZMax           50;
 
-    zMesh
-    {
-        //type            uniform;
-        type            meshRatio;
+    //type            uniform;
+    zMeshType       meshRatio;
 
-        //   uniform   : uniform mesh
-        //   sine      : sine mesh
-        //   meshRatio : sine mesh
+    //   uniform   : uniform mesh
+    //   sine      : sine mesh
+    //   meshRatio : sine mesh
 
-        zMinRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z<0)
-        zMaxRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z>0)
-        // dz_min locates near to the free surface
-    }
+    zMinRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z<0)
+    zMaxRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z>0)
+    // dz_min locates near to the free surface
 }
+
 
 HOSOcean
 {
@@ -48,7 +46,7 @@ HOSOcean
 
     interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 
-    $zMeshInfo
+    $zMesh
 
     writeLog        TRUE;
 }
@@ -63,7 +61,7 @@ HOSNWT
 
     interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 
-    $zMeshInfo
+    $zMesh
 
     writeLog        TRUE;
 }

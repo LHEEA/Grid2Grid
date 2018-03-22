@@ -63,7 +63,7 @@
 	t  = 0.0d0; 		dt = 0.1d0
 
 	!! Given Point
-	x = 0.5d0; 			y = 0.5d0; 			z = -0.5d0
+	x = 0.5d0; 			y = 0.0d0; 			z = -0.2d0
 
 	!! Time Loop
 	do it = 1,10
@@ -81,7 +81,11 @@
 		Call getHOSPd(hosIndex, x, y, z, t, pd)
 
 		!! Write Flow Information
-		write(*,*) t, eta, u, v, w, pd
+		write(*,"(a, f15.8)")  "HOS Time = ", t
+		write(*,"(a, f15.8)")  "HOS eta  = ", eta
+		write(*,"(a, 3f15.8)") "HOS U    = ", u, v, w
+		write(*,"(a, f15.8)")  "HOS Pd = ", pd
+		write(*,*) ""
 
 		!! Time Update
 		t = t + dt

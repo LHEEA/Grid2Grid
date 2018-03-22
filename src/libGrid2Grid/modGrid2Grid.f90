@@ -145,7 +145,7 @@ contains
         inpVol2Vol(idx)%zMaxRatio  = this%zMaxRatio
 
         inpVol2Vol(idx)%isDictInput  = this%isDictInput
-        inpVol2Vol(idx)%dict_  = this%dict_        
+        inpVol2Vol(idx)%dict_  = this%dict_
 
         if (inpVol2Vol(idx)%isDictInput) then
 
@@ -200,7 +200,7 @@ contains
         Type(typinpVol2Vol)            :: tmpInpVol2Vol
         character(len=StringLength)    :: charF_dictFilePath
         integer :: i
-        Type(typDictionaryPtr)         :: fileDict, subDict
+        Type(typDictionaryPtr)         :: fileDict
         Character(len=CHAR_LEN)        :: HOSType, zMeshType
         Character(len=CHAR_LEN)        :: fileDir, fileName, fileExt
 
@@ -227,13 +227,11 @@ contains
         tmpInpVol2Vol%nZmin      = tmpInpVol2Vol%dict_%getInt("nZMin")
         tmpInpVol2Vol%nZmax      = tmpInpVol2Vol%dict_%getInt("nZMax")
 
-        subDict = tmpInpVol2Vol%dict_%subDict("zMesh")
-
-        zMeshType = subDict%getChar("type")
+        zMeshType = tmpInpVol2Vol%dict_%getChar("zMeshType")
 
         if (isStringEqual(zMeshType,"meshRatio") )then
-            tmpInpVol2Vol%zMinRatio  = subDict%getReal("zMinRatio")
-            tmpInpVol2Vol%zMaxRatio  = subDict%getReal("zMaxRatio")
+            tmpInpVol2Vol%zMinRatio  = tmpInpVol2Vol%dict_%getReal("zMinRatio")
+            tmpInpVol2Vol%zMaxRatio  = tmpInpVol2Vol%dict_%getReal("zMaxRatio")
         else
             tmpInpVol2Vol%zMinRatio  = 1.0_RP
             tmpInpVol2Vol%zMaxRatio  = 1.0_RP
