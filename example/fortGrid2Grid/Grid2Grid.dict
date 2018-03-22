@@ -56,8 +56,13 @@ HOSNWT
     type            NWT;
 
     fileType        ASCII;      // ASCII or HDF5
-
     filePath        ../modes_HOS_SWENSE.dat;
+
+    // fileType        ASCII;      // ASCII or HDF5
+    //filePath        /home/cyoungmy/Project/HOS/HOS-NWT.org/bin/Results/modes_HOS_SWENSE.dat;
+
+    // fileType        HDF5;      // ASCII or HDF5
+    // filePath        /home/cyoungmy/Project/HOS/HOS-NWT/bin/Results/modes_HOS_SWENSE.hdf5;
 
     interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 

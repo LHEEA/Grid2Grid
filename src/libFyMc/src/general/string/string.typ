@@ -40,9 +40,9 @@ Character(len=2), parameter, private :: commentBlockStart = "/*"
 
 Character(len=2), parameter, private :: commentBlockEnd   = "*/"
 
-Character(len=3),parameter, private :: commentCharList = "/!#"
+Character(len=2),parameter, private :: commentCharList = "!#"
 
-integer, parameter, private :: nCommentCharList = 3    !! It should be same with length of commentCharList
+integer, parameter, private :: nCommentCharList = 2    !! It should be same with length of commentCharList
 
 !! Return string header type
 !!
