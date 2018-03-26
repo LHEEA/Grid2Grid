@@ -68,7 +68,6 @@ simulation
 
 vtkMesh
 {
-    writeVTK        true;
     airMesh         true;
 
     xMin            0.0;

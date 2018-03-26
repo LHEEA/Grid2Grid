@@ -3,12 +3,11 @@
 
 	\subsubsection{Description}
 
-	\texttt{Vol2Vol} is an interpolation class used to give interpolated wave information data from the reconstructed HOS wave field. It holds several \texttt{Surf2Vol} classes and interpolation class. The \texttt{Vol2Vol} class structure is described in Fig \ref{fig:vol2volStructure}. 
+	\texttt{Vol2Vol} interpolates the wave fields and return wave properties at given time and position. It has the multiple \texttt{Surf2Vol} classes and interpolation class. The \texttt{Vol2Vol} class structure is described in Fig \ref{fig:vol2volStructure}. The reconstructed HOS wave fields (snapshot of wave field) retrived from \texttt{Surf2Vol} are used to construct interpolation data. 
+	
+	The HOS result file contains the whole simulation time information. If the HOS wave fields and interpolation is applied for the whole HOS simulatio time, the pre-computation time becomes too long and it needs hugh computation memory. \texttt{Grid2Grid} is designed for the efficient wave-field reconstruction demanded by CFD solvers for a relatively short period and small domain. Therefore it is not necessary to reconstruct whole HOS wave fields. For the efficient memory control, the revolving algorithm is introduced to holds multiple HOS wave fields and to update HOS wave field if it is demanded.
 
-	HOS result file holds modes amplitudes time series for the whole HOS simulation time. If we construct HOS wave fields and interpolation data structure for the whole HOS simulation time, not only the computation time is long but also a huge memory is demanded. \texttt{Grid2Grid} aims for construction of demanding wave fields for relatively short period and domain, it is not necessary to construct the whole HOS wave fields and interpolation data structure. Therefore revolving algorithm is applied just to update HOS wave fields adjucent to simulation time and constuct small interpolation data structure for efficient computation time and memory.  
-
-	When \texttt{initialize} of \texttt{Vol2Vol} is called, it allocates \texttt{Surf2Vol} array, interpolation data and array related to revolving algorithm. And it initialises \texttt{Surf2Vol} classes and interpolation class and call its subroutine \texttt{correct} at $t=0$.
-
+	\vspace{1em}
 	{
 		\begin{figure} [H]
 			\centering
@@ -21,9 +20,11 @@
 
 	\pagebreak
 
-	The subroutine \texttt{correct} with input $t$ first determine HOS \texttt{Surf2Vol} correction index and \texttt{Surf2Vol} order based on input $t$ and previous HOS time index. By using correction index and order, only necessary HOS \texttt{Surf2Vol} is updated and re-ordered to constructed for interpolation data. After interpolation data is constructed, it is delivered to the interpolation class. The interpolation class communicates with the \texttt{bspline-Fortran} module and constructs the interpolation data structure. 
+	When \texttt{Vol2Vol} initialised, the \texttt{Surf2Vol} class array is allocated and initialise multiple \texttt{Surf2Vol} and connect those \texttt{Surf2Vol} class array with the revolving algorithm. The revolving algorithm determine which \texttt{Surf2Vol} should be updated and the order of \texttt{Surf2Vol} array for the efficient generation of interpolation data. 
+	
+	The subroutine \texttt{correct} with an input $t$ first determine HOS \texttt{Surf2Vol} correction indexand \texttt{Surf2Vol} order by revolving algorithm. Only necessary HOS \texttt{Surf2Vol} is updated and re-ordered to constructed for interpolation data. The interpolation data is constructed from the multiple wave field snapshot. The interpolation class holds the intepolation classes specific to HOS and it communicates with the \texttt{bspline-Fortran} module.
 
-	The subroutine \texttt{getEta}, \texttt{getU}, \texttt{getPd} and \texttt{getFlow} return interpolated values for given space and time from the constructed interpolation data structure.
+	The subroutine \texttt{getEta}, \texttt{getU}, \texttt{getPd} and \texttt{getFlow} return the interpolated wave properties for the given time and space. 
 
 	\subsubsection{Class (Type)}
 	
@@ -79,6 +80,13 @@
 	!	: Ratio of maximum and minimum height of grid (default=3)
 	!
 	!	iflag : Wriging option (iflag = 1, write Grid2Grid information)
+	
+	! or 
+	
+	Call hosV2V%initialize(dict)
+	
+	!	hosV2V			:  Vol2vol Class (Type)
+	!	dict				: HOS dictionary to initialize HOS vol2vol (Type)
 	\end{lstlisting}
 	
 	\hspace{0.5 cm} -- Correct \texttt{Vol2Vol}

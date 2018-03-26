@@ -58,6 +58,9 @@ Type, public :: typPostGrid2Grid
         !!- Read Grid2Grid Post Processing Input Program
         procedure, pass, private :: readPostG2GInputFile
 
+        !!- Read Grid2Grid Post Processing Input Program (Dictionary Type)
+        procedure, pass, private :: readPostG2GInputFileDict
+
         !!- Check Input Parameters
         procedure, pass, private :: checkPostG2GParameter
 
