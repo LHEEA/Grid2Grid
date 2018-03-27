@@ -841,6 +841,7 @@ Subroutine removeCommentBlock(charArray, removedCharArray)
     Implicit None
     Character(len=fileLineLength),dimension(:), intent(in)  :: charArray
     Character(len=fileLineLength),allocatable, intent(out) :: removedCharArray(:)
+
     Character(len=fileLineLength) :: tmpLine, ttmpLine
     integer :: nLine, iLine, jLine, nChar
     logical :: isBlockStart, isBlockEnd, isBlock
@@ -855,17 +856,57 @@ Subroutine removeCommentBlock(charArray, removedCharArray)
     isBlockEnd   = .FALSE.
 
     nLine = size(charArray)
-    if (allocated(removedCharArray)) deallocate(removedCharArray)
-    allocate(removedCharArray(nLine))
-    removedCharArray = ""
 
     if (nLine.ge.1) then
 
-        !!      // comment treatement
+        if (allocated(removedCharArray)) deallocate(removedCharArray)
+        allocate(removedCharArray(nLine))
+
+        if (allocated(tmpCharArray)) deallocate(tmpCharArray)
+        allocate(tmpCharArray(nLine))
+
+        removedCharArray = ""
+
+        !! // Remove Comment Block First
         do iLine = 1, nLine
             tmpLine = charArray(iLine)
-            nChar = len_trim(tmpLine)
+            if (isBlock.EQV..FALSE.) then
+                Call findCommentBlockStart(tmpLine, isBlockStart, iBlock)
+                if (isBlockStart) isBlock = .TRUE.
+            end if
+            if (isBlock.EQV..TRUE.) then
+                Call findCommentBlockEnd(tmpLine, isBlockEnd, jBlock)
+                if (isBlockEnd) isBlock     = .FALSE.
+            end if
+            if (isBlock) then
+                if (isBlockStart.EQV..TRUE.) then
+                    ttmpLine = tmpLine
+                    tmpLine  = ""
+                    if (iBlock.ge.1) then
+                        tmpLine  = ttmpLine(1:iBlock)
+                    endif
+                else
+                    tmpLine  = ""
+                end if
+                isBlockStart = .FALSE.
+            end if
 
+            if ((isBlock.EQV..FALSE.).AND.(isBlockEnd.EQV..TRUE.)) then
+                ttmpLine = tmpLine
+                tmpLine  = ""
+                if (jBlock.ge.1) then
+                    tmpLine  = ttmpLine(jBlock:)
+                end if
+                isBlockEnd = .FALSE.
+            end if
+            removedCharArray(iLine) = ""
+            removedCharArray(iLine) = tmpLine
+        enddo
+
+        !! // comment treatement
+        do iLine = 1, nLine
+            tmpLine = removedCharArray(iLine)
+            nChar = len_trim(tmpLine)
             if (nChar.ge.1) then
                 if (nChar.ge.2) then
                     nch = nChar
@@ -891,48 +932,71 @@ Subroutine removeCommentBlock(charArray, removedCharArray)
                 else
                     removedCharArray(iLine) = tmpLine
                 end if
-
             else
                 removedCharArray(iLine) = ""
             end if
         enddo
 
+        !! other comment treatement
         do iLine = 1, nLine
+            tmpLine = trim(removedCharArray(iLine))
+            nChar = len_trim(tmpLine)
 
-            tmpLine = removedCharArray(iLine)
+            isCommented = .FALSE.
+            if (nChar.ge.1) then
+                nch = nChar
+                do ich =1, nChar
+                    if ( testOneCharCommment(tmpLine(ich:ich)) ) then
+                        nch = ich-1
+                        isCommented = .TRUE.
+                        exit
+                    endif
+                enddo
 
-            if (isBlock.EQV..FALSE.) then
-                Call findCommentBlockStart(tmpLine, isBlockStart, iBlock)
-                if (isBlockStart) isBlock = .TRUE.
-            end if
-
-            if (isBlock.EQV..TRUE.) then
-                Call findCommentBlockEnd(tmpLine, isBlockEnd, jBlock)
-                if (isBlockEnd) isBlock     = .FALSE.
-            end if
-
-            if (isBlock) then
-                if (isBlockStart.EQV..TRUE.) then
-                    ttmpLine = tmpLine
-                    tmpLine  = ""
-                    tmpLine  = ttmpLine(1:iBlock)
+                if (isCommented) then
+                    if (nch.ge.1) then
+                        removedCharArray(iLine) = ""
+                        removedCharArray(iLine) = tmpLine(1:nch)
+                    else
+                        removedCharArray(iLine) = ""
+                    endif
                 else
-                    tmpLine  = ""
-                end if
-                isBlockStart = .FALSE.
-            end if
+                    removedCharArray(iLine) = tmpLine
+                endif
 
-            if ((isBlock.EQV..FALSE.).AND.(isBlockEnd.EQV..TRUE.)) then
-                ttmpLine = tmpLine
-                tmpLine  = ""
-                tmpLine  = ttmpLine(jBlock:)
-                isBlockEnd = .FALSE.
+            else
+                removedCharArray(iLine) = ""
             end if
-
-            removedCharArray(iLine) = ""
-            removedCharArray(iLine) = tmpLine
 
         enddo
+
+        ! jline = 0
+        ! do iline = 1, nLine
+        !     tmpLine = trim(removedCharArray(iLine))
+        !     nChar   = len_trim(tmpLine)
+        !     if (nChar.ge.1) then
+        !         jLine = jLine + 1
+        !         tmpCharArray(jline) = ""
+        !         tmpCharArray(jline) = tmpLine
+        !     end if
+        !
+        !     write(*,*) iline, nChar, trim(tmpLine)
+        ! enddo
+        !
+        ! if (allocated(removedCharArray)) deallocate(removedCharArray)
+        ! allocate(removedCharArray(jline))
+        !
+        ! removedCharArray = tmpCharArray(1:jLine)
+        !
+        ! deallocate(tmpCharArray)
+        !
+        ! do iline = 1, jline
+        !     write(*,*) iline, trim(removedCharArray(iline))
+        ! enddo
+
+    else
+        write(*,*)  "   [ERROR] removeCommentBlock :: Empty CharArray."
+        stop
     endif
 
 End Subroutine
@@ -967,7 +1031,7 @@ Subroutine findCommentBlockEnd(charLine, isBlockEnd, nLineBlock)
     if (nLineBlock.ge.2) then
         do ichar =1, nLineBlock-1
             if (charLine(ichar:ichar+1).EQ.commentBlockEnd) then
-                nLineBlock = ichar + 1
+                nLineBlock = ichar + 2
                 isBlockEnd = .TRUE.
                 exit
             endif
