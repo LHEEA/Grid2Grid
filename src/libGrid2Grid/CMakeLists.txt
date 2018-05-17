@@ -35,7 +35,18 @@ set_target_properties(Grid2Grid
     PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${GRID2GRID_LIB_OUT}
 )
 
-target_include_directories(postG2G PRIVATE ${GRID2GRID_INCLUDE} )
+set_target_properties(Grid2Grid
+    PROPERTIES COMPILE_FLAGS "-cpp"
+)
+
+target_include_directories(postG2G
+    PRIVATE ${GRID2GRID_INCLUDE}
+)
+
+set_target_properties(postG2G
+    PROPERTIES COMPILE_FLAGS "-cpp"
+)
+
 target_link_libraries(postG2G ${GRID2GRID_FLAG} )
 
 install(TARGETS postG2G

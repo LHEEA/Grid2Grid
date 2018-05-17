@@ -26,7 +26,13 @@ Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
 
         else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
           index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+
+#ifdef ENABLE_HDF5
           this%isHDF5Format_ = .true.
+#else
+          write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+          stop
+#endif
         else
           write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
             trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
@@ -37,7 +43,14 @@ Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
         if (isStringEqual(HOSfileType, "ASCII")) then
             this%isHDF5Format_ = .false.
         else if (isStringEqual(HOSfileType, "HDF5")) then
+
+#ifdef ENABLE_HDF5
             this%isHDF5Format_ = .true.
+#else
+            write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+            stop
+#endif
+
         else
             write(*,*) "    [ERROR] HOS Dictionary : wrong fileType is given."
             write(*,*) "    fileType : ", trim(HOSfileType)
@@ -114,7 +127,14 @@ SUBROUTINE initHOSNWT(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxR
 
     else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
       index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
+
+#ifdef ENABLE_HDF5
       this%isHDF5Format_ = .true.
+#else
+      write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+      stop
+#endif
+
     else
       write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
         trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
@@ -196,7 +216,14 @@ subroutine init_read_mod_HOSNWT(this)
 !!!......................................
 
     if (this%isHDF5Format_) then
+
+#ifdef ENABLE_HDF5
       Call this%init_hdf5_read_mod(x1, x2, x3)
+#else
+      write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+      stop
+#endif
+
     else
       Call this%init_ascii_read_mod(x1, x2, x3)
     endif
@@ -257,6 +284,7 @@ subroutine init_ascii_read_mod_HOSNWT(this, x1, x2, x3)
 
 end subroutine
 
+#ifdef ENABLE_HDF5
 subroutine init_hdf5_read_mod_HOSNWT(this, x1, x2, x3)
     implicit none
     class(typHOSNWT), intent(inout) :: this
@@ -313,7 +341,7 @@ subroutine init_hdf5_read_mod_HOSNWT(this, x1, x2, x3)
     Call h5close_f(error)
 
 end subroutine
-
+#endif
 
 !!!- read HOS NWT mode array from HOS_NWT results file
 subroutine read_mod_HOSNWT(this, iTime)
@@ -338,7 +366,12 @@ subroutine read_mod_HOSNWT(this, iTime)
     endif
 
     if (this%isHDF5Format_) then
+#ifdef ENABLE_HDF5
       Call this%read_hdf5_mod(iTime)
+#else
+      write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+      stop
+#endif
     else
       Call this%read_ascii_mod(iTime)
     endif
@@ -379,7 +412,7 @@ subroutine read_ascii_mod_HOSNWT(this, iTime)
     1001 format((5000(ES17.10,1X)))
 end subroutine
 
-
+#ifdef ENABLE_HDF5
 subroutine read_hdf5_mod_HOSNWT(this, iTime)
     implicit none
     class(typHOSNWT), intent(inout) :: this
@@ -437,7 +470,7 @@ subroutine read_hdf5_mod_HOSNWT(this, iTime)
     Call h5close_f(error)
 
 end subroutine
-
+#endif
 
 !!- Build HOS NWT Global Mesh & calculate Wave numbers and additional mode part
 subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)

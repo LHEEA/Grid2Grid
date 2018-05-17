@@ -25,25 +25,37 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
           this%isHDF5Format_ = .false.
         else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
           index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
-          this%isHDF5Format_ = .true.
+
+#ifdef ENABLE_HDF5
+            this%isHDF5Format_ = .true.
+#else
+            write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+            stop
+#endif
+
         else
           write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
             trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
           stop
         endif
     else
-
         if (isStringEqual(HOSfileType, "ASCII")) then
             this%isHDF5Format_ = .false.
         else if (isStringEqual(HOSfileType, "HDF5")) then
+
+#ifdef ENABLE_HDF5
             this%isHDF5Format_ = .true.
+#else
+            write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+            stop
+#endif
+
         else
             write(*,*) "    [ERROR] HOS Dictionary : wrong fileType is given."
             write(*,*) "    fileType : ", trim(HOSfileType)
             write(*,*) " "
             stop
         end if
-
     end if
 
     zMin    = HOSdict%getReal("zMin")
@@ -107,7 +119,13 @@ SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
 
     else if (index(trim(this%hosFile_%name), ".h5", .true.) /= 0 .or. &
       index(trim(this%hosFile_%name), ".hdf5", .true.) /= 0 ) then
-      this%isHDF5Format_ = .true.
+#ifdef ENABLE_HDF5
+        this%isHDF5Format_ = .true.
+#else
+        write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+        stop
+#endif
+
     else
       write(error_unit, '(3A)') "Error in init_read_mod: Unknown file extension for '",&
         trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
@@ -169,7 +187,12 @@ subroutine init_read_mod_HOSOcean(this)
     !!!......................................
 
     if (this%isHDF5Format_) then
+#ifdef ENABLE_HDF5
       Call this%init_hdf5_read_mod(x1, x2)
+#else
+      write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+      stop
+#endif
     else
       Call this%init_ascii_read_mod(x1, x2)
     endif
@@ -232,6 +255,7 @@ subroutine init_ascii_read_mod_HOSOcean(this, x1, x2)
 
 end subroutine
 
+#ifdef ENABLE_HDF5
 subroutine init_hdf5_read_mod_mod_HOSOcean(this, x1, x2)
      implicit none
      class(typHOSOcean), intent(inout) :: this
@@ -290,6 +314,7 @@ subroutine init_hdf5_read_mod_mod_HOSOcean(this, x1, x2)
      Call h5close_f(error)
 
  end subroutine
+#endif
 
 !!!- read HOS Ocean mode array from HOS_Ocean results file
 subroutine read_mod_HOSOcean(this, iTime)
@@ -315,9 +340,14 @@ subroutine read_mod_HOSOcean(this, iTime)
     endif
 
     if (this%isHDF5Format_) then
-      Call this%read_hdf5_mod(iTime)
+#ifdef ENABLE_HDF5
+        Call this%read_hdf5_mod(iTime)
+#else
+        write(*,*) " NO HDF library is supported. Please Compile with HDF5 Option."
+        stop
+#endif
     else
-      Call this%read_ascii_mod(iTime)
+        Call this%read_ascii_mod(iTime)
     endif
 
   end subroutine
@@ -353,6 +383,7 @@ subroutine read_mod_HOSOcean(this, iTime)
 1001    format((5000(ES17.10,1X)))
   end subroutine
 
+#ifdef ENABLE_HDF5
 subroutine read_hdf5_mod_HOSOcean(this, iTime)
     implicit none
     class(typHOSOcean), intent(inout) :: this
@@ -403,6 +434,7 @@ subroutine read_hdf5_mod_HOSOcean(this, iTime)
     Call h5close_f(error)
 
 end subroutine
+#endif
 
 !!- Build HOS NWT Global Mesh & calculate Wave numbers and additional mode part
 subroutine buildGlobalMesh_HOSOcean(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)

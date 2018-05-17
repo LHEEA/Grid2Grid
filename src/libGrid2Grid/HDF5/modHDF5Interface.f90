@@ -33,19 +33,25 @@ Module  modHDF5interface
 !-----------------------------------------------------------------------
 
     use iso_fortran_env, only : error_unit
-    use hdf5
     use modGrid2GridGlobal
+
+#ifdef ENABLE_HDF5
+    use hdf5
+#endif
 
 Implicit none
 
   INTEGER(8), parameter :: HOS_TYPE_NAME_SIZE = 10
 
+#ifdef ENABLE_HDF5
   interface read_hdf5_dataset_mod
     module procedure read_hdf5_double_dataset_mod, read_hdf5_complex_dataset_mod
   end interface
+#endif
 
 contains
 
+#ifdef ENABLE_HDF5
   !! - Read the name of the HOS result file type (HOS_NWT or HOS_Ocean)
   function read_hos_type_name_mod(file_id) result(name)
     implicit none
@@ -125,6 +131,7 @@ contains
     deallocate(tmpIm)
 
   end subroutine read_hdf5_complex_dataset_mod
+#endif
 
 !-----------------------------------------------------------------------
 End Module

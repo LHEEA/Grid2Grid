@@ -60,12 +60,18 @@ contains
     !!- initialize simulation parameter
     procedure, pass, private :: init_read_mod => init_read_mod_HOSNWT
     procedure, pass, private :: init_ascii_read_mod => init_ascii_read_mod_HOSNWT
+
+#ifdef ENABLE_HDF5
     procedure, pass, private :: init_hdf5_read_mod => init_hdf5_read_mod_HOSNWT
+#endif
 
     !!- read HOS NWT mode
     procedure, pass, private :: read_mod => read_mod_HOSNWT
     procedure, pass, private :: read_ascii_mod => read_ascii_mod_HOSNWT
+
+#ifdef ENABLE_HDF5
     procedure, pass, private :: read_hdf5_mod => read_hdf5_mod_HOSNWT
+#endif
 
     !!- build global mesh and wave numbers
     procedure, pass, private :: buildGlobalMesh => buildGlobalMesh_HOSNWT

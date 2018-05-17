@@ -54,28 +54,28 @@ Private
 !!... Module Data
 
     !!... HOS Surf2Vol Base Mesh Class
-    Include "HOSMesh/hosMesh.typ"
+#include "HOSMesh/hosMesh.typ"
 
     !!... HOS NWT Surf2Vol Mesh Class
-    Include "HOSNWTMesh/hosNWTMesh.typ"
+#include "HOSNWTMesh/hosNWTMesh.typ"
 
     !!... HOS NWT Surf2Vol Mode Class
-    Include "HOSNWTMode/hosNWTMode.typ"
+#include "HOSNWTMode/hosNWTMode.typ"
 
     !!... HOS NWT Surf2Vol Class
-    Include "HOSNWT/hosNWT.typ"
+#include "HOSNWT/hosNWT.typ"
 
     !!... HOS Ocean Surf2Vol Mesh Class
-    Include "HOSOceanMesh/hosOceanMesh.typ"
+#include "HOSOceanMesh/hosOceanMesh.typ"
 
     !!... HOS Ocean Surf2Vol Mode Class
-    Include "HOSOceanMode/hosOceanMode.typ"
+#include "HOSOceanMode/hosOceanMode.typ"
 
     !!... HOS Ocean Surf2Vol Class
-    Include "HOSOcean/hosOcean.typ"
+#include "HOSOcean/hosOcean.typ"
 
     !!... HOS Surf2Vol Class
-    Include "HOSSurf2Vol/hosSurf2Vol.typ"
+#include "HOSSurf2Vol/hosSurf2Vol.typ"
 
 !-----------------------------------------------------------------------
 contains
@@ -83,28 +83,28 @@ contains
 !!... Module Function
 
     !!... HOS Surf2Vol Base Mesh Class Member Function
-    Include "HOSMesh/hosMesh.inc"
+#include "HOSMesh/hosMesh.inc"
 
     !!... HOS NWT Surf2Vol Mesh Class Member Function
-    Include "HOSNWTMesh/hosNWTMesh.inc"
+#include "HOSNWTMesh/hosNWTMesh.inc"
 
     !!... HOS NWT Surf2Vol Mode Class Member Function
-    Include "HOSNWTMode/hosNWTMode.inc"
+#include "HOSNWTMode/hosNWTMode.inc"
 
     !!... HOS NWT Surf2Vol Class Member Function
-    Include "HOSNWT/hosNWT.inc"
+#include "HOSNWT/hosNWT.inc"
 
     !!... HOS Ocean Surf2Vol Mesh Class Member Function
-    Include "HOSOceanMesh/hosOceanMesh.inc"
+#include "HOSOceanMesh/hosOceanMesh.inc"
 
     !!... HOS Ocean Surf2Vol Mode Class Member Function
-    Include "HOSOceanMode/hosOceanMode.inc"
+#include "HOSOceanMode/hosOceanMode.inc"
 
     !!... HOS Ocean Surf2Vol Class Member Function
-    Include "HOSOcean/hosOcean.inc"
+#include "HOSOcean/hosOcean.inc"
 
     !!... HOS Surf2Vol Class Member Function
-    Include "HOSSurf2Vol/hosSurf2Vol.inc"
+#include "HOSSurf2Vol/hosSurf2Vol.inc"
 
 !-----------------------------------------------------------------------
 End Module
