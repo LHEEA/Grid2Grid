@@ -1,0 +1,43 @@
+#-------------------------------------------------------------------------- #
+#
+#                  Grid2Grid Dictionary Input File
+#
+#-------------------------------------------------------------------------- #
+#
+#   Grid2Grid Dictionary Input
+#
+#   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
+#
+#-------------------------------------------------------------------------- #
+Grid2Grid       HOSOcean;
+zMesh
+{
+    zMin           -0.6;
+    zMax            0.6;
+    nZMin           50;
+    nZMax           50;
+    zMeshType       meshRatio;
+    zMinRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z<0)
+    zMaxRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z>0)
+}
+HOSOcean
+{
+    type            Ocean;
+    fileType        ASCII;      // ASCII or HDF5
+    filePath        /home/cyoungmy/Project/HOS/temp/HOS-Ocean-LHEEA/bin/Results/modes_HOS_SWENSE.dat;
+    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+    $zMesh
+    writeLog        TRUE;
+}
+HOSNWT
+{
+    type            NWT;
+    fileType        ASCII;      // ASCII or HDF5
+    filePath        ../modes_HOS_SWENSE.dat;
+    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+    $zMesh
+    writeLog        TRUE;
+}
+/* ------------------------------------------------------------------------- *\
+#                                END OF FILE
+\* ------------------------------------------------------------------------- */

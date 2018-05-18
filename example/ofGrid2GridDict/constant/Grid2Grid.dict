@@ -1,0 +1,36 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  5.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     0.5;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      Grid2Grid.dict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Grid2Grid       HOSNWT;
+
+HOSNWT
+{
+    type            NWT;
+    fileType        ASCII;
+    filePath        ../modes_HOS_SWENSE.dat;
+    interpolationOrder 3;
+    zMeshType       meshRatio;
+    zMin            -0.6;
+    zMax            0.6;
+    nZMin           50;
+    nZMax           50;
+    zMinRatio       3;
+    zMaxRatio       3;
+}
+
+
+// ************************************************************************* //

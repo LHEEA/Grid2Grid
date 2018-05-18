@@ -3,12 +3,11 @@
 
 \subsubsection{Description}
 
-\texttt{modGrid2Grid} is not a class but a Fortan module which contains an array of \texttt{Vol2Vol} classes and subroutines to communicate with other languages. The module structure is depicted in Fig. \ref{fig:modGrid2GridStructure}. It has two static data which are input data array and \texttt{Vol2Vol} array not to have and update multiple \texttt{Vol2Vol} classes for efficiency and to save memory. When \texttt{Grid2Grid} is initialized from a program written in another language, it firstly check the input variables and return \texttt{HOSIndex}. If the same input variables are given, it returns the same \texttt{HOSIndex} and does not allocate nor initialise \texttt{Vol2Vol}. Other languages can distiguish different HOS wave theory by using the \texttt{HOSIndex}.
-The subroutines \texttt{correct} and \texttt{get*} can be called with \texttt{HOSIndex}, position and time. 
+\texttt{modGrid2Grid} is not a class but the module which is desinged for the communication between other programming languages. The module structure is depicted in Fig. \ref{fig:modGrid2GridStructure}. It has a data base (DB) which has the input data information and \texttt{Vol2Vol}. The input data is saved in data base and dertermines whether new \texttt{Vol2Vol} is initialized. When the ohter program first initialise \texttt{Grid2Grid}, \texttt{modGrid2Grid} firstly checks the input variables. If the same input is previously given, it return previous \texttt{Vol2Vol} index. But it does not exist, it allocates new \texttt{Vol2Vol} and issues \texttt{Vol2Vol} index. Other programming language distingush the different HOS wave theory in a same simulation by \texttt{HOSIndex} (pointer in \texttt{ISO\_C\_BINDING} is complicate). Therefore the subroutines \texttt{correct} and \texttt{get*} should be called with \texttt{HOSIndex}, position and time.  
 
-The array size of \texttt{modGrid2Grid} is 100 by default (It can deal with 100 different HOS waves) but it does not consume much memory because classes of \texttt{Grid2Grid} are programmed with dynamic arrays and consequently only a few of static data are used. If more HOS wave theories are needed, the variable \texttt{nMaxVol2Vol} in \texttt{src/modGrid2Grid.f90} can be changed to deal with over than 100 different HOS wave theory. 
+The array size of \texttt{modGrid2Grid} is set to be 100 as a default (100 different HOS waves) but it does not consume much of memory because the classes of \texttt{Grid2Grid} are programmed with the dynamic arrays and consequently only a few static data are used. The variable \texttt{nMaxVol2Vol} in \texttt{src/libGrid2Grid/modGrid2Grid.f90} can be changed. 
 
-The functionality of \texttt{modGrid2Grid} is almost the same with \texttt{Vol2Vol}. 
+The functionalities of \texttt{modGrid2Grid} are similar with \texttt{Vol2Vol}. 
 
 \vspace{0.5cm}
 
@@ -22,21 +21,22 @@ The functionality of \texttt{modGrid2Grid} is almost the same with \texttt{Vol2V
 	\end{figure}
 }
 
+\pagebreak
 \subsubsection{Subroutines}	
 
-The interface between other languages with \texttt{modGrid2Grid} will be detailed in Chap. \ref{chap:interfaceLang}. 
-
-Subroutines in \texttt{modGrid2Grid} follows \texttt{ISO\_C\_BINDING}. 
+The interface between other languages with \texttt{modGrid2Grid} will be described in Chap. \ref{chap:interfaceLang}. 
 
 \vspace{0.5cm}
 
-Static subroutines : 
+Subroutines : 
 
 \vspace{0.5cm}
 
 -- Initialise Grid2Grid
 
-\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_initializegrid2grid}
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_initializegrid2grid} 
+
+\hspace{0.5 cm} $\circ$ \texttt{\_\_modgrid2grid\_MOD\_initializegrid2griddict}
 \vspace{0.2cm}
 
 -- Correct Grid2Grid

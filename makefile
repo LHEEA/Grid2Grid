@@ -1,181 +1,68 @@
 #!/usr/bin/make
 
-### Path ----------------------a-------------------------------------------------
+### Compiler and Compiling Rule ------------------------------------------------
 
-DSRC=src/
-DOBJ=obj/
-DEXE=./
+#... Get Current makefile path
+DIR_CURRENT=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 
-EXES=postG2G
+#... Extract Project directory path
+PROJECT_NAME=Grid2Grid
+PROJECT_DIR:=$(shell echo $(DIR_CURRENT) | awk '{sub(/$(PROJECT_NAME).*/,x)}1')$(PROJECT_NAME)/
+#... Project Configuration directory
+PROJECT_CONFIG_DIR:=$(PROJECT_DIR)config/
 
-### FFT library (later it should be fixed.)
-DTHRDLIB=/usr/local/lib/
+#... Manual setting for directory path
+# ifndef $(PROJECT_DIR)
+# 	PROJECT_CONFIG_DIR = $(DIR_CURRENT)config/
+# endif
 
-### compiler (gfortran) --------------------------------------------------------
-FC=gfortran
+#... Read make configuration setting
+include $(PROJECT_CONFIG_DIR)config.mk
 
-#CFLAGS = -fPIC -Wall -Wextra -O2 -g # C flags
-CFLAGS = -fPIC -O2 -g # C flags
+### Compile Order --------------------------------------------------------------
 
-LDFLAGS = -shared  					# linking flags
+DIR_CURRENT_SRC=$(DIR_CURRENT)src/
 
-FLAGMOD1= -J $(DOBJ) #Flag for writing modules in $(OBJ)
-FLAGMOD2= -I $(DOBJ) #Flag for reading modules in $(OBJ)
-OPTSC0  = -c $(FLAGMOD1)
-OPTSL0  =  $(FLAGMOD2)
-MKDIRS  = $(DOBJ)
+SUB_CREATEOBJ_LIST= $(DIR_CURRENT_SRC)libBspline 	\
+				    $(DIR_CURRENT_SRC)libFyMc 		\
+				    $(DIR_CURRENT_SRC)libGrid2Grid
 
-### Targets for compilation ----------------------------------------------------
-
-Release: OPTSC = $(OPTSC0)
-Release: OPTSL = $(OPTSL0)
-Release: $(MKDIRS)
+Release: createLib
 Release: postG2G
 
-testspline: OPTSC = $(OPTSC0)
-testspline: OPTSL = $(OPTSL0)
-testspline: $(MKDIRS)
-testspline: testspline
+createLib: cleanObj cleanlib
+createLib:
+	$(MAKE_SUB_CREATEOBJ) $(DIR_CURRENT_SRC)libBspline/makefile
+	$(MAKE_SUB_CREATELIB) $(DIR_CURRENT_SRC)libFyMc/makefile
+	$(MAKE_SUB_CREATELIB) $(DIR_CURRENT_SRC)libGrid2Grid/makefile
 
-createlib: OPTSC = $(OPTSC0)
-createlib: OPTSL = $(OPTSL0)
-createlib: $(MKDIRS)
-createlib: libGrid2Grid
+createObj: cleanObj cleanlib
+createObj:
+	$(foreach subMakeObj, $(SUB_CREATEOBJ_LIST), 		\
+		$(MAKE_SUB_CREATEOBJ) $(subMakeObj)/makefile;)
 
-createOFlib: OPTSC = $(OPTSC0)
-createOFlib: OPTSL = $(OPTSL0)
-createOFlib: $(MKDIRS)
-createOFlib: libOFGrid2Grid
-
-### auxiliary variables --------------------------------------------------------
-COTEXT  = "Compiling $(<F)"
-LITEXT  = "Assembling $@"
-
-postG2G: $(DOBJ)main.o
-	@echo $(COTEXT)
-	@$(FC) -o $@ $(DOBJ)*.o $(DTHRDLIB)libfftw3.a
+postG2G: $(DIR_OBJ)main.o
+	@echo $(EXEPRINT)
+	@$(FC) -o $@ $(DIR_OBJ)*.o $(LIBRARY_LINK)
 EXES :=$(EXES) postG2G
 
-testspline: $(DOBJ)testspline.o
-	@echo $(COTEXT)
-	@$(FC) -o $@ $(DOBJ)*.o $(DTHRDLIB)libfftw3.a
-EXES :=$(EXES) testspline
+### Compile Rule ---------------------------------------------------------------
 
-libGrid2Grid: $(DOBJ)libGrid2Grid.so
-	@echo $(LITEXT)
-EXES :=$(EXES) libGrid2Grid
+$(DIR_OBJ)main.o: $(DIR_SRC)main.f90
+	$(COMPILE_OBJECT_RULE) $< -o $@
 
-libOFGrid2Grid: $(FOAM_USER_LIBBIN)/libGrid2Grid.so
-	@echo $(LITEXT)
-EXES :=$(EXES) libGrid2Grid
+### Clean Rule -----------------------------------------------------------------
 
-### compiling rules ------------------------------------------------------------
+#... delete object file
+.PHONY : cleanObj
+cleanObj:
+	@rm -rf obj
 
-$(DOBJ)main.o: $(DSRC)main.f90 \
-	$(DOBJ)modGrid2Grid.o \
-    $(DOBJ)modPostGrid2Grid.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
+#... delete library and headers
+.PHONY : cleanlib
+cleanlib:
+	@rm -rf lib
+	@rm -rf postG2G
 
-$(DOBJ)testspline.o: $(DSRC)test/testSpline.f90 \
-	$(DOBJ)modGrid2Grid.o \
-    $(DOBJ)modPostGrid2Grid.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(FOAM_USER_LIBBIN)/libGrid2Grid.so: \
-	$(DOBJ)modVol2Vol.o \
-	$(DOBJ)modSurf2Vol.o \
-	$(DOBJ)modGrid2Grid.o \
-	$(DOBJ)modPostGrid2Grid.o
-	@$(FC) $(LDFLAGS) -o $(FOAM_USER_LIBBIN)/libGrid2Grid.so $(DOBJ)*.o $(DTHRDLIB)libfftw3.a
-
-$(DOBJ)libGrid2Grid.so: \
-	$(DOBJ)modVol2Vol.o \
-	$(DOBJ)modSurf2Vol.o \
-	$(DOBJ)modGrid2Grid.o \
-	$(DOBJ)modPostGrid2Grid.o
-	@$(FC) $(LDFLAGS) -o $(DOBJ)libGrid2Grid.so $(DOBJ)*.o $(DTHRDLIB)libfftw3.a
-
-$(DOBJ)modGrid2Grid.o: $(DSRC)modGrid2Grid.f90 \
-	$(DOBJ)modGrid2GridType.o \
-	$(DOBJ)modVol2Vol.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modPostGrid2Grid.o: $(DSRC)modPostGrid2Grid.f90 \
-	$(DOBJ)modGrid2GridType.o \
-	$(DOBJ)modVol2Vol.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modVol2Vol.o: $(DSRC)modVol2Vol.f90 \
-	$(DOBJ)modSurf2Vol.o \
-	$(DOBJ)modV2VSplineInterp.o \
-	$(DOBJ)modGrid2GridType.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modSurf2Vol.o: $(DSRC)modSurf2Vol.f90 \
-	$(DOBJ)modNWTsurf2vol.o \
-	$(DOBJ)modOceansurf2vol.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modV2VSplineInterp.o: $(DSRC)modV2VSplineInterp.f90 \
-	$(DOBJ)modGrid2GridType.o
-	@echo $(COTEXT)
-	$(MAKE) createlib -f ./auxiliary/bspline-fortran/makefile
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modNWTsurf2vol.o: $(DSRC)modNWTsurf2vol.f90 \
-	$(DOBJ)modFourier_r2c_FFTW3NWT.o \
-	$(DOBJ)modGrid2GridType.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modOceansurf2vol.o: $(DSRC)modOceansurf2vol.f90 \
-	$(DOBJ)modFourier_r2c_FFTW3_ocean.o \
-	$(DOBJ)modGrid2GridType.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modFourier_r2c_FFTW3NWT.o: $(DSRC)modFourier_r2c_FFTW3NWT.f90 \
-	$(DOBJ)modGrid2GridType.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modFourier_r2c_FFTW3_ocean.o: $(DSRC)modFourier_r2c_FFTW3_ocean.f90 \
-	$(DOBJ)modGrid2GridType.o
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-$(DOBJ)modGrid2GridType.o: $(DSRC)modGrid2GridType.f90
-	@echo $(COTEXT)
-	@$(FC) $(CFLAGS) $(OPTSC) $< -o $@
-
-
-### phony auxiliary rules ------------------------------------------------------
-.PHONY : $(MKDIRS)
-$(MKDIRS):
-	@mkdir -p $@
-.PHONY : cleanobj
-cleanobj:
-	@echo deleting objects
-	@rm -fr $(DOBJ) @rm *.so *.o
-.PHONY : cleanmod
-cleanmod:
-	@echo deleting mods
-	@rm -fr $(DMOD)
-.PHONY : cleanexe
-cleanexe:
-	@echo deleting exes
-	@rm -f $(addprefix $(DEXE),$(EXES))
-.PHONY : cleanvtk
-cleanvtk:
-	@echo deleting VTK
-	@rm -rf VTK resultVTK
-.PHONY : clean
-clean: cleanobj cleanmod
-.PHONY : cleanall
-cleanall: clean cleanexe cleanvtk
+#... Read recursive clean setting
+include $(PROJECT_CONFIG_DIR)cleanTool.mk

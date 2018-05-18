@@ -5,9 +5,7 @@
 
 	\subsubsection{Description}
 	
-	\texttt{PostGrid2Grid} is a HOS post-processing class. It generates 3D VTK files of wave fields for visualization and wave elevation time series computed from \texttt{Vol2Vol} class. Wave fields at desired simulation time and spatial domain and wave elevation time series can be re-generated at some provided wave probes position. 
-
-	\texttt{PostGrid2Grid} algorithm is depicted in Fig. \ref{fig:postGrid2GridAlgorighm}. \texttt{PostGrid2Grid} is initialised with input file. The input file \texttt{postGrid2Grid.inp} contains HOS grid information and post processing information. \texttt{PostGrid2Grid} first reads and checks the input file and then build 3D visualization grid and wave probes. \texttt{Vol2Vol} class is also initialised. The subroutine \texttt{doPostProcessing} do time loop of \texttt{correct}. Subroutine \texttt{correct} first corrects the \texttt{Vol2Vol} class and gets the wave fields. If the grid option is set to no air mesh, 3D grid is fitted to wave elevation. It writes the results on files (3D VTK file and wave elevation time series). 
+	\texttt{PostGrid2Grid} is a HOS post-processing class. It generates 3D VTK files of wave fields for the visualization and wave elevation time series computed from \texttt{Vol2Vol} class. \texttt{PostGrid2Grid} algorithm is depicted in Fig. \ref{fig:postGrid2GridAlgorighm}. \texttt{PostGrid2Grid} is initialised with the input file. The input file (\texttt{postGrid2Grid.dict}) contains the parameters needed for the post processing and HOS-reconstruction. It is composed with many dictionary input (HOS, simulation, vtkMesh and waveProbe dictionaries). \texttt{PostGrid2Grid} reads and checks the input file and then build 3D visualization grid and wave probes with given dictionaries. \texttt{Vol2Vol} class is also initialised with HOS dictionary. The subroutine \texttt{doPostProcessing} run a time simulation of reconstruction. The subroutine \texttt{correct} updates the \texttt{Vol2Vol} class and gets the wave fields. If the grid option \texttt{airMesh} is equal to \texttt{false}, 3D grid is fitted to the wave elevation. 
 	
 	\vspace{0.2cm}
 	
@@ -52,7 +50,7 @@
 	
 	\hspace{0.5 cm} -- Functionality (Private) :
 	
-	\hspace{1.0 cm} $\circ$ \texttt{readPostG2GInputFile} : Read \texttt{PostGrid2Grid} input file
+	\hspace{1.0 cm} $\circ$ \texttt{readPostG2GInputFileDict} : Read \texttt{PostGrid2Grid} input file
 	
 	\hspace{1.0 cm} $\circ$ \texttt{checkPostG2GParameter} : Check \texttt{PostGrid2Grid} input file
 	
@@ -65,161 +63,132 @@
 	\pagebreak
 	\subsubsection{Input File of PostGrid2Grid}
 	
-	\texttt{PostGrid2Grid} needs input file. The input file name is \texttt{postGrid2Grid.inp}. The input is recognized by \texttt{keyword}. Input file has free format. \texttt{keyword} can be located at any line of file but \texttt{keyword} should be located as first word at line. If special character is added on character, it is recognized as comment. The input keyword is following. 
+	\texttt{PostGrid2Grid} needs the input file. The input file name is \texttt{postGrid2Grid.dict}. The input is recognized by \texttt{dictionary(keyword + value with sub-dictionary)}. The special characters are treated as a comment (\texttt{!, \# and \textbackslash\textbackslash}) and C++ style comment block is also allowed. 
 	
 	\vspace{0.5cm}
-	-- HOS Type (\texttt{solver}) and Result File (\texttt{hosFile})
+	
+	-- PostGrid2Grid variables 
 	
 	\begin{lstlisting}[language=bash]
 	
-	### Select Solver (Ocean or NWT) ----------------------------------- #
+	### Select HOS dictionary and set post processing option ----------------------------------- #
 	
-	solver		Ocean
+	Grid2Grid					HOSDict;	# HOS dictionary
 	
-	### hosFile Path --------------------------------------------------- #
+	writeVTK					true;	# 3D visualization option; true or false
 	
-	hosFile 	modes_HOS_SWENSE.dat
+	writeWaveProbe		true;	# Wave probe option; true or false
+
 	\end{lstlisting}
 	
-	-- Post Processing Time (\texttt{startTime}, \texttt{endTime}, \texttt{dt})
+	
+	-- HOS dictionary
+	
+	\begin{lstlisting}[language=bash]
+	
+	### HOS dictionary ----------------------------------- #
+	
+	HOSDict
+	{
+		type	Ocean;		# HOS solver type; NWT or Ocean
+		
+		filePath	example/modes_HOS_SWENSE.dat;	# HOS file path
+
+		fileType	ASCII;	# Option; HOS result file type, ASCII or HDF5
+		
+		interpolationOrder	3;	# Option; 3:Cubic spline [Default]
+		
+		zMin		-0.6;		# HOS domain zMin		
+		zMax		0.6;		# HOS domain zMax
+		
+		nZMin		50;		# HOS domain nZMin
+		nZMax		50;		# HOS domain nZMax
+		
+		zMeshType	meshRatio;		# Mesh type (uniform, sine, meshRatio)
+		
+		zMinRatio	3.0;	# Option, z<=0 meshing ratio (meshRatio)
+		zMaxRatio	3.0;	# Option, z<=0 meshing ratio (meshRatio)
+				
+		writeLog        true;	# Option; write log option	
+	}
+	\end{lstlisting}
+	
+	-- Simulation Dictionary
 		
 	\begin{lstlisting}[language=bash]
 	
-	### Post Processing Time ------------------------------------------- #
+	### Simulation dictionary ------------------------------------------- #
 	
-	startTime		2712.0
-	endTime			2812.0
-	dt	     		0.1	
+	simulation
+	{
+		startTime		2712.0;
+	
+		endTime			2812.0;
+	
+		dt	     		0.1;
+	}	
 	\end{lstlisting}
 	
-	-- Write VTK Option (\texttt{writeVTK}) and Air Meshing Option  (\texttt{airMesh})
+	-- 3D visualization dictionary
 	
 	\begin{lstlisting}[language=bash]
 	
-	### Write 3D VTK File (true or false) ------------------------------ #
+	### VTK mesh dictionary ------------------------------ #
 	
-	writeVTK		true	
-	
-	### Air Meshing (true or false) ------------------------------------ #
-	
-	airMesh			 true
-	
-	#	If airMesh is true or yes, grid will be constructed up to zMax.
-	#				     is false or no, mesh will be constructed up to wave 
-	#					   elevation.
+	vtkMesh
+	{
+		airMesh		false;		# Air meshing option 
+		
+		xMin		 0.0;			# VTK mesh xMin
+		xMax		100.0;		# VTK mesh xMax
+
+		yMin		 0.0;			# VTK mesh yMin
+		yMax		100.0;		# VTK mesh yMax		
+		
+		nX			50;				# VTK mesh nX
+		nY			50;				# VTK mesh nX
+		
+		zMin		-0.6;			# VTK mesh zMin		
+		zMax		0.6;			# VTK mesh zMax
+		
+		nZMin		50;				# VTK mesh nZMin
+		nZMax		50;				# VTK mesh nZMax
+		
+		zMeshType	meshRatio;		# Mesh type (uniform, sine, meshRatio)
+		
+		zMinRatio	3.0;	# Option, z<=0 meshing ratio (meshRatio)
+		zMaxRatio	3.0;	# Option, z<=0 meshing ratio (meshRatio)
+		
+	}
 	\end{lstlisting}
 	
 	\pagebreak
 	
-	-- 3D Output Domain Size (\texttt{xMin}, \texttt{xMax}, \texttt{yMin}, \texttt{yMax}, \texttt{zMin}, \texttt{zMax})
+	-- Wave probe dictionary
 	
 	\begin{lstlisting}[language=bash]
 	
-	### 3D Output Domain Size ------------------------------------------ #
+	### Wave probe dictionary ------------------------------------------ #
 	
-	xMin		1200
-	xMax		2000
-	
-	yMin		1200
-	yMax		2000
-	
-	zMin	-100.0
-	zMax		50.0	
-
-	# 	zMin and zMax are used to construct Surf2Vol HOS Grid.
+	waveProbe
+	{
+		waveProbeFile	waveElevation.dat;		# Output file name
+		
+		waveProbes
+		{
+			probe1
+			{
+				position  ( 0.0   10.0 );		# wave probe position
+			}			
+			probe2
+			{
+				position  ( 0.0   15.0 );
+			}			
+		}
+	}
 	\end{lstlisting}
 	
-	-- Number of Grid (\texttt{nX}, \texttt{nY}, \texttt{nZmin}, \texttt{nZmax})
-	
-	\begin{lstlisting}[language=bash]
-	
-	### Number of Mesh for 3D Output ----------------------------------- #
-	
-	nX          500
-	nY          500
-	
-	nZmin       100
-	nZmax        60
-	
-	# 	nZmin and nZmax are used to construct Surf2Vol HOS Grid.
-	\end{lstlisting}
-	
-	-- Vertical meshing scheme (\texttt{zMesh})
-	
-	\begin{lstlisting}[language=bash]
-	
-	### Z meshing scheme ----------------------------------------------- #
-	
-	zMesh       meshRatio    3.0    3.0
-	
-	#	Meshing Scheme
-	#	
-	#	uniform 	: uniform grid 
-	#	sine			: sine spaced grid (densed grid near to z=0)
-	#	meshRatio	: grid with constant geometric ratio. Minimum dz located  
-	#					    at z=0. (given two ratio is dz_max/dz_min)
-	#
-	#	meshRatio needs two ratios (ratio for z <= 0  and ratio for z > 0)
-	#
-	\end{lstlisting}
-	
-	\pagebreak
-	
-	-- Wave probe write option (\texttt{writeWaveProbe}) and Output file path (\texttt{waveProbeFile})
-	
-	\begin{lstlisting}[language=bash]
-	
-	### Wave probe write option (true or false) ------------------------ #
-	
-	writeWaveProbe  true
-	
-	### Wave Probe File path ------------------------------------------- #
-	
-	waveProbeFile   waveElevation.dat
-
-	#	If waveProbeFile is not given in input file. 
-	#	Default iutput file name "waveElevation.dat" is used. 
-	\end{lstlisting}
-	
-	-- Wave probes
-	
-	\begin{lstlisting}[language=bash]
-	
-	### Wave probe Input Format ---------------------------------------- #
-	#
-	#   There should be no blank line after nWaveProbe and probe data.
-	#   If blank line is given, last wave probes will be discarded.
-	#
-	#		There should be no blank line. 
-	#
-	#		## Format
-	#
-	# 		nWaveProbe  nProbes
-	# 		probe1name(option)     xPos1    yPos1
-	# 		probe2name             xPos2    yPos2
-	# 		...
-	# 		probeNname             xPosN    yPosN
-	#
-	# ------------------------------------------------------------------ #
-	
-	### Wave Probe Input ----------------------------------------------- #
-	
-	nWaveProbe  5
-	wp1     0.0     0.0
-	wp2     1.0     2.0
-	wp3     2.0     3.0
-	wp4     4.0     5.0
-	6.0 		7.0	
-
-	#	probeName		xPosition		yPosition
-	#
-	#	probeName is optional.
-	\end{lstlisting}	
-	
-	\pagebreak
 	\subsubsection{How to use}
-	
-	Fortran subroutine for \texttt{postGrid2Grid} is given as example.
 	
 	\vspace{0.5cm}
 	

@@ -7,13 +7,13 @@
 		
 		\label{chap:FFTWInstall}
 		
-		\texttt{Grid2Grid} needs fast Fourier transform (FFT) library. \texttt{FFTW} is GNU licenced FFT library. The installation order is the following:
+		\texttt{Grid2Grid} needs a fast Fourier transform (FFT) library. \texttt{FFTW} is GNU licenced FFT library. The installation order is the following:
 		
 		\vspace{0.5cm}
 		
 		\textbf{1. Download FFTW library}
 		
-		At the FFTW website (http://www.fftw.org/download.html), latest version of FFTW is available. Download \texttt{FFTW} library. 
+		At the FFTW website (http://www.fftw.org/download.html), the latest version of FFTW is available. Download \texttt{FFTW} library. 
 		
 		\vspace{0.5cm}
 		{
@@ -24,7 +24,7 @@
 				\end{tcolorbox}
 				\vspace{0.3cm}
 				\caption{Download \texttt{FFTW library}}			
-				\label{fig:vol2volStructure}
+				\label{fig:fftw3Download}
 			\end{figure}
 		}
 		
@@ -35,7 +35,7 @@
 		
 		\begin{lstlisting}[language=bash]
 		
-		$	tar -xvf fftw-3.3.7.tar.gz
+		$	tar -xvzf fftw-3.3.7.tar.gz
 		\end{lstlisting}
 		
 		\vspace{0.5cm}
@@ -58,7 +58,7 @@
 		\vspace{0.5cm}
 		\textbf{4. Make soft link of FFTW library }
 		
-		If user has super user authority
+		If user has a super user authority
 		
 		\begin{lstlisting}[language=bash]
 		
@@ -67,13 +67,136 @@
 				
 		\vspace{0.5cm}
 		
-		If user has no super user authority, third party path in \texttt{makefile} of \texttt{Grid2Grid} can be changed manually. If FFTW library (\texttt{libfftw3.a}) locates at \texttt{/home/lib/libfftw3.a}, then \texttt{makefile} of \texttt{Grid2Grid} can be changed as: 
+		If user has no super user authority, FFTW library path should be changed manually. If FFTW library (\texttt{libfftw3.a}) locates at \texttt{/home/user/lib/libfftw3.a}, the FFTW3 library path should be changed as following : 
 		
+		- Compile with makefile
+		
+		Change the library path in \texttt{config/config.mk}
 		
 		\begin{lstlisting}[language=bash]
 		
-		DTHRDLIB=/home/lib/
+		FFTW_LIB=/home/user/lib/
 		\end{lstlisting}
+
+		- Compile with cmake		
+		
+		Change the library path in \texttt{CMakeLists.txt}		
+
+		\begin{lstlisting}[language=bash]
+		
+		set(FFTW3_LIB_PATH /home/user/lib)
+		\end{lstlisting}		
+		
+		\subsubsection{HDF5 Install}
+		
+		\label{chap:HDF5Install}
+		
+		In version 2.0, HDF5 library can be used as a option. Because the result file of HOS for 3 hours simulation is huge, the file size can be reduced thanks to HDF5 library. In a experience, the size is reduced around 60\% when the result file is generated in a HDF5 format. 
+				
+		When compiling \texttt{Grid2Grid}, the default installation setting with HDF library is \texttt{disbled}. The compilation with HDF library will be explaind in section \ref{chap:Grid2GridInstall}; The installation procedures for the HDF5 library is given in below. 		
+				
+		\vspace{0.5cm}
+		
+		\textbf{1. Download HDF5 library}
+		
+		At the HDF5 website (https://support.hdfgroup.org/HDF5/release/cmakebuild518.html), the source code of HDF5 with cmake is available (26 March 2018)
+		
+		\vspace{0.5cm}
+		{
+			\begin{figure} [H]
+				\centering
+				\begin{tcolorbox}[standard jigsaw,opacityback=0]
+					\includegraphics[scale=0.72]{images/c2.install/"hdf5Download".png}
+				\end{tcolorbox}
+				\vspace{0.3cm}
+				\caption{Download \texttt{HDF5} source code with Cmake}			
+				\label{fig:hdf5download}
+			\end{figure}
+		}
+	
+		\textbf{2. Unzip the compressed folder}
+		
+		\begin{lstlisting}[language=bash]
+		
+
+		$	tar -xvzf CMake-hdf5-1.10.1.tar.gz
+		\end{lstlisting}
+		
+		\pagebreak		
+		\textbf{3. Add compiling rules in \texttt{HDF5options.cmake}}
+		
+		Open the file \texttt{HDF5options.cmake} inside of extracted folder and add compiling rules as following : 
+		
+		\begin{lstlisting}[language=bash]
+		
+
+### disable packaging
+
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
+### Create install package with external libraries (szip, zlib)
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=ON")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_CPP_LIB:BOOL=ON")
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_THREADSAFE:BOOL=ON")
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
+
+set(CMAKE_Fortran_FLAGS "-fPIC")
+		\end{lstlisting}
+		
+		\vspace{1em}
+		\textbf{4. Compile the source code with Cmake}
+		
+		\begin{lstlisting}[language=bash]
+		
+		$ ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log
+		
+		\end{lstlisting}
+
+		\vspace{1em}		
+		\textbf{5. Check the compiled libraries exist in sub-directory \texttt{build/bin}}
+		
+		\begin{lstlisting}[language=bash]
+		
+		$ ls build/bin/libhdf5.a build/bin/libhdf5_fortran.a build/bin/libszip.a build/bin/libz.a
+		
+		\end{lstlisting}
+		
+		\pagebreak
+		\textbf{6. Make soft link of HDF5 or connect HDF5 library with Grid2Grid}
+		
+		If the user has a super user authority, and want to add HDF5 library on user library path :
+		
+		\begin{lstlisting}[language=bash]
+		
+		export HDF5_PATH=/home/CMake-hdf5-x
+		
+		$ ln -s $HDF5_PATH /usr/local/lib/hdf5
+		
+		\end{lstlisting}
+		
+		
+		If the user have no super user authority, or do not want to add HDF5 library on user library path :
+		
+		\vspace{0.5em}
+		- Compile with makefile
+		
+		Change the library path in \texttt{config/config.mk}
+		
+		\begin{lstlisting}[language=bash]
+		
+		HDF5_LIB=/home/CMake-hdf5-x/build/bin
+		\end{lstlisting}
+		
+		\vspace{0.5em}
+		- Compile with cmake		
+		
+		Change the library path in \texttt{CMakeLists.txt}		
+		
+		\begin{lstlisting}[language=bash]
+		
+		set(HDF5_LIB_PATH /home/CMake-hdf5-x/build/bin)
+		\end{lstlisting}		
 		
 		
 		\pagebreak
@@ -81,12 +204,12 @@
 		
 		\texttt{Grid2Grid} needs the result file of HOS solver. Installation of HOS is the following: 
 		
-		\vspace{0.2cm}
-		\textbf{1. Install FFTW}
+		\vspace{1em}
+		\textbf{1. Install FFTW and HDF5}
 		
-		See Chapter \ref{chap:FFTWInstall}
+		See Chapters \ref{chap:FFTWInstall} and \ref{chap:HDF5Install}
 		
-		\vspace{0.2cm}
+		\vspace{1em}
 		\textbf{2. Install makedepf90}
 		
 		\begin{lstlisting}[language=bash]		
@@ -94,7 +217,7 @@
 		$	sudo apt-get install makedepf90		
 		\end{lstlisting}
 		
-		\vspace{0.2cm}
+		\vspace{1em}
 		\textbf{3. Install LAPACK}
 		
 		\begin{lstlisting}[language=bash]
@@ -102,7 +225,7 @@
 		$	sudo apt-get install liblapack-dev liblapack-doc-man liblapack-doc liblapack-pic liblapack3 liblapack-test liblapack3gf liblapacke liblapacke-dev
 		\end{lstlisting}
 		
-		\vspace{0.2cm}
+		\vspace{1em}
 		\textbf{4. Download HOS Ocean and NWT}
 		
 		\begin{lstlisting}[language=bash]
@@ -116,19 +239,25 @@
 		$	git clone https://github.com/LHEEA/HOS-NWT.git		
 		\end{lstlisting}
 		
-		\vspace{0.2cm}
-		\textbf{5. Change shared library path defined in makefile}
+		\vspace{1em}
+		\textbf{5. Change the library path defined in makefile}
 		
 		Open \texttt{makefile} of HOS Ocean and NWT and change as following : 
 		
 		\begin{lstlisting}[language=bash]
+		
+		HDF5_INCLUDE=/usr/local/lib/hdf5/build/bin/static/
+		HDF5_LIB=/usr/local/lib/hdf5/build/bin/
 
 		#LINKLIB = $(LIBDIR)libfftw3.a $(LIBDIR)liblapack.a $(LIBDIR)librefblas.a
 		
 		LINKLIB = $(LIBDIR)libfftw3.a -llapack
+		
+		LINKLIB+= $(HDF5_LIB)libhdf5_fortran.a $(HDF5_LIB)libhdf5_f90cstub.a $(HDF5_LIB)libhdf5.a $(HDF5_LIB)libszip.a $(HDF5_LIB)libz.a -ldl -pthread
+		
 		\end{lstlisting}
 		
-		If FFTW s not installed at \texttt{\$(LIBDIR)} in \texttt{makefile}, it can be changed as an example of previous chapter. 
+		The setting of FFTW3 and HDF5 library is depicted in the previous chapters
 		
 		\pagebreak
 		
@@ -194,30 +323,28 @@
 		
 		\vspace{0.2cm}
 		
-		\textbf{Set FFTW Path (FFTW library is not installed on \texttt{/usr/local/lib/}}
+		\textbf{Set FFTW and HDF5 library path}
 		
-		Change \texttt{DTHRDLIB} in \texttt{makefile} at FFTW library path.
+		See chapters \ref{chap:FFTWInstall} and \ref{chap:HDF5Install}
 		
-		\begin{lstlisting}[language=bash]
+		\subsubsection{Compile PostGrid2Grid with makefile}
 		
-		DTHRDLIB=$FFTW_LIBRARY_PATH
+		Compiling with \texttt{makefile} without HDF5 library is not realised. To unable HDF5, please install with \texttt{cmake}
 		
-		# Example
-		#	DTHRDLIB=/home/lib/			if "libfftw3.a" exists at /home/lib/
-		\end{lstlisting}
+		\vspace{1em}
 		
-		\subsubsection{Compile PostGrid2Grid}
+		- Compile with makefile
 		
 		\begin{lstlisting}[language=bash]										
 
 		$	cd Grid2Grid
 		$
-		$	make 
-		\end{lstlisting}
+		$	make create
+		\end{lstlisting}	
 		
 		\subsubsection{Compile Grid2Grid Shared Library}
 		
-		\textbf{Compile \texttt{libGrid2Grid.so} in \texttt{Grid2Grid/obj/}}
+		- Compile \texttt{libGrid2Grid.so} in \texttt{Grid2Grid/lib/}
 		
 		\begin{lstlisting}[language=bash]
 		
@@ -226,7 +353,7 @@
 	
 		\vspace{0.2cm}
 
-		\textbf{Compile \texttt{libGrid2Grid.so} in \texttt{\$FOAM\_USER\_LIBBIN}}
+		- Compile \texttt{libGrid2Grid.so} in \texttt{\$FOAM\_USER\_LIBBIN}
 		
 		If OpenFOAM is installed, \texttt{libGrid2Grid.so} can be compiled at \texttt{\$FOAM\_USER\_LIBBIN}. If OpenFOAM environment is called, following make rule can be used directly. 
 		
@@ -234,3 +361,44 @@
 		
 		$	make createOFlib
 		\end{lstlisting}
+		
+		\subsubsection{Compile with cmake}
+		
+		\vspace{1em}		
+		- Compile \texttt{libGrid2Grid.so} in \texttt{lib/} and \texttt{postG2G} in \texttt{Grid2Grid}
+		
+		\begin{lstlisting}[language=bash]										
+		
+		$	cd Grid2Grid
+		$
+		$	cmake -H. -Bbuild 
+		$
+		$	cmake --build build
+		\end{lstlisting}	
+		
+		\vspace{1em}		
+		- Compile with HDF5 library
+		
+		\begin{lstlisting}[language=bash]										
+		
+		$	cd Grid2Grid
+		$
+		$	cmake -H. -Bbuild -DHDF_LIBRARY:STRING="ON"
+		$
+		$	cmake --build build
+		\end{lstlisting}	
+
+		\vspace{1em}				
+		- Compile \texttt{libGrid2Grid.so} in \texttt{\$FOAM\_USER\_LIBBIN} and \texttt{postG2G} in \texttt{Grid2Grid}		
+		
+		If OpenFOAM is installed, \texttt{libGrid2Grid.so} can be compiled at \texttt{\$FOAM\_USER\_LIBBIN}.
+		
+		\begin{lstlisting}[language=bash]	
+		
+		$	cd Grid2Grid
+		$
+		$	cmake -H. -BbuildOF -DBUILD_OF_LIB=ON
+		$
+		$	cmake --build buildOF
+		\end{lstlisting}	
+		

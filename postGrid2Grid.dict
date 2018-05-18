@@ -1,0 +1,108 @@
+#-------------------------------------------------------------------------- #
+#
+#                  Grid2Grid Dictionary Input File
+#
+#-------------------------------------------------------------------------- #
+#
+#   Grid2Grid Dictionary Input
+#
+#   Copyright (C) 2017 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
+#
+#-------------------------------------------------------------------------- #
+
+Grid2Grid       HOSNWT;
+
+writeVTK            true;
+writeWaveProbe      true;
+
+zMesh
+{
+    zMin           -0.6;
+    zMax            0.4;
+
+    nZMin           30;
+    nZMax           30;
+
+    //type            uniform;
+    zMeshType         meshRatio;
+    //   uniform   : uniform mesh
+    //   sine      : sine mesh
+
+    zMinRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z<0)
+    zMaxRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z>0)
+    // dz_min locates near to the free surface
+}
+
+HOSOcean
+{
+    type            Ocean;
+
+    filePath        example/modes_HOS_SWENSE.dat;
+
+    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+
+    $zMesh
+
+    writeLog        TRUE;
+}
+
+HOSNWT
+{
+    type            NWT;
+
+    filePath        example/modes_HOS_SWENSE.dat;
+
+    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+
+    $zMesh
+
+    writeLog        TRUE;
+}
+
+simulation
+{
+    startTime       0.0;
+    endTime		    1.0;
+    dt              0.1;
+}
+
+vtkMesh
+{
+    airMesh         true;
+
+    xMin            0.0;
+    xMax            5.65730522;
+
+    yMin            0.0;
+    yMax            0.1;
+
+    nX              10;
+    nY              2;
+
+    $zMesh
+}
+
+waveProbe
+{
+    waveProbeFile   waveElevation.dat;
+
+    waveProbes
+    {
+        waveProbes1
+        {
+            position    ( 0.0     0.0 );
+        }
+        waveProbes2
+        {
+            position    ( 1.0     2.0 );
+        }
+        waveProbes3
+        {
+            position    ( 2.0     3.0 );
+        }
+    }
+}
+
+/* ------------------------------------------------------------------------- *\
+#                                END OF FILE
+\* ------------------------------------------------------------------------- */
