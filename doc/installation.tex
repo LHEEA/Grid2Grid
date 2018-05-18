@@ -67,7 +67,7 @@
 				
 		\vspace{0.5cm}
 		
-		If user has no super user authority, FFTW library path should be changed manually. If FFTW library (\texttt{libfftw3.a}) locates at \texttt{/home/user/lib/libfftw3.a}, the FFTW3 library path should be changed as following : 
+		If user has no super user authority, FFTW library path should be changed manually. If FFTW library (\texttt{libfftw3.a}) locates at \texttt{/home/user/lib/libfftw3.a}, the FFTW3 library path should be changed as follows: 
 		
 		- Compile with makefile
 		
@@ -91,9 +91,9 @@
 		
 		\label{chap:HDF5Install}
 		
-		In version 2.0, HDF5 library can be used as a option. Because the result file of HOS for 3 hours simulation is huge, the file size can be reduced thanks to HDF5 library. In a experience, the size is reduced around 60\% when the result file is generated in a HDF5 format. 
+		In version 2.0, HDF5 library can be used as a option. Because the result file of HOS for a 3 hours simulation is huge, the file size can be reduced thanks to use of the HDF5 library. In our experience, the size is reduced around 60\% when the result file is generated in a HDF5 format. 
 				
-		When compiling \texttt{Grid2Grid}, the default installation setting with HDF library is \texttt{disbled}. The compilation with HDF library will be explaind in section \ref{chap:Grid2GridInstall}; The installation procedures for the HDF5 library is given in below. 		
+		When compiling \texttt{Grid2Grid}, the default installation setting with HDF library is \texttt{disbled}. The compilation with HDF library will be explained in section \ref{chap:Grid2GridInstall}; The installation procedures for the HDF5 library is given below. 		
 				
 		\vspace{0.5cm}
 		
@@ -125,7 +125,7 @@
 		\pagebreak		
 		\textbf{3. Add compiling rules in \texttt{HDF5options.cmake}}
 		
-		Open the file \texttt{HDF5options.cmake} inside of extracted folder and add compiling rules as following : 
+		Open the file \texttt{HDF5options.cmake} inside of extracted folder and add compiling rules as follows: 
 		
 		\begin{lstlisting}[language=bash]
 		
@@ -242,7 +242,7 @@ set(CMAKE_Fortran_FLAGS "-fPIC")
 		\vspace{1em}
 		\textbf{5. Change the library path defined in makefile}
 		
-		Open \texttt{makefile} of HOS Ocean and NWT and change as following : 
+		Open \texttt{makefile} of HOS Ocean and NWT and change as follows: 
 		
 		\begin{lstlisting}[language=bash]
 		

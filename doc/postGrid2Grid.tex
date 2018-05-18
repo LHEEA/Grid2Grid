@@ -5,8 +5,11 @@
 
 	\subsubsection{Description}
 	
-	\texttt{PostGrid2Grid} is a HOS post-processing class. It generates 3D VTK files of wave fields for the visualization and wave elevation time series computed from \texttt{Vol2Vol} class. \texttt{PostGrid2Grid} algorithm is depicted in Fig. \ref{fig:postGrid2GridAlgorighm}. \texttt{PostGrid2Grid} is initialised with the input file. The input file (\texttt{postGrid2Grid.dict}) contains the parameters needed for the post processing and HOS-reconstruction. It is composed with many dictionary input (HOS, simulation, vtkMesh and waveProbe dictionaries). \texttt{PostGrid2Grid} reads and checks the input file and then build 3D visualization grid and wave probes with given dictionaries. \texttt{Vol2Vol} class is also initialised with HOS dictionary. The subroutine \texttt{doPostProcessing} run a time simulation of reconstruction. The subroutine \texttt{correct} updates the \texttt{Vol2Vol} class and gets the wave fields. If the grid option \texttt{airMesh} is equal to \texttt{false}, 3D grid is fitted to the wave elevation. 
-	
+\texttt{PostGrid2Grid} is a HOS post-processing class. It generates 3D VTK files of wave fields for visualization and wave elevation time series computed from \texttt{Vol2Vol} class. Wave fields at desired simulation time and spatial domain and wave elevation time series can be re-generated at some provided wave probes position. 
+
+\texttt{PostGrid2Grid} algorithm is depicted in Fig. \ref{fig:postGrid2GridAlgorighm}. \texttt{PostGrid2Grid} is initialised with input file. The input file \texttt{postGrid2Grid.dict} contains HOS grid information and post processing information which have dictionary format. \texttt{PostGrid2Grid} first reads and checks the input file and then build 3D visualization grid and wave probes. \texttt{Vol2Vol} class is also initialised. The subroutine \texttt{doPostProcessing} do time loop of \texttt{correct}. Subroutine \texttt{correct} first corrects the \texttt{Vol2Vol} class and gets the wave fields. If the grid option is set to no air mesh, 3D grid is fitted to wave elevation. It writes the results on files (3D VTK file and wave elevation time series).
+
+
 	\vspace{0.2cm}
 	
 	{
