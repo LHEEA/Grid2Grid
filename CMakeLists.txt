@@ -27,7 +27,7 @@ endif()
 ###-------------------------------------------------------------------------###
 
 set(COMPILE_LANGUAGE Fortran)                       #
-set(CMAKE_Fortran_COMPILER /usr/bin/gfortran)       #... Fortran Compiler Path
+set(CMAKE_Fortran_COMPILER gfortran)       #... Fortran Compiler Path
 
 ###-------------------------------------------------------------------------###
 
@@ -115,6 +115,7 @@ foreach(LIB ${HDF5_LIB_NAME})
     if (NOT LIBEXIST)
         message("${BoldYellow}   [WARNING] library: " ${LIB} " not found. ${ColourReset}")
         set(HDF_LIBRARY "OFF")
+        set(HDF5_INC_PATH "")
     endif()
     set(HDF5_LIB_FLAG ${HDF5_LIB_FLAG} ${HDF5_LIB_PATH}/${LIB})
 endforeach()
@@ -122,7 +123,8 @@ message("${ColourReset}")
 
 set(HDF5_LIB_FLAG ${HDF5_LIB_FLAG} -ldl -pthread)
 add_definitions(-DENABLE_HDF5=${HDF_LIBRARY})
-
+else()
+set(HDF5_INC_PATH "")
 endif()
 
 message("${Green}")

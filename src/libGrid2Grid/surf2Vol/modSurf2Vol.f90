@@ -39,7 +39,10 @@ Module  modSurf2vol
 
     use iso_fortran_env, only : error_unit
     use modHDF5interface
+
+#ifdef ENABLE_HDF5
     use hdf5
+#endif
 
     use mfpGlobal, only : CHAR_LEN
     use mfpGeneral, only : typDictionaryPtr
