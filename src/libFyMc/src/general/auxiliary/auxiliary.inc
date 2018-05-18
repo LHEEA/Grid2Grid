@@ -1,1 +1,0 @@
-Include "auxiliary/arrayOperaion.inc"

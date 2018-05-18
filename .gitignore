@@ -8,11 +8,6 @@
 *.listing
 *.gz
 *.toc
-*.o
-*.build
-*.stamp
 resultVTK/
 VTK/
 obj/
-lib/
-build/
