@@ -6,6 +6,9 @@ type,extends(typHOSMesh), public :: typHOSNWTMesh
     real(rp),allocatable :: nonDimAddPhiZ(:,:,:)
     real(rp),allocatable :: nonDimAddPhit(:,:,:)
 
+    real(rp),allocatable :: nonDimAdddvitXdx(:,:,:), nonDimAdddvitYdY(:,:,:), nonDimAdddvitXdY(:,:,:)
+    real(rp),allocatable :: nonDimAdddvitXdZ(:,:,:), nonDimAdddvitYdZ(:,:,:)
+
     real(rp),allocatable :: nonDimAddDuDt(:,:,:)
     real(rp),allocatable :: nonDimAddDvDt(:,:,:)
     real(rp),allocatable :: nonDimAddDwDt(:,:,:)
@@ -18,10 +21,12 @@ type,extends(typHOSMesh), public :: typHOSNWTMesh
 
     !!- general mode flow quantities in fourier domain (fixed z)
     real(rp),allocatable,private :: aVitX(:,:), aVitY(:,:), aVitZ(:,:), aPhit(:,:)
+    real(rp),allocatable,private :: adVitXdx(:,:), adVitYdy(:,:), adVitXdy(:,:), adVitXdz(:,:), adVitYdz(:,:)
     real(rp),allocatable,private :: aDuDt(:,:), aDvDt(:,:), aDwDt(:,:)
 
     !!- added mode flow quantites in fourier domain
     real(rp),allocatable,private :: lVitX(:),lVitY(:),lVitZ(:),lPhit(:)
+    real(rp),allocatable,private :: ldVitXdx(:), ldVitYdy(:), ldVitXdy(:), ldVitXdz(:), ldVitYdz(:)
     real(rp),allocatable,private :: lDuDt(:),lDvDt(:),lDwDt(:)
 
     contains

@@ -5,7 +5,7 @@ type,private :: typHOSNWTmode
 
     !!- Mode amplitudes
     real(rp),allocatable :: modeX(:,:), modeY(:,:), modeZ(:,:)
-    real(rp),allocatable :: modet(:,:), modeFS(:,:), modeFSt(:,:)
+    real(rp),allocatable :: modet(:,:), modeFS(:,:), modeFSt(:,:), modeFSx(:,:), modeFSy(:,:)
     real(rp),allocatable :: modeAdd(:,:), modeAddt(:,:)
 
     !!- Wave Numbers

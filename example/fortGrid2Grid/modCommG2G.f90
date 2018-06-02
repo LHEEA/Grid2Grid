@@ -24,7 +24,9 @@
         type(commSub) :: comm_initDict
         type(commSub) :: comm_correct
         type(commSub) :: comm_getEta
+        type(commSub) :: comm_getdEta
         type(commSub) :: comm_getU
+        type(commSub) :: comm_getdU
         type(commSub) :: comm_getPd
         type(commSub) :: comm_getFlow
         type(commSub) :: comm_getEndTime
@@ -102,12 +104,28 @@
                 Double precision, intent(out) ::  eta
             end subroutine
 
+            subroutine proc_getHOSdEta(hosIndex, x, y, t, detadx, detady, detadt) bind(c)
+                use, intrinsic :: iso_c_binding
+                implicit none
+                integer, intent(in)           :: hosIndex
+                Double precision, intent(in)  :: x, y, t
+                Double precision, intent(out) ::  detadx, detady, detadt
+            end subroutine
+
             subroutine proc_getHOSU(hosIndex, x, y, z, t, u, v, w) bind(c)
                 use, intrinsic :: iso_c_binding
                 implicit none
                 integer, intent(in)           :: hosIndex
                 Double precision, intent(in)  :: x, y, z, t
                 Double precision, intent(out) :: u, v, w
+            end subroutine
+
+            subroutine proc_getHOSdU(hosIndex, x, y, z, t, dudx, dvdy, dudy, dudz, dvdz) bind(c)
+                use, intrinsic :: iso_c_binding
+                implicit none
+                integer, intent(in)           :: hosIndex
+                Double precision, intent(in)  :: x, y, z, t
+                Double precision, intent(out) :: dudx, dvdy, dudy, dudz, dvdz
             end subroutine
 
             subroutine proc_getHOSPd(hosIndex, x, y, z, t, pd) bind(c)
@@ -154,7 +172,9 @@
         procedure(proc_initDict), bind(c), pointer   :: subG2G_initDict
         procedure(proc_correct), bind(c), pointer    :: subG2G_correct
         procedure(proc_getHOSEta), bind(c), pointer  :: subG2G_getHOSEta
+        procedure(proc_getHOSdEta), bind(c), pointer  :: subG2G_getHOSdEta
         procedure(proc_getHOSU), bind(c), pointer    :: subG2G_getHOSU
+        procedure(proc_getHOSdU), bind(c), pointer    :: subG2G_getHOSdU
         procedure(proc_getHOSPd), bind(c), pointer   :: subG2G_getHOSPd
         procedure(proc_getHOSFlow), bind(c), pointer :: subG2G_getHOSFlow
         procedure(proc_getHOSEndTime), bind(c), pointer :: subG2G_getHOSEndTime
@@ -196,9 +216,17 @@
                 Call linkG2GSubroutine(comm_getEta, subroutineName)
                 call c_f_procpointer(comm_getEta%proc_addr, subG2G_getHOSEta)
 
+                subroutineName = trim(headerG2G)//"gethosdEta"
+                Call linkG2GSubroutine(comm_getdEta, subroutineName)
+                call c_f_procpointer(comm_getdEta%proc_addr, subG2G_getHOSdEta)
+
                 subroutineName = trim(headerG2G)//"gethosu"
                 Call linkG2GSubroutine(comm_getU, subroutineName)
                 call c_f_procpointer(comm_getU%proc_addr, subG2G_getHOSU)
+
+                subroutineName = trim(headerG2G)//"gethosdu"
+                Call linkG2GSubroutine(comm_getdU, subroutineName)
+                call c_f_procpointer(comm_getdU%proc_addr, subG2G_getHOSdU)
 
                 subroutineName = trim(headerG2G)//"gethospd"
                 Call linkG2GSubroutine(comm_getPd, subroutineName)
@@ -311,12 +339,28 @@
             Call subG2G_getHOSEta(hosIndex, x, y, t, eta)
         end subroutine
 
+        subroutine getHOSdEta(hosIndex, x, y, t, detadx, detady, detadt)
+            implicit none
+            integer, intent(in)           :: hosIndex
+            Double precision, intent(in)  :: x, y, t
+            Double precision, intent(out) ::  detadx, detady, detadt
+            Call subG2G_getHOSdEta(hosIndex, x, y, t, detadx, detady, detadt)
+        end subroutine
+
         subroutine getHOSU(hosIndex, x, y, z, t, u, v, w)
             implicit none
             integer, intent(in)           :: hosIndex
             Double precision, intent(in)  :: x, y, z, t
             Double precision, intent(out) :: u, v, w
             Call subG2G_getHOSU(hosIndex, x, y, z, t, u, v, w)
+        end subroutine
+
+        subroutine getHOSdU(hosIndex, x, y, z, t, dudx, dvdy, dudy, dudz, dvdz)
+            implicit none
+            integer, intent(in)           :: hosIndex
+            Double precision, intent(in)  :: x, y, z, t
+            Double precision, intent(out) :: dudx, dvdy, dudy, dudz, dvdz
+            Call subG2G_getHOSdU(hosIndex, x, y, z, t, dudx, dvdy, dudy, dudz, dvdz)
         end subroutine
 
         subroutine getHOSPd(hosIndex, x, y, z, t, pd)

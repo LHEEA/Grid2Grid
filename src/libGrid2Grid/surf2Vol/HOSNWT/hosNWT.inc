@@ -652,6 +652,16 @@ subroutine reconstructionFFTs_HOSNWT(this)
 
     !! - Compute nondimensionalized wave elevation
     this%hosMesh_%nonDimEta = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFS,'cos','cos')
+    this%hosMesh_%nonDimdEtadt = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFSt,'cos','cos')
+    do ix = 1, this%nXmode_
+      do iy = 1, this%nYmode_
+            this%hosMode_%modeFSx(ix, iy) = -this%hosMode_%kx(ix) * this%hosMode_%modeFS(ix, iy) !this%hosMode_%kx(ix)
+            this%hosMode_%modeFSy(ix, iy) = -this%hosMode_%ky(iy) * this%hosMode_%modeFS(ix, iy) !this%hosMode_%kyN2(iy)
+      enddo
+    end do
+    this%hosMesh_%nonDimdEtadx = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFSx,'sin','cos')
+    this%hosMesh_%nonDimdEtady = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFSy,'cos','sin')
+
 
     do iz = 1, this%hosMesh_%nZ
         hosZ = this%hosMesh_%nonDimZ(iz)
@@ -662,6 +672,14 @@ subroutine reconstructionFFTs_HOSNWT(this)
         this%hosMesh_%aVitY(ix, iy) =  this%hosMode_%modeY(ix, iy)
         this%hosMesh_%aVitZ(ix, iy) =  this%hosMode_%modeZ(ix, iy)
         this%hosMesh_%aPhit(ix, iy) =  this%hosMode_%modet(ix, iy)
+
+        !if (reconstruct_space_derivative) THEN
+        this%hosMesh_%adVitXdx(ix, iy) = this%hosMode_%kx(ix) * this%hosMesh_%aVitX(ix, iy)
+        this%hosMesh_%adVitYdy(ix, iy) = this%hosMode_%ky(iy) * this%hosMesh_%aVitY(ix, iy)
+        this%hosMesh_%adVitXdy(ix, iy) = -this%hosMode_%ky(iy) * this%hosMesh_%aVitX(ix, iy)
+        this%hosMesh_%adVitXdz(ix, iy) = -this%hosMode_%kx(ix) * this%hosMesh_%aVitZ(ix, iy)
+        this%hosMesh_%adVitYdz(ix, iy) = -this%hosMode_%ky(iy) * this%hosMesh_%aVitZ(ix, iy)
+        !endif
         ! this%hosMesh_%aDuDt(ix, iy) = -this%hosMode_%kx(ix) * this%hosMode_%modet(ix, iy)
         ! this%hosMesh_%aDvDt(ix, iy) = -this%hosMode_%ky(iy) * this%hosMode_%modet(ix, iy)
         ! this%hosMesh_%aDwDt(ix, iy) =  this%hosMode_%ktheta(ix,iy) * this%hosMode_%modet(ix, iy)
@@ -691,6 +709,15 @@ subroutine reconstructionFFTs_HOSNWT(this)
             this%hosMesh_%aVitY(ix, iy) =  this%hosMode_%modeY(ix, iy) * coeff
             this%hosMesh_%aVitZ(ix, iy) =  this%hosMode_%modeZ(ix, iy) * coeff2
             this%hosMesh_%aPhit(ix, iy) =  this%hosMode_%modet(ix, iy) * coeff
+
+            !if (reconstruct_space_derivative) THEN
+            this%hosMesh_%adVitXdx(ix, iy) = this%hosMode_%kx(ix) * this%hosMesh_%aVitX(ix, iy)
+            this%hosMesh_%adVitYdy(ix, iy) = this%hosMode_%ky(iy) * this%hosMesh_%aVitY(ix, iy)
+            this%hosMesh_%adVitXdy(ix, iy) = -this%hosMode_%ky(iy) * this%hosMesh_%aVitX(ix, iy)
+            this%hosMesh_%adVitXdz(ix, iy) = -this%hosMode_%kx(ix) * this%hosMesh_%aVitZ(ix, iy)
+            this%hosMesh_%adVitYdz(ix, iy) = -this%hosMode_%ky(iy) * this%hosMesh_%aVitZ(ix, iy)
+            !endif
+
             ! this%hosMesh_%aDuDt(ix, iy) = -this%hosMode_%kx(ix) * this%hosMesh_%aPhit(ix, iy)
             ! this%hosMesh_%aDvDt(ix, iy) = -this%hosMode_%ky(iy) * this%hosMesh_%aPhit(ix, iy)
             ! this%hosMesh_%aDwDt(ix, iy) =  this%hosMode_%ktheta(ix,iy) * this%hosMode_%modet(ix, iy) * coeff2
@@ -720,6 +747,14 @@ subroutine reconstructionFFTs_HOSNWT(this)
                 this%hosMesh_%aVitY(ix, iy) =  this%hosMode_%modeY(ix, iy) * coeff
                 this%hosMesh_%aVitZ(ix, iy) =  this%hosMode_%modeZ(ix, iy) * coeff2
                 this%hosMesh_%aPhit(ix, iy) =  this%hosMode_%modet(ix, iy) * coeff
+
+                !if (reconstruct_space_derivative) THEN
+                this%hosMesh_%adVitXdx(ix, iy) = this%hosMode_%kx(ix) * this%hosMesh_%aVitX(ix, iy)
+                this%hosMesh_%adVitYdy(ix, iy) = this%hosMode_%ky(iy) * this%hosMesh_%aVitY(ix, iy)
+                this%hosMesh_%adVitXdy(ix, iy) = -this%hosMode_%ky(iy) * this%hosMesh_%aVitX(ix, iy)
+                this%hosMesh_%adVitXdz(ix, iy) = -this%hosMode_%kx(ix) * this%hosMesh_%aVitZ(ix, iy)
+                this%hosMesh_%adVitYdz(ix, iy) = -this%hosMode_%ky(iy) * this%hosMesh_%aVitZ(ix, iy)
+                !endif
                 ! this%hosMesh_%aDuDt(ix, iy) = -this%hosMode_%kx(ix) * this%hosMesh_%aPhit(ix, iy)
                 ! this%hosMesh_%aDvDt(ix, iy) = -this%hosMode_%ky(iy) * this%hosMesh_%aPhit(ix, iy)
                 ! this%hosMesh_%aDwDt(ix, iy) =  this%hosMode_%ktheta(ix,iy) * this%hosMode_%modet(ix, iy) * coeff2
@@ -730,13 +765,22 @@ subroutine reconstructionFFTs_HOSNWT(this)
         this%hosMesh_%nonDimPhiX(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aVitX,'sin','cos')
         if (this%nYmode_.NE.1) then
             this%hosMesh_%nonDimPhiY(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aVitY,'cos','sin')
+            this%hosMesh_%nonDimdvitYdy(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%adVitYdy,'cos','cos')
+            this%hosMesh_%nonDimdvitXdy(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%adVitXdy,'sin','sin')
+            this%hosMesh_%nonDimdvitYdz(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%adVitYdz,'cos','sin')
             ! this%hosMesh_%nonDimDvDt(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aDvDt,'cos','sin')
         else
             this%hosMesh_%nonDimPhiY(:,:, iz) = 0.0_rp
+            this%hosMesh_%nonDimdvitYdy(:,:, iz) = 0.0_rp
+            this%hosMesh_%nonDimdvitXdy(:,:, iz) = 0.0_rp
+            this%hosMesh_%nonDimdvitYdz(:,:, iz) = 0.0_rp
             ! this%hosMesh_%nonDimDvDt(:,:, iz) = 0.0_rp
         end if
         this%hosMesh_%nonDimPhiZ(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aVitZ,'cos','cos')
         this%hosMesh_%nonDimPhit(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aPhit,'cos','cos')
+
+        this%hosMesh_%nonDimdvitXdx(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%adVitXdx,'cos','cos')
+        this%hosMesh_%nonDimdvitXdz(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%adVitXdz,'sin','cos')
         ! this%hosMesh_%nonDimDuDt(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aDuDt,'cos','cos')
         ! this%hosMesh_%nonDimDwDt(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aDwDt,'cos','cos')
 
@@ -749,7 +793,7 @@ subroutine reconstructionAddFFTs_HOSNWT(this)
     class(typHOSNWT), intent(inout) :: this
     integer  :: ix, iy, iz, iAdd
     REAL(RP) :: coskx_add,sinkx_add,coeff1,coeff2,coeff3,coeff4
-    REAL(RP) :: hosZ
+    REAL(RP) :: hosZ, kxyAdd
 
     do iz = 1, this%hosMesh_%nZ
         hosZ = this%hosMesh_%nonDimZ(iz)
@@ -760,6 +804,12 @@ subroutine reconstructionAddFFTs_HOSNWT(this)
                 this%hosMesh_%lVitY(iy) = 0.0_rp
                 this%hosMesh_%lVitZ(iy) = 0.0_rp
                 this%hosMesh_%lPhit(iy) = 0.0_rp
+
+                this%hosMesh_%ldVitXdx(iy) = 0.0_rp
+                this%hosMesh_%ldVitYdy(iy) = 0.0_rp
+                this%hosMesh_%ldVitXdy(iy) = 0.0_rp
+                this%hosMesh_%ldVitXdz(iy) = 0.0_rp
+                this%hosMesh_%ldVitYdz(iy) = 0.0_rp
 
                 ! this%hosMesh_%lDuDt(iy) = 0.0_rp
                 ! this%hosMesh_%lDvDt(iy) = 0.0_rp
@@ -773,6 +823,8 @@ subroutine reconstructionAddFFTs_HOSNWT(this)
                     coeff2 = sinkx_add * this%hosMesh_%kx_add_csh_add_x(ix,iy,iAdd)
                     coeff3 = coskx_add * this%hosMesh_%k_add_sh_add_x(ix,iy,iAdd)
                     coeff4 = coskx_add * this%hosMesh_%kycsh_add_x(ix,iy,iAdd)
+                    kxyAdd  = sqrt(this%hosMode_%kxAdd(iAdd) * this%hosMode_%kxAdd(iAdd)+ &
+                                   this%hosMode_%ky(iy) * this%hosMode_%ky(iy))
 
                     this%hosMesh_%lVitX(iy) =  this%hosMesh_%lVitX(iy) &
                                                 - this%hosMode_%modeAdd(iAdd, iy) * coeff3
@@ -782,6 +834,22 @@ subroutine reconstructionAddFFTs_HOSNWT(this)
                                                 - this%hosMode_%modeAdd(iAdd, iy) * coeff2
                     this%hosMesh_%lPhit(iy) =  this%hosMesh_%lPhit(iy) &
                                                 + this%hosMode_%modeAddt(iAdd, iy) * coeff1
+
+                    this%hosMesh_%ldVitXdx(iy) =  this%hosMesh_%ldVitXdx(iy) &
+                                                + this%hosMode_%modeAdd(iAdd, iy) * &
+                                                  kxyAdd * kxyAdd * coeff1
+                    this%hosMesh_%ldVitYdy(iy) =  this%hosMesh_%ldVitYdy(iy) &
+                                                - this%hosMode_%modeAdd(iAdd, iy) * coeff4 &
+                                                * this%hosMode_%ky(iy)
+                    this%hosMesh_%ldVitXdy(iy) =  this%hosMesh_%ldVitXdy(iy) &
+                                                + this%hosMode_%modeAdd(iAdd, iy) * coeff3 &
+                                                * this%hosMode_%ky(iy)
+                    this%hosMesh_%ldvitXdz(iy) =  this%hosMesh_%ldvitXdz(iy) &
+                                                + this%hosMode_%modeAdd(iAdd, iy) * this%hosMode_%kxAdd(iAdd) &
+                                                * sinkx_add * this%hosMesh_%k_add_sh_add_x(ix,iy,iAdd)
+                    this%hosMesh_%ldvitYdz(iy) =  this%hosMesh_%ldvitYdz(iy) &
+                                                + this%hosMode_%modeAdd(iAdd, iy) * coeff2 &
+                                                * this%hosMode_%ky(iy)
 
                     ! this%hosMesh_%lDuDt(iy) =  this%hosMesh_%lDuDt(iy) &
                     !                             - this%hosMode_%modeAddt(iAdd, iy) * coeff3
@@ -796,6 +864,12 @@ subroutine reconstructionAddFFTs_HOSNWT(this)
             this%hosMesh_%nonDimAddPhiY(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%lVitY,'sin')
             this%hosMesh_%nonDimAddPhiZ(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%lVitZ,'cos')
             this%hosMesh_%nonDimAddPhit(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%lPhit,'cos')
+
+            this%hosMesh_%nonDimAdddvitXdx(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%ldVitXdx,'cos')
+            this%hosMesh_%nonDimAdddvitYdy(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%ldVitYdy,'cos')
+            this%hosMesh_%nonDimAdddvitXdy(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%ldVitXdy,'sin')
+            this%hosMesh_%nonDimAdddvitXdz(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%ldvitXdz,'cos')
+            this%hosMesh_%nonDimAdddvitYdz(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%ldvitYdz,'sin')
 
             ! this%hosMesh_%nonDimAddDuDt(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%lDuDt,'cos')
             ! this%hosMesh_%nonDimAddDvDt(ix, :, iz) = this%hosNWTFFTW_%fourier_2_space_y(this%hosMesh_%lDvDt,'sin')

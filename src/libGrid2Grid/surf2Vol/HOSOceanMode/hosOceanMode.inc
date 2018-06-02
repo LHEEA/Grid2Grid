@@ -10,6 +10,8 @@ subroutine allocOceanMode(this, nXo2p1, nYmode)
              this%modeZ(nXo2p1, nYmode),&
              this%modet(nXo2p1, nYmode),&
              this%modeFS(nXo2p1, nYmode),&
+             this%modeFSx(nXo2p1, nYmode),&
+             this%modeFSy(nXo2p1, nYmode),&
              this%modeFSt(nXo2p1, nYmode) )
 
     !-- Allocate wave number array
@@ -32,6 +34,8 @@ subroutine destroyOceanMode(this)
     if (allocated(this%modet))   deallocate( this%modet )
     if (allocated(this%modeFS))  deallocate( this%modeFS )
     if (allocated(this%modeFSt)) deallocate( this%modeFSt )
+    if (allocated(this%modeFSx)) deallocate( this%modeFSx )
+    if (allocated(this%modeFSy)) deallocate( this%modeFSy )
 
     if (allocated(this%kx))     deallocate( this%kx )
     if (allocated(this%kyN2))   deallocate( this%kyN2 )

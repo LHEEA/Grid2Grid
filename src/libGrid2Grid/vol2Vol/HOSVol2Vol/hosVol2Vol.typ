@@ -98,9 +98,13 @@ contains
 
     !!- Get interpolated Eta
     procedure, pass, public :: getEta
+    !!- Get interpolated dEta
+    procedure, pass, public :: getdEta
 
     !!- Get interpolated U
     procedure, pass, public :: getU
+    !!- Get interpolated dU
+    procedure, pass, public :: getdU
 
     !!- Get interpolated Pd
     procedure, pass, public :: getPd

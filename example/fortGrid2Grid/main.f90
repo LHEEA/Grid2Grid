@@ -21,6 +21,7 @@
 	Double precision       :: t, dt			!! Simulation Time, dt
 	Double precision       :: x, y, z		!! Computation Point
 	Double precision       :: eta, u, v, w, pd	!! HOS Wave Information
+	Double precision       :: detadx, detady, detadt, dudx, dvdy, dudy, dudz, dvdz !! HOS Wave Derivative Information
 	!! Dummy variables --------------------------------------------------
 	integer                :: it				!! Dummy time loop integer
 
@@ -41,7 +42,7 @@
 	hosIndex = -1
 
 	!!!... Set HOS Type (Ocean or NWT)
-	hosSolver = "NWT"
+	hosSolver = "Ocean"
 
 	!!!... Set HOS Result file Path
 	hosFileName = "../modes_HOS_SWENSE.dat"
@@ -74,8 +75,14 @@
 		!! Get Wave Elevation
 		Call getHOSeta(hosIndex, x, y , t, eta)
 
+		!! Get Wave Elevation derivative
+    Call getHOSdeta(hosIndex, x, y , t, detadx, detady, detadt)
+
 		!! Get Flow Velocity
 		Call getHOSU(hosIndex, x, y, z, t, u, v ,w)
+
+		!! Get Flow Velocity derivative
+    Call getHOSdU(hosIndex, x, y, z, t, dudx, dvdy ,dudy, dudz, dvdz)
 
 		!! Get Dynamic Pressure
 		Call getHOSPd(hosIndex, x, y, z, t, pd)
@@ -83,8 +90,10 @@
 		!! Write Flow Information
 		write(*,"(a, f15.8)")  "HOS Time = ", t
 		write(*,"(a, f15.8)")  "HOS eta  = ", eta
+		write(*,"(a, 3f15.8)") "HOS deta = ", detadx, detady, detadt
 		write(*,"(a, 3f15.8)") "HOS U    = ", u, v, w
-		write(*,"(a, f15.8)")  "HOS Pd = ", pd
+		write(*,"(a, 5f15.8)") "HOS dU   = ", dudx, dvdy, dudy, dudz, dvdz
+		write(*,"(a, f15.8)")  "HOS Pd   = ", pd
 		write(*,*) ""
 
 		!! Time Update

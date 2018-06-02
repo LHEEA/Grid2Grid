@@ -370,6 +370,44 @@ REAL(RP) FUNCTION getEta(this, x, y, t, iflag)
 
 END FUNCTION
 
+SUBROUTINE getdeta(this, x, y, t, detadx, detady, detadt, iflag)
+        implicit none
+        class(typHOSVol2Vol), intent(inout) :: this
+        real(RP),intent(in) :: x, y, t
+        real(RP),intent(out) :: detadx, detady, detadt
+        real(RP) :: nonDimX, nonDimY
+        real(RP) :: etaVal
+        integer,optional    :: iflag
+        !------------------------------------------------------
+        if(present(iflag).and.(iflag.eq.1)) then
+            nonDimX = x
+            nonDimY = y
+            if (this%isHOS2D_) nonDimY = 0.0_RP
+        else
+            nonDimX = x / this%dimL_
+            nonDimY = y / this%dimL_
+            if (this%isHOS2D_) nonDimY = 0.0_RP
+        endif
+
+        !!! Coordinate Check
+        Call checkHOSXY(this, nonDimX, nonDimY)
+
+        if (this%isHOS2D_) then
+            etaVal = this%itp2D_%interpEta(nonDimX,t)
+        else
+            etaVal = this%itp3D_%interpEta(nonDimX, nonDimY,t)
+        end if
+
+        if (this%isHOS2D_) then
+            detady = 0.0_RP
+            Call this%itp2D_%interpdeta(nonDimX, t, detadx, detadt)
+        else
+            Call this%itp3D_%interpdeta(nonDimX, nonDimY, t, detadx, detady, detadt)
+        end if
+
+
+END SUBROUTINE
+
 SUBROUTINE getU(this, x, y, z, t, u, v, w, iflag)
     implicit none
     class(typHOSVol2Vol), intent(inout) :: this
@@ -432,6 +470,79 @@ SUBROUTINE getU(this, x, y, z, t, u, v, w, iflag)
             end if
         endif
     end if
+
+END SUBROUTINE
+
+SUBROUTINE getdU(this, x, y, z, t, dudx, dvdy, dudy, dudz, dvdz, iflag)
+        implicit none
+        class(typHOSVol2Vol), intent(inout) :: this
+        real(RP),intent(in) :: x, y, z, t
+        real(RP),intent(out) :: dudx, dvdy, dudy, dudz, dvdz
+        real(RP) :: nonDimX, nonDimY, nonDimZ
+        real(RP) :: etaVal
+        integer,optional    :: iflag
+        !------------------------------------------------------
+        if(present(iflag).and.(iflag.eq.1)) then
+            nonDimX = x
+            nonDimY = y
+            nonDimZ = z
+            if (this%isHOS2D_) nonDimY = 0.0_RP
+        else
+            nonDimX = x / this%dimL_
+            nonDimY = y / this%dimL_
+            nonDimZ = z / this%dimL_
+            if (this%isHOS2D_) nonDimY = 0.0_RP
+        endif
+
+        !!! Coordinate Check
+        Call checkHOSXY(this, nonDimX, nonDimY)
+
+        if (this%isHOS2D_) then
+            etaVal = this%itp2D_%interpEta(nonDimX,t)
+        else
+            etaVal = this%itp3D_%interpEta(nonDimX, nonDimY,t)
+        end if
+
+        if(present(iflag).and.(iflag.eq.1)) then
+            if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
+            if (nonDimZ.gt.etaVal / this%dimL_) then
+                dudx = 0.0_RP
+                dvdy = 0.0_RP
+                dudy = 0.0_RP
+                dudz = 0.0_RP
+                dvdz = 0.0_RP
+            else
+                Call checkHOSZ(this, nonDimZ)
+                if (this%isHOS2D_) then
+                    dvdy = 0.0_RP
+                    dudy = 0.0_RP
+                    dvdz = 0.0_RP
+                    Call this%itp2D_%interpdU(nonDimX, nonDimZ, t, dudx, dudz)
+                else
+                    Call this%itp3D_%interpdU(nonDimX, nonDimY, nonDimZ, t, dudx, dvdy, dudy, dudz, dvdz)
+                end if
+
+            endif
+        else
+            if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
+            if (nonDimZ.gt.etaVal / this%dimL_) then
+                dudx = 0.0_RP
+                dvdy = 0.0_RP
+                dudy = 0.0_RP
+                dudz = 0.0_RP
+                dvdz = 0.0_RP
+            else
+                Call checkHOSZ(this, nonDimZ)
+                if (this%isHOS2D_) then
+                    dvdy = 0.0_RP
+                    dudy = 0.0_RP
+                    dvdz = 0.0_RP
+                    Call this%itp2D_%interpdU(nonDimX, nonDimZ, t, dudx, dudz)
+                else
+                    Call this%itp3D_%interpdU(nonDimX, nonDimY, nonDimZ, t, dudx, dvdy, dudy, dudz, dvdz)
+                end if
+            endif
+        end if
 
 END SUBROUTINE
 
@@ -586,6 +697,11 @@ subroutine constructSpline(this)
                 this%itp2D_%etaValue(1:this%nX_, it) = this%HOSs2v_(idx)%ptrHOSMesh_%eta(:, 1)
                 this%itp2D_%etaValue(1+this%nX_, it) = this%HOSs2v_(idx)%ptrHOSMesh_%eta(1, 1)
 
+                this%itp2D_%detadxValue(1:this%nX_, it) = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(:, 1)
+                this%itp2D_%detadxValue(1+this%nX_, it) = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(1, 1)
+                this%itp2D_%detadtValue(1:this%nX_, it) = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(:, 1)
+                this%itp2D_%detadtValue(1+this%nX_, it) = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(1, 1)
+
                 this%itp2D_%uValue(1:this%nX_,:, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u(:, 1,  :)
                 this%itp2D_%uValue(1+this%nX_,:, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u(1, 1,  :)
 
@@ -594,11 +710,29 @@ subroutine constructSpline(this)
 
                 this%itp2D_%pdValue(1:this%nX_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(:, 1,  :)
                 this%itp2D_%pdValue(1+this%nX_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(1, 1,  :)
+
+                this%itp2D_%dudxValue(1:this%nX_,:, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(:, 1,  :)
+                this%itp2D_%dudxValue(1+this%nX_,:, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(1, 1,  :)
+                this%itp2D_%dudzValue(1:this%nX_,:, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(:, 1,  :)
+                this%itp2D_%dudzValue(1+this%nX_,:, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(1, 1,  :)
             else
                 this%itp3D_%etaValue(1:this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%eta
                 this%itp3D_%etaValue(1+this%nX_, : , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%eta(1, :)
                 this%itp3D_%etaValue(:, 1+this%nY_ , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%eta(:, 1)
                 this%itp3D_%etaValue(1+this%nX_, 1+this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%eta(1, 1)
+
+                this%itp3D_%detadxValue(1:this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadx
+                this%itp3D_%detadxValue(1+this%nX_, : , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(1, :)
+                this%itp3D_%detadxValue(:, 1+this%nY_ , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(:, 1)
+                this%itp3D_%detadxValue(1+this%nX_, 1+this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(1, 1)
+                this%itp3D_%detadyValue(1:this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detady
+                this%itp3D_%detadyValue(1+this%nX_, : , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detady(1, :)
+                this%itp3D_%detadyValue(:, 1+this%nY_ , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detady(:, 1)
+                this%itp3D_%detadyValue(1+this%nX_, 1+this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detady(1, 1)
+                this%itp3D_%detadtValue(1:this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadt
+                this%itp3D_%detadtValue(1+this%nX_, : , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(1, :)
+                this%itp3D_%detadtValue(:, 1+this%nY_ , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(:, 1)
+                this%itp3D_%detadtValue(1+this%nX_, 1+this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(1, 1)
 
                 this%itp3D_%uValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u
                 this%itp3D_%uValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u(1,:,:)
@@ -619,6 +753,27 @@ subroutine constructSpline(this)
                 this%itp3D_%pdValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(1,:,:)
                 this%itp3D_%pdValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(:,1,:)
                 this%itp3D_%pdValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(1,1,:)
+
+                this%itp3D_%dudxValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx
+                this%itp3D_%dudxValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(1,:,:)
+                this%itp3D_%dudxValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(:,1,:)
+                this%itp3D_%dudxValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(1,1,:)
+                this%itp3D_%dvdyValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy
+                this%itp3D_%dvdyValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy(1,:,:)
+                this%itp3D_%dvdyValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy(:,1,:)
+                this%itp3D_%dvdyValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy(1,1,:)
+                this%itp3D_%dudyValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy
+                this%itp3D_%dudyValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy(1,:,:)
+                this%itp3D_%dudyValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy(:,1,:)
+                this%itp3D_%dudyValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy(1,1,:)
+                this%itp3D_%dudzValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz
+                this%itp3D_%dudzValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(1,:,:)
+                this%itp3D_%dudzValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(:,1,:)
+                this%itp3D_%dudzValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(1,1,:)
+                this%itp3D_%dvdzValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz
+                this%itp3D_%dvdzValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz(1,:,:)
+                this%itp3D_%dvdzValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz(:,1,:)
+                this%itp3D_%dvdzValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz(1,1,:)
             end if
         else
             if (this%isHOS2D_) then

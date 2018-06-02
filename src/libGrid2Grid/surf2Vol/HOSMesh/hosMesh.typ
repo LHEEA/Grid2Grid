@@ -10,6 +10,9 @@ type, public :: typHOSMesh
     real(rp),allocatable :: nonDimX(:), nonDimY(:), nonDimZ(:)
 
     real(rp),allocatable :: nonDimEta(:,:)
+    real(rp),allocatable :: nonDimdEtadx(:,:)
+    real(rp),allocatable :: nonDimdEtady(:,:)
+    real(rp),allocatable :: nonDimdEtadt(:,:)
     real(rp),allocatable :: nonDimPhiX(:,:,:)
     real(rp),allocatable :: nonDimPhiY(:,:,:)
     real(rp),allocatable :: nonDimPhiZ(:,:,:)
@@ -19,6 +22,12 @@ type, public :: typHOSMesh
     real(rp),allocatable :: nonDimDvDt(:,:,:)
     real(rp),allocatable :: nonDimDwDt(:,:,:)
 
+    real(rp),allocatable :: nonDimdVitXdx(:,:,:)
+    real(rp),allocatable :: nonDimdVitYdy(:,:,:)
+    real(rp),allocatable :: nonDimdVitXdy(:,:,:)
+    real(rp),allocatable :: nonDimdVitXdz(:,:,:)
+    real(rp),allocatable :: nonDimdVitYdz(:,:,:)
+
     !!- Dimensionalized values (HOS Domain)
 
     real(rp) :: dimL, dimT
@@ -26,10 +35,19 @@ type, public :: typHOSMesh
     real(rp) :: Lx, Ly, zMin, zMax
 
     real(rp),allocatable :: eta(:,:)
+    real(rp),allocatable :: detadx(:,:)
+    real(rp),allocatable :: detady(:,:)
+    real(rp),allocatable :: detadt(:,:)
     real(rp),allocatable :: u(:,:,:)
     real(rp),allocatable :: v(:,:,:)
     real(rp),allocatable :: w(:,:,:)
     real(rp),allocatable :: pd(:,:,:)
+
+    real(rp),allocatable :: dudx(:,:,:)
+    real(rp),allocatable :: dvdy(:,:,:)
+    real(rp),allocatable :: dudy(:,:,:)
+    real(rp),allocatable :: dudz(:,:,:)
+    real(rp),allocatable :: dvdz(:,:,:)
 
     real(rp),allocatable :: dudt(:,:,:)
     real(rp),allocatable :: dvdt(:,:,:)

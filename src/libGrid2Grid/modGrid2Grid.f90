@@ -321,6 +321,24 @@ contains
         end if
     end subroutine
 
+    subroutine getHOSdEta(v2vIndex, x, y, t, detadx, detady, detadt) &
+    bind(c, name='__modgrid2grid_MOD_gethosdEta')
+    implicit none
+    integer, intent(in)           :: v2vIndex
+    Double precision, intent(in)  :: x, y, t
+    Double precision, intent(out) ::  detadx, detady, detadt
+    real(rp)         :: tmp_detadx, tmp_detady, tmp_detadt
+    if (inpVol2Vol(v2vIndex)%isActive) then
+        Call vol2vol_(v2vIndex)%getdEta(real(x,rp), real(y, rp), real(t, rp), tmp_detadx, tmp_detady, tmp_detadt)
+        detadx = dble(tmp_detadx)
+        detady = dble(tmp_detady)
+        detadt = dble(tmp_detadt)
+    else
+        write(*,*) "    [Error] getHOSdEta : wrong index is given., index : ", v2vIndex
+        stop
+    end if
+    end subroutine
+
     subroutine getHOSU(v2vIndex, x, y, z, t, u, v, w) &
         bind(c, name='__modgrid2grid_MOD_gethosu')
         implicit none
@@ -338,6 +356,27 @@ contains
             stop
         end if
     end subroutine
+
+    subroutine getHOSdU(v2vIndex, x, y, z, t, dudx, dvdy, dudy, dudz, dvdz) &
+    bind(c, name='__modgrid2grid_MOD_gethosdu')
+    implicit none
+    integer, intent(in)           :: v2vIndex
+    Double precision, intent(in)  :: x, y, z, t
+    Double precision, intent(out) :: dudx, dvdy, dudy, dudz, dvdz
+    real(rp)          :: tmp_dudx, tmp_dvdy, tmp_dudy, tmp_dudz, tmp_dvdz
+    if (inpVol2Vol(v2vIndex)%isActive) then
+        Call vol2vol_(v2vIndex)%getdU(real(x,rp), real(y, rp), real(z, rp), real(t, rp), tmp_dudx, tmp_dvdy, &
+        tmp_dudy, tmp_dudz, tmp_dvdz)
+        dudx = dble(tmp_dudx)
+        dvdy = dble(tmp_dvdy)
+        dudy = dble(tmp_dudy)
+        dudz = dble(tmp_dudz)
+        dvdz = dble(tmp_dvdz)
+    else
+        write(*,*) "    [Error] getHOSdU : wrong index is given., index : ", v2vIndex
+        stop
+    end if
+end subroutine
 
     subroutine getHOSPd(v2vIndex, x, y, z, t, pd) &
         bind(c, name='__modgrid2grid_MOD_gethospd')
