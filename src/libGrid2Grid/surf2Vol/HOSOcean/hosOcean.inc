@@ -488,6 +488,12 @@ subroutine buildGlobalMesh_HOSOcean(this, zMin, zMax, nZmin, nZmax, zMinRatio, z
     allocate( this%hosMesh_%aDvDt(this%nXo2p1_, this%nYmode_) )
     allocate( this%hosMesh_%aDwDt(this%nXo2p1_, this%nYmode_) )
 
+    allocate( this%hosMesh_%adVitXdx(this%nXo2p1_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitYdy(this%nXo2p1_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitXdy(this%nXo2p1_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitXdz(this%nXo2p1_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitYdz(this%nXo2p1_, this%nYmode_) )
+
     !-- Build Wave Number
     ! Specify temporary number of points
     nDer(1) = this%nXo2p1_
@@ -568,12 +574,14 @@ subroutine reconstructionFFTs_HOSOcean(this)
     !! - Compute nondimensionalized wave elevation
     Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFS,this%hosMesh_%nonDimEta)
     Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFSt,this%hosMesh_%nonDimdEtadt)
+
     do ix = 1, this%nXo2p1_
       do iy = 1, this%nYmode_
         this%hosMode_%modeFSx(ix, iy) = this%hosMode_%ikx(ix, iy) * this%hosMode_%modeFS(ix, iy) !this%hosMode_%kx(ix)
         this%hosMode_%modeFSy(ix, iy) = this%hosMode_%iky(ix, iy) * this%hosMode_%modeFS(ix, iy) !this%hosMode_%kyN2(iy)
       enddo
     end do
+
     Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFSx,this%hosMesh_%nonDimdEtadx)
     Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFSy,this%hosMesh_%nonDimdEtady)
 
@@ -591,6 +599,7 @@ subroutine reconstructionFFTs_HOSOcean(this)
         !if (reconstruct_space_derivative) THEN
         this%hosMesh_%adVitXdx(ix, iy) = -this%hosMode_%ikx(ix, iy) * this%hosMesh_%aVitX(ix, iy)
         this%hosMesh_%adVitYdy(ix, iy) = -this%hosMode_%iky(ix, iy) * this%hosMesh_%aVitY(ix, iy)
+
         this%hosMesh_%adVitXdy(ix, iy) = this%hosMode_%iky(ix, iy) * this%hosMesh_%aVitX(ix, iy)
         this%hosMesh_%adVitXdz(ix, iy) = this%hosMode_%ikx(ix, iy) * this%hosMesh_%aVitZ(ix, iy)
         this%hosMesh_%adVitYdz(ix, iy) = this%hosMode_%iky(ix, iy) * this%hosMesh_%aVitZ(ix, iy)
@@ -698,7 +707,7 @@ subroutine reconstructionFFTs_HOSOcean(this)
         Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%adVitXdy, this%hosMesh_%nonDimdvitXdY(:,:, iz) )
         Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%adVitXdz, this%hosMesh_%nonDimdvitXdZ(:,:, iz) )
         Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%adVitYdz, this%hosMesh_%nonDimdvitYdZ(:,:, iz) )
-
+        
         ! Call this%hosOceanFFTW_%fourier_2_space( this%hosMesh_%aDuDt, this%hosMesh_%nonDimDuDt(:,:, iz) )
         ! Call this%hosOceanFFTW_%fourier_2_space( this%hosMesh_%aDwDt, this%hosMesh_%nonDimDwDt(:,:, iz) )
 

@@ -538,6 +538,12 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     allocate( this%hosMesh_%nonDimAddPhiZ(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAddPhit(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
 
+    allocate( this%hosMesh_%nonDimAdddvitXdx(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
+    allocate( this%hosMesh_%nonDimAdddvitYdY(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
+    allocate( this%hosMesh_%nonDimAdddvitXdY(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
+    allocate( this%hosMesh_%nonDimAdddvitXdZ(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
+    allocate( this%hosMesh_%nonDimAdddvitYdZ(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
+
     allocate( this%hosMesh_%nonDimAddDuDt(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAddDvDt(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAddDwDt(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
@@ -551,6 +557,12 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     allocate( this%hosMesh_%aDvDt(this%nXmode_, this%nYmode_) )
     allocate( this%hosMesh_%aDwDt(this%nXmode_, this%nYmode_) )
 
+    allocate( this%hosMesh_%adVitXdx(this%nXmode_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitYdy(this%nXmode_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitXdy(this%nXmode_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitXdz(this%nXmode_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitYdz(this%nXmode_, this%nYmode_) )
+
     !... added mode flow quantities in Fourier Domain
     allocate( this%hosMesh_%lVitX(this%nYmode_))
     allocate( this%hosMesh_%lVitY(this%nYmode_))
@@ -559,6 +571,12 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     allocate( this%hosMesh_%lDuDt(this%nYmode_))
     allocate( this%hosMesh_%lDvDt(this%nYmode_))
     allocate( this%hosMesh_%lDwDt(this%nYmode_))
+
+    allocate( this%hosMesh_%ldVitXdx(this%nYmode_))
+    allocate( this%hosMesh_%ldVitYdy(this%nYmode_))
+    allocate( this%hosMesh_%ldVitXdy(this%nYmode_))
+    allocate( this%hosMesh_%ldVitXdz(this%nYmode_))
+    allocate( this%hosMesh_%ldVitYdz(this%nYmode_))
 
     !!- build wave number -----------------
     allocate( this%hosMesh_%csh_add_x(this%nXmode_, this%nYmode_, this%nAddmode_) )

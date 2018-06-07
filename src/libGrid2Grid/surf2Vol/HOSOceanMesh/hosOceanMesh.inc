@@ -100,6 +100,12 @@ subroutine destroyOceanMesh(this)
     if (allocated(this%aDuDt)) deallocate( this%aDuDt )
     if (allocated(this%aDvDt)) deallocate( this%aDvDt )
     if (allocated(this%aDwDt)) deallocate( this%aDwDt )
+
+    if (allocated(this%adVitXdx)) deallocate( this%adVitXdx )
+    if (allocated(this%adVitYdy)) deallocate( this%adVitYdy )
+    if (allocated(this%adVitXdy)) deallocate( this%adVitXdy )
+    if (allocated(this%adVitXdz)) deallocate( this%adVitXdz )
+    if (allocated(this%adVitYdz)) deallocate( this%adVitYdz )
 end subroutine
 
 subroutine finalHOSOceanMesh(this)

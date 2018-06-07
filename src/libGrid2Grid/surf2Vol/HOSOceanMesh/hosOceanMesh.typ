@@ -5,7 +5,8 @@ type,extends(typHOSMesh), public :: typHOSOceanMesh
         complex(cp),allocatable, private :: aVitX(:,:), aVitY(:,:), aVitZ(:,:), aPhit(:,:)
         complex(cp),allocatable, private :: aDuDt(:,:), aDvDt(:,:), aDwDt(:,:)
 
-        complex(cp),allocatable, private :: adVitXdx(:,:), adVitYdy(:,:), adVitXdy(:,:), adVitXdz(:,:), adVitYdz(:,:)
+        complex(cp),allocatable, private :: adVitXdx(:,:), adVitYdy(:,:), adVitXdy(:,:)
+        complex(cp),allocatable, private :: adVitXdz(:,:), adVitYdz(:,:)
 
     contains
 
