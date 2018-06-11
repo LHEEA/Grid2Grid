@@ -122,7 +122,7 @@ subroutine destroyHOSNWTMesh(this)
 
     if ( allocated(this%adVitXdx) ) deallocate( this%adVitXdx )
     if ( allocated(this%adVitYdy) ) deallocate( this%adVitYdy )
-    if ( allocated(this%adVitXdy) ) deallocate( this%aPhit )
+    if ( allocated(this%adVitXdy) ) deallocate( this%adVitXdy )
     if ( allocated(this%adVitXdz) ) deallocate( this%adVitXdz )
     if ( allocated(this%adVitYdz) ) deallocate( this%adVitYdz )
 
