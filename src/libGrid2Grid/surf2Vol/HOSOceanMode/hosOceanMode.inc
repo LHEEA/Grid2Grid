@@ -23,6 +23,15 @@ subroutine allocOceanMode(this, nXo2p1, nYmode)
     allocate( this%ikx(nXo2p1, nYmode) )
     allocate( this%iky(nXo2p1, nYmode) )
 
+    this%modeX = 0.0_RP
+    this%modeY = 0.0_RP
+    this%modeZ = 0.0_RP
+    this%modet = 0.0_RP
+    this%modeFS = 0.0_RP
+    this%modeFSx = 0.0_RP
+    this%modeFSy = 0.0_RP
+    this%modeFSt = 0.0_RP
+
 end subroutine
 
 subroutine destroyOceanMode(this)

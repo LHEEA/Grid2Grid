@@ -47,7 +47,7 @@ Module modGrid2GridGlobal
     integer, parameter :: INDEX_GEOMETRICRATIO_MESH = 2
 
     ! Function Z Value Criterion
-    REAL(RP),PARAMETER :: FNZ_VALUE = 10.0_RP
+    REAL(RP),PARAMETER :: FNZ_VALUE = 3.0_RP
 
     Include "auxiliary/fileIO.typ"
 

@@ -25,6 +25,7 @@ HOSOcean
     type            Ocean;
     fileType        ASCII;      // ASCII or HDF5
     filePath        ../modes_HOS_SWENSE.dat;
+    extraInterpolationNumber 2;
     interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
     $zMesh
     writeLog        TRUE;

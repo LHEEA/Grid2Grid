@@ -10,7 +10,7 @@
 #
 #-------------------------------------------------------------------------- #
 
-Grid2Grid       HOSNWT;
+Grid2Grid       HOSOcean;
 
 writeVTK            true;
 writeWaveProbe      true;
@@ -38,6 +38,8 @@ HOSOcean
     type            Ocean;
 
     filePath        example/modes_HOS_SWENSE.dat;
+ 
+    extraInterpolationNumber 2;
 
     interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 

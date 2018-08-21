@@ -14,7 +14,13 @@ private
     Logical :: isInitialized_ = .FALSE.
 
     !!- Simulation Parameters of HOS Ocean
+
+    integer  :: nXmodeOrg_, nYmodeOrg_
+
     integer  :: nXmode_, nYmode_
+
+    integer  :: nXo2p1Org_, nYo2p1Org_
+
     integer  :: nXo2p1_, nYo2p1_
 
     logical  :: isXeven_,isYeven_

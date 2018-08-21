@@ -197,9 +197,22 @@ subroutine init_read_mod_HOSOcean(this)
       Call this%init_ascii_read_mod(x1, x2)
     endif
 
+    this%nXmodeOrg_  = nint(x1)
+
+    this%nXo2p1Org_ = this%nXmodeOrg_ / 2 + 1
+
     ! Set Simulation Parameters
-    this%nXmode_   = nint(x1)
-    this%nYmode_   = nint(x2)
+    this%nXmode_   = nint(x1) * this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
+
+    !! Consider 2D Case
+    this%nYmodeOrg_  = nint(x2)
+    if (x2.eq.1) then
+      this%nYmode_     = nint(x2)
+    else
+      this%nYmode_   = nint(x2) * this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
+    end if
+    this%nYo2p1Org_ = this%nYmodeOrg_ / 2 + 1
+
     this%nHOSTime_ = nint(this%Tstop_ / this%dtOut_)
 
     this%Tstop_    = this%Tstop_ * this%dimT_
@@ -242,6 +255,9 @@ subroutine init_ascii_read_mod_HOSOcean(this, x1, x2)
                                                 this%dtOut_, this%Tstop_, &
                                                 this%nonDimxLen_, this%nonDimyLen_, this%nonDimDepth_, &
                                                 this%gravi, this%dimL_, this%dimT_
+
+
+
 
     CLOSE(this%hosFile_%unit) ! close HOS Ocean file
 
@@ -322,7 +338,7 @@ subroutine read_mod_HOSOcean(this, iTime)
     !   Input
     !       iTime : time index
     !           - iTime = 0;            time = 0
-    !           - iTime = nHOSTime_;    time = T_stop_
+    !           - iTime = nHOSTimenXo2p1Org__;    time = T_stop_
     ! --------------------------------------------------
     implicit none
     class(typHOSOcean), intent(inout) :: this
@@ -364,18 +380,20 @@ subroutine read_mod_HOSOcean(this, iTime)
       status='OLD', &
       form='FORMATTED', &
       access='DIRECT', &
-      recl=18*(2 * this%nXo2p1_))
+      recl=18*(2 * this%nXo2p1Org_))
 
     ! HOS Ocean mode file read
-    NRECL = (iTime + 1)*this%nYmode_*6
-    do i2=1,this%nYmode_
-      READ(this%hosFile_%unit,1001,REC=NRECL+1+6*(i2-1)) (this%hosMode_%modeX(i1,i2), i1=1,this%nXo2p1_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+2+6*(i2-1)) (this%hosMode_%modeY(i1,i2), i1=1,this%nXo2p1_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+3+6*(i2-1)) (this%hosMode_%modeZ(i1,i2), i1=1,this%nXo2p1_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+4+6*(i2-1)) (this%hosMode_%modet(i1,i2), i1=1,this%nXo2p1_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+5+6*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+6+6*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1_)
+    NRECL = (iTime + 1)*this%nYmodeOrg_*6
+
+    do i2=1,this%nYmodeOrg_
+      READ(this%hosFile_%unit,1001,REC=NRECL+1+6*(i2-1)) (this%hosMode_%modeX(i1,i2), i1=1,this%nXo2p1Org_)
+      READ(this%hosFile_%unit,1001,REC=NRECL+2+6*(i2-1)) (this%hosMode_%modeY(i1,i2), i1=1,this%nXo2p1Org_)
+      READ(this%hosFile_%unit,1001,REC=NRECL+3+6*(i2-1)) (this%hosMode_%modeZ(i1,i2), i1=1,this%nXo2p1Org_)
+      READ(this%hosFile_%unit,1001,REC=NRECL+4+6*(i2-1)) (this%hosMode_%modet(i1,i2), i1=1,this%nXo2p1Org_)
+      READ(this%hosFile_%unit,1001,REC=NRECL+5+6*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1Org_)
+      READ(this%hosFile_%unit,1001,REC=NRECL+6+6*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1Org_)
     end do
+
 
     CLOSE(this%hosFile_%unit)    ! file close
 
@@ -707,7 +725,7 @@ subroutine reconstructionFFTs_HOSOcean(this)
         Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%adVitXdy, this%hosMesh_%nonDimdvitXdY(:,:, iz) )
         Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%adVitXdz, this%hosMesh_%nonDimdvitXdZ(:,:, iz) )
         Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%adVitYdz, this%hosMesh_%nonDimdvitYdZ(:,:, iz) )
-        
+
         ! Call this%hosOceanFFTW_%fourier_2_space( this%hosMesh_%aDuDt, this%hosMesh_%nonDimDuDt(:,:, iz) )
         ! Call this%hosOceanFFTW_%fourier_2_space( this%hosMesh_%aDwDt, this%hosMesh_%nonDimDwDt(:,:, iz) )
 
