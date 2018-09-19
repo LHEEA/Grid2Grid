@@ -41,6 +41,8 @@ type, public :: typHOSVol2Vol
         !!- HOS 2D bool
         logical,public  :: isHOS2D_
 
+        logical         :: cutAtElevation_
+        
         !!- HOS delta t and end Time (dimensionalzed)
         real(rp),public :: dt_, endTime_
 

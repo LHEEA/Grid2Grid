@@ -17,6 +17,8 @@ Subroutine initilizeVol2VolDict(this, HOSdict)
     this%nInterp_ = HOSdict%getIntOrDefault("interpolationOrder", 3) + 1
     this%nSaveT_  = this%nInterp_ + 2
 
+    this%cutAtElevation_ = HOSdict%getLogicalOrDefault("cutAtElevation",.false.)
+
     allocate(this%HOSs2v_(this%nSaveT_))
     allocate(this%hosCorrectIdx_(this%nSaveT_))
     allocate(this%hosPointerIdx_(this%nSaveT_))
@@ -440,11 +442,22 @@ SUBROUTINE getU(this, x, y, z, t, u, v, w, iflag)
 
     if(present(iflag).and.(iflag.eq.1)) then
         if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
-        if (nonDimZ.gt.etaVal / this%dimL_) then
-            u = 0.0_RP
-            v = 0.0_RP
-            w = 0.0_RP
-        else
+
+        if (this%cutAtElevation_) then
+            if (nonDimZ.gt.etaVal / this%dimL_) then
+                u = 0.0_RP
+                v = 0.0_RP
+                w = 0.0_RP
+            else
+                Call checkHOSZ(this, nonDimZ)
+                if (this%isHOS2D_) then
+                    v = 0.0_RP
+                    Call this%itp2D_%interpU(nonDimX, nonDimZ, t, u, w)
+                else
+                    Call this%itp3D_%interpU(nonDimX, nonDimY, nonDimZ, t, u, v, w)
+                end if
+            endif
+        else 
             Call checkHOSZ(this, nonDimZ)
             if (this%isHOS2D_) then
                 v = 0.0_RP
@@ -456,10 +469,20 @@ SUBROUTINE getU(this, x, y, z, t, u, v, w, iflag)
         endif
     else
         if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
-        if (nonDimZ.gt.etaVal / this%dimL_) then
-            u = 0.0_RP
-            v = 0.0_RP
-            w = 0.0_RP
+        if (this%cutAtElevation_) then
+            if (nonDimZ.gt.etaVal / this%dimL_) then
+                u = 0.0_RP
+                v = 0.0_RP
+                w = 0.0_RP
+            else
+                Call checkHOSZ(this, nonDimZ)
+                if (this%isHOS2D_) then
+                    v = 0.0_RP
+                    Call this%itp2D_%interpU(nonDimX, nonDimZ, t, u, w)
+                else
+                    Call this%itp3D_%interpU(nonDimX, nonDimY, nonDimZ, t, u, v, w)
+                end if
+            endif
         else
             Call checkHOSZ(this, nonDimZ)
             if (this%isHOS2D_) then
@@ -505,12 +528,24 @@ SUBROUTINE getdU(this, x, y, z, t, dudx, dvdy, dudy, dudz, dvdz, iflag)
 
         if(present(iflag).and.(iflag.eq.1)) then
             if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
-            if (nonDimZ.gt.etaVal / this%dimL_) then
-                dudx = 0.0_RP
-                dvdy = 0.0_RP
-                dudy = 0.0_RP
-                dudz = 0.0_RP
-                dvdz = 0.0_RP
+            if (this%cutAtElevation_) then
+                if (nonDimZ.gt.etaVal / this%dimL_) then
+                    dudx = 0.0_RP
+                    dvdy = 0.0_RP
+                    dudy = 0.0_RP
+                    dudz = 0.0_RP
+                    dvdz = 0.0_RP
+                else
+                    Call checkHOSZ(this, nonDimZ)
+                    if (this%isHOS2D_) then
+                        dvdy = 0.0_RP
+                        dudy = 0.0_RP
+                        dvdz = 0.0_RP
+                        Call this%itp2D_%interpdU(nonDimX, nonDimZ, t, dudx, dudz)
+                    else
+                        Call this%itp3D_%interpdU(nonDimX, nonDimY, nonDimZ, t, dudx, dvdy, dudy, dudz, dvdz)
+                    end if
+                endif
             else
                 Call checkHOSZ(this, nonDimZ)
                 if (this%isHOS2D_) then
@@ -525,12 +560,24 @@ SUBROUTINE getdU(this, x, y, z, t, dudx, dvdy, dudy, dudz, dvdz, iflag)
             endif
         else
             if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
-            if (nonDimZ.gt.etaVal / this%dimL_) then
-                dudx = 0.0_RP
-                dvdy = 0.0_RP
-                dudy = 0.0_RP
-                dudz = 0.0_RP
-                dvdz = 0.0_RP
+            if (this%cutAtElevation_) then
+                if (nonDimZ.gt.etaVal / this%dimL_) then
+                    dudx = 0.0_RP
+                    dvdy = 0.0_RP
+                    dudy = 0.0_RP
+                    dudz = 0.0_RP
+                    dvdz = 0.0_RP
+                else
+                    Call checkHOSZ(this, nonDimZ)
+                    if (this%isHOS2D_) then
+                        dvdy = 0.0_RP
+                        dudy = 0.0_RP
+                        dvdz = 0.0_RP
+                        Call this%itp2D_%interpdU(nonDimX, nonDimZ, t, dudx, dudz)
+                    else
+                        Call this%itp3D_%interpdU(nonDimX, nonDimY, nonDimZ, t, dudx, dvdy, dudy, dudz, dvdz)
+                    end if
+                endif
             else
                 Call checkHOSZ(this, nonDimZ)
                 if (this%isHOS2D_) then
@@ -577,8 +624,17 @@ REAL(RP) FUNCTION getPd(this, x, y, z, t, iflag)
 
     if(present(iflag).and.(iflag.eq.1)) then
         if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
-        if (nonDimZ.gt.etaVal / this%dimL_) then
-            getPd = 0.0_RP
+        if (this%cutAtElevation_) then
+            if (nonDimZ.gt.etaVal / this%dimL_) then
+                getPd = 0.0_RP
+            else
+                Call checkHOSZ(this, nonDimZ)
+                if (this%isHOS2D_) then
+                    getPd = this%itp2D_%interpPd(nonDimX, nonDimZ, t)
+                else
+                    getPd = this%itp3D_%interpPd(nonDimX, nonDimY, nonDimZ, t)
+                end if
+            endif
         else
             Call checkHOSZ(this, nonDimZ)
             if (this%isHOS2D_) then
@@ -590,8 +646,17 @@ REAL(RP) FUNCTION getPd(this, x, y, z, t, iflag)
         endif
     else
         if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
-        if (nonDimZ.gt.etaVal / this%dimL_) then
-            getPd = 0.0_RP
+        if (this%cutAtElevation_) then
+            if (nonDimZ.gt.etaVal / this%dimL_) then
+                getPd = 0.0_RP
+            else
+                Call checkHOSZ(this, nonDimZ)
+                if (this%isHOS2D_) then
+                    getPd = this%itp2D_%interpPd(nonDimX, nonDimZ, t)
+                else
+                    getPd = this%itp3D_%interpPd(nonDimX, nonDimY, nonDimZ, t)
+                end if
+            endif
         else
             Call checkHOSZ(this, nonDimZ)
             if (this%isHOS2D_) then
@@ -637,11 +702,23 @@ SUBROUTINE getFlow(this, x, y, z, t, eta, u, v, w, pd, iflag)
 
     if(present(iflag).and.(iflag.eq.1)) then
         if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
-        if (nonDimZ.gt.etaVal / this%dimL_) then
-            u = 0.0_RP
-            v = 0.0_RP
-            w = 0.0_RP
-            pd = 0.0_RP
+        if (this%cutAtElevation_) then
+            if (nonDimZ.gt.etaVal / this%dimL_) then
+                u = 0.0_RP
+                v = 0.0_RP
+                w = 0.0_RP
+                pd = 0.0_RP
+            else
+               Call checkHOSZ(this, nonDimZ)
+                if (this%isHOS2D_) then
+                    v = 0.0_RP
+                    Call this%itp2D_%interpU(nonDimX, nonDimZ, t, u, w)
+                    pd = this%itp2D_%interpPd(nonDimX, nonDimZ, t)
+                else
+                    Call this%itp3D_%interpU(nonDimX, nonDimY, nonDimZ, t, u, v, w)
+                    pd = this%itp3D_%interpPd(nonDimX, nonDimY, nonDimZ, t)
+                end if
+            endif
         else
             Call checkHOSZ(this, nonDimZ)
             if (this%isHOS2D_) then
@@ -655,11 +732,23 @@ SUBROUTINE getFlow(this, x, y, z, t, eta, u, v, w, pd, iflag)
         endif
     else
         if (abs (nonDimZ * this%dimL_ - etaVal).le.convErr) nonDimZ = etaVal / this%dimL_
-        if (nonDimZ.gt.etaVal / this%dimL_) then
-            u = 0.0_RP
-            v = 0.0_RP
-            w = 0.0_RP
-            pd = 0.0_RP
+        if (this%cutAtElevation_) then
+            if (nonDimZ.gt.etaVal / this%dimL_) then
+                u = 0.0_RP
+                v = 0.0_RP
+                w = 0.0_RP
+                pd = 0.0_RP
+            else
+                Call checkHOSZ(this, nonDimZ)
+                if (this%isHOS2D_) then
+                    v = 0.0_RP
+                    Call this%itp2D_%interpU(nonDimX, nonDimZ, t, u, w)
+                    pd = this%itp2D_%interpPd(nonDimX, nonDimZ, t)
+                else
+                    Call this%itp3D_%interpU(nonDimX, nonDimY, nonDimZ, t, u, v, w)
+                    pd = this%itp3D_%interpPd(nonDimX, nonDimY, nonDimZ, t)
+                end if
+            endif
         else
             Call checkHOSZ(this, nonDimZ)
             if (this%isHOS2D_) then

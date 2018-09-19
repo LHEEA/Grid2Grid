@@ -46,6 +46,8 @@ HOSOcean
     $zMesh
 
     writeLog        TRUE;
+
+    cutAtElevation  FALSE;
 }
 
 HOSNWT
