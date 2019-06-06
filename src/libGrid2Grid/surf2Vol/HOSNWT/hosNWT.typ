@@ -10,11 +10,17 @@ private
     !!- HOS NWT file IO
     type(typFileIO) :: hosFile_
 
+    !!- HOS volume procedure
+    character(len=StringLength) :: hosProcedure_
+
     !!- Initialization logical Value
     Logical :: isInitialized_ = .FALSE.
 
     !!- Simulation Parameters of HOS NWT
     integer         :: nXmode_, nYmode_, nAddmode_
+
+    integer         :: nXmodeOrg_, nYmodeOrg_
+
     real(rp),public :: dtOut_, Tstop_
     real(rp),public :: depth_
     real(rp),public :: nonDimDepth_

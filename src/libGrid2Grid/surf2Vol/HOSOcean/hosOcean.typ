@@ -10,6 +10,9 @@ private
     !!- HOS Ocean file IO
     type(typFileIO) :: hosFile_
 
+    !!- HOS volume procedure
+    character(len=StringLength) :: hosProcedure_
+
     !!- Initialization logical Value
     Logical :: isInitialized_ = .FALSE.
 

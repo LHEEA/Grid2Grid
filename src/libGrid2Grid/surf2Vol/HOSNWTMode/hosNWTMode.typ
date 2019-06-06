@@ -4,6 +4,7 @@ type,private :: typHOSNWTmode
     integer :: nXMode, nYMode, nAddMode
 
     !!- Mode amplitudes
+    real(rp),allocatable :: mode(:,:)
     real(rp),allocatable :: modeX(:,:), modeY(:,:), modeZ(:,:)
     real(rp),allocatable :: modet(:,:), modeFS(:,:), modeFSt(:,:), modeFSx(:,:), modeFSy(:,:)
     real(rp),allocatable :: modeAdd(:,:), modeAddt(:,:)

@@ -17,6 +17,8 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
     this%hosFile_%name = HOSdict%getChar("filePath")
     this%hosFile_%unit = callFileUnit()
 
+    this%hosProcedure_ = HOSdict%getChar("procedure")
+
     HOSfileType = HOSdict%getCharOrDefault("fileType", "NONE")
 
     if (isStringEqual(HOSfileType,"NONE")) then
@@ -90,7 +92,7 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
 End Subroutine
 
 !!!- initialize HOS Ocean reading Module
-SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+SUBROUTINE initHOSOcean(this, procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     !---------------------------------------------------------
     !   Input :
     !       fileName : file path of HOS Ocean mode file
@@ -101,6 +103,7 @@ SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     !---------------------------------------------------------
     implicit none
     class(typHOSOcean), intent(inout) :: this
+    character(len=*),intent(in) :: procedure
     character(len=*),intent(in) :: fileName
     real(rp),intent(in) :: zMin, zMax
     integer, intent(in) :: nZmin, nZmax
@@ -108,6 +111,8 @@ SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     !!!......................................
 
     if (this%isInitialized_) return
+    !! - Set HOS volume procedure
+    this%hosProcedure_ = procedure
 
     !! - Set file name and file unit
     this%hosFile_%name = fileName
@@ -232,7 +237,7 @@ subroutine init_read_mod_HOSOcean(this)
     this%iReadTimeIndex_ = -1
 
     ! set size of HOS Ocean mode array
-    Call this%hosMode_%allocOceanMode(this%nXo2p1_, this%nYmode_)
+    Call this%hosMode_%allocOceanMode(this%hosProcedure_, this%nXo2p1_, this%nYmode_)
 
 end subroutine
 
@@ -338,7 +343,7 @@ subroutine read_mod_HOSOcean(this, iTime)
     !   Input
     !       iTime : time index
     !           - iTime = 0;            time = 0
-    !           - iTime = nHOSTimenXo2p1Org__;    time = T_stop_
+    !           - iTime = nHOSTime_;    time = T_stop_
     ! --------------------------------------------------
     implicit none
     class(typHOSOcean), intent(inout) :: this
@@ -383,16 +388,26 @@ subroutine read_mod_HOSOcean(this, iTime)
       recl=18*(2 * this%nXo2p1Org_))
 
     ! HOS Ocean mode file read
-    NRECL = (iTime + 1)*this%nYmodeOrg_*6
+    if (this%hosProcedure_=='velocity') then
+      NRECL = (iTime + 1)*this%nYmodeOrg_*6
 
-    do i2=1,this%nYmodeOrg_
-      READ(this%hosFile_%unit,1001,REC=NRECL+1+6*(i2-1)) (this%hosMode_%modeX(i1,i2), i1=1,this%nXo2p1Org_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+2+6*(i2-1)) (this%hosMode_%modeY(i1,i2), i1=1,this%nXo2p1Org_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+3+6*(i2-1)) (this%hosMode_%modeZ(i1,i2), i1=1,this%nXo2p1Org_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+4+6*(i2-1)) (this%hosMode_%modet(i1,i2), i1=1,this%nXo2p1Org_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+5+6*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1Org_)
-      READ(this%hosFile_%unit,1001,REC=NRECL+6+6*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1Org_)
-    end do
+      do i2=1,this%nYmodeOrg_
+        READ(this%hosFile_%unit,1001,REC=NRECL+1+6*(i2-1)) (this%hosMode_%modeX(i1,i2), i1=1,this%nXo2p1Org_)
+        READ(this%hosFile_%unit,1001,REC=NRECL+2+6*(i2-1)) (this%hosMode_%modeY(i1,i2), i1=1,this%nXo2p1Org_)
+        READ(this%hosFile_%unit,1001,REC=NRECL+3+6*(i2-1)) (this%hosMode_%modeZ(i1,i2), i1=1,this%nXo2p1Org_)
+        READ(this%hosFile_%unit,1001,REC=NRECL+4+6*(i2-1)) (this%hosMode_%modet(i1,i2), i1=1,this%nXo2p1Org_)
+        READ(this%hosFile_%unit,1001,REC=NRECL+5+6*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1Org_)
+        READ(this%hosFile_%unit,1001,REC=NRECL+6+6*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1Org_)
+      end do
+    elseif (this%hosProcedure_=='potential') then
+      NRECL = (iTime + 1)*this%nYmodeOrg_*4
+      do i2=1,this%nYmode_
+        READ(this%hosFile_%unit,1001,REC=NRECL+1+4*(i2-1)) (this%hosMode_%mode(i1,i2), i1=1,this%nXo2p1Org_)
+        READ(this%hosFile_%unit,1001,REC=NRECL+2+4*(i2-1)) (this%hosMode_%modet(i1,i2), i1=1,this%nXo2p1Org_)
+        READ(this%hosFile_%unit,1001,REC=NRECL+3+4*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1Org_)
+        READ(this%hosFile_%unit,1001,REC=NRECL+4+4*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1Org_)
+      end do
+    endif
 
 
     CLOSE(this%hosFile_%unit)    ! file close
@@ -609,9 +624,16 @@ subroutine reconstructionFFTs_HOSOcean(this)
         ix = 1
         iy = 1
 
-        this%hosMesh_%aVitX(ix, iy) = this%hosMode_%modeX(ix, iy)
-        this%hosMesh_%aVitY(ix, iy) = this%hosMode_%modeY(ix, iy)
-        this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%modeZ(ix, iy)
+        if (this%hosProcedure_=='velocity') then
+                this%hosMesh_%aVitX(ix, iy) = this%hosMode_%modeX(ix, iy)
+                this%hosMesh_%aVitY(ix, iy) = this%hosMode_%modeY(ix, iy)
+                this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%modeZ(ix, iy)
+        elseif (this%hosProcedure_=='potential') then
+                this%hosMesh_%aVitX(ix, iy) = this%hosMode_%ikx(ix, iy) * this%hosMode_%mode(ix, iy)
+                this%hosMesh_%aVitY(ix, iy) = this%hosMode_%iky(ix, iy) * this%hosMode_%mode(ix, iy)
+                this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%ktheta(ix,iy) * this%hosMode_%mode(ix, iy)
+        endif
+
         this%hosMesh_%aPhit(ix, iy) = this%hosMode_%modet(ix, iy)
 
         !if (reconstruct_space_derivative) THEN
@@ -649,9 +671,15 @@ subroutine reconstructionFFTs_HOSOcean(this)
                 coeff2 = FNZ_VALUE
             endif
 
-            this%hosMesh_%aVitX(ix, iy) = this%hosMode_%modeX(ix, iy) * coeff
-            this%hosMesh_%aVitY(ix, iy) = this%hosMode_%modeY(ix, iy) * coeff
-            this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%modeZ(ix, iy) * coeff2
+            if (this%hosProcedure_=='velocity') then
+                 this%hosMesh_%aVitX(ix, iy) = this%hosMode_%modeX(ix, iy) * coeff
+                 this%hosMesh_%aVitY(ix, iy) = this%hosMode_%modeY(ix, iy) * coeff
+                 this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%modeZ(ix, iy) * coeff2
+            elseif (this%hosProcedure_=='potential') then
+                this%hosMesh_%aVitX(ix, iy) = this%hosMode_%ikx(ix, iy) * this%hosMode_%mode(ix, iy) * coeff
+                this%hosMesh_%aVitY(ix, iy) = this%hosMode_%iky(ix, iy) * this%hosMode_%mode(ix, iy) * coeff
+                this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%ktheta(ix,iy) * this%hosMode_%mode(ix, iy) * coeff2
+            endif
             this%hosMesh_%aPhit(ix, iy) = this%hosMode_%modet(ix, iy) * coeff
 
             !if (reconstruct_space_derivative) THEN
@@ -688,9 +716,16 @@ subroutine reconstructionFFTs_HOSOcean(this)
                     coeff2 = 1000.0_RP
                 endif
 
-                this%hosMesh_%aVitX(ix, iy) = this%hosMode_%modeX(ix, iy) * coeff
-                this%hosMesh_%aVitY(ix, iy) = this%hosMode_%modeY(ix, iy) * coeff
-                this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%modeZ(ix, iy) * coeff2
+                if (this%hosProcedure_=='velocity') then
+                     this%hosMesh_%aVitX(ix, iy) = this%hosMode_%modeX(ix, iy) * coeff
+                     this%hosMesh_%aVitY(ix, iy) = this%hosMode_%modeY(ix, iy) * coeff
+                     this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%modeZ(ix, iy) * coeff2
+                elseif (this%hosProcedure_=='potential') then
+                    this%hosMesh_%aVitX(ix, iy) = this%hosMode_%ikx(ix, iy) * this%hosMode_%mode(ix, iy) * coeff
+                    this%hosMesh_%aVitY(ix, iy) = this%hosMode_%iky(ix, iy) * this%hosMode_%mode(ix, iy) * coeff
+                    this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%ktheta(ix,iy) * this%hosMode_%mode(ix, iy) * coeff2
+                endif
+
                 this%hosMesh_%aPhit(ix, iy) = this%hosMode_%modet(ix, iy) * coeff
 
                 !if (reconstruct_space_derivative) THEN

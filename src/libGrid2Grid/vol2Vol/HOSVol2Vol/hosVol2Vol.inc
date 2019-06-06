@@ -143,10 +143,10 @@ Subroutine initilizeVol2VolDict(this, HOSdict)
 
 End Subroutine
 
-SUBROUTINE initializeVol2VolArgument(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, iflag)
+SUBROUTINE initializeVol2VolArgument(this, solver, procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, iflag)
     implicit none
     class(typHOSVol2Vol), intent(inout) :: this
-    character(len=*), intent(in)     :: solver, fileName
+    character(len=*), intent(in)     :: solver, procedure, fileName
     real(RP),intent(in)              :: zMin, zMax
     integer,intent(in)               :: nZmin, nZmax
     real(rp),optional, intent(in)    :: zMinRatio, zMaxRatio
@@ -170,13 +170,20 @@ SUBROUTINE initializeVol2VolArgument(this, solver, fileName, zMin, zMax, nZmin, 
 
     !!- Solver Check (HOS Ocean or HOS NWT)
     if ((trim(solver).ne."NWT").and.(trim(solver).ne."Ocean")) then
-        write(*,*) "    [ERROR] Grid2Grid, typHOSVol2Vol::initialize(solver, fileName, zMin, zMax, nZmin, nZmax)"
+        write(*,*) "    [ERROR] Grid2Grid, typHOSVol2Vol::initialize(solver, procedure, fileName, zMin, zMax, nZmin, nZmax)"
         write(*,*) "        Wrong solver is given when HOS vol2Vol initialize"
         write(*,*) "        given solver : ", solver
     end if
 
+    !!- HOS volume procedure Check (potential of velocity)
+    if ((trim(procedure).ne."potential").and.(trim(procedure).ne."velocity")) then
+        write(*,*) "    [ERROR] Grid2Grid, typHOSVol2Vol::initialize(solver, procedure, fileName, zMin, zMax, nZmin, nZmax)"
+        write(*,*) "        Wrong procedure is given when HOS vol2Vol initialize"
+        write(*,*) "        given procedure : ", procedure
+    end if
+
     do it = 1, this%nSaveT_
-        Call this%HOSs2v_(it)%initialize(solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+        Call this%HOSs2v_(it)%initialize(solver, procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
         this%hosCorrectIdx_(it) = this%HOSs2v_(it)%correctIdx_
     enddo
 
@@ -457,7 +464,7 @@ SUBROUTINE getU(this, x, y, z, t, u, v, w, iflag)
                     Call this%itp3D_%interpU(nonDimX, nonDimY, nonDimZ, t, u, v, w)
                 end if
             endif
-        else 
+        else
             Call checkHOSZ(this, nonDimZ)
             if (this%isHOS2D_) then
                 v = 0.0_RP

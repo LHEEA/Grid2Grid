@@ -17,8 +17,8 @@ writeWaveProbe      true;
 
 zMesh
 {
-    zMin           -0.6;
-    zMax            0.4;
+    zMin           -0.2;
+    zMax            0.2;
 
     nZMin           30;
     nZMax           30;
@@ -28,20 +28,25 @@ zMesh
     //   uniform   : uniform mesh
     //   sine      : sine mesh
 
-    zMinRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z<0)
-    zMaxRatio       1.0;        // if type = meshRatio (dz_max/dz_min, z>0)
+    zMinRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z<0)
+    zMaxRatio       3.0;        // if type = meshRatio (dz_max/dz_min, z>0)
     // dz_min locates near to the free surface
+
 }
 
 HOSOcean
 {
     type            Ocean;
 
-    filePath        example/modes_HOS_SWENSE.dat;
- 
-    extraInterpolationNumber 2;
+    filePath        example/modes_HOS_SWENSE_OCean_potential.dat;
+  //filePath        example/modes_HOS_SWENSE_HOSOcean.dat;
 
-    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+	procedure		potential; // 1.velocity 2.potential
+  //procedure		velocity; // 1.velocity 2.potential
+
+    extraInterpolationNumber 4;
+
+    interpolationOrder  1;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 
     $zMesh
 
@@ -54,9 +59,13 @@ HOSNWT
 {
     type            NWT;
 
-    filePath        example/modes_HOS_SWENSE.dat;
+    filePath        example/modes_HOS_SWENSE_HOSNWT.dat;
 
-    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+	procedure		velocity; // 1.velocity 2.potential 
+
+    extraInterpolationNumber 2;
+    
+	interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 
     $zMesh
 
@@ -67,7 +76,7 @@ simulation
 {
     startTime       0.0;
     endTime		    1.0;
-    dt              0.1;
+    dt              0.01;
 }
 
 vtkMesh
@@ -80,7 +89,7 @@ vtkMesh
     yMin            0.0;
     yMax            0.1;
 
-    nX              10;
+    nX              500;
     nY              2;
 
     $zMesh

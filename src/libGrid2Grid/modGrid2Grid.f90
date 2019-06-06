@@ -44,6 +44,8 @@ Type typinpVol2Vol
 
     character(len=StringLength)   :: solver_
 
+    character(len=StringLength)   :: procedure_
+
     character(len=StringLength)   :: fileName_
 
     double precision              :: zMin, zMax
@@ -76,6 +78,7 @@ contains
             do i = 1, nVol2Vol
                 isEqual = .TRUE.
                 if (trim(this%solver_).ne.trim(inpVol2Vol(i)%solver_))     isEqual = .FALSE.
+                if (trim(this%procedure_).ne.trim(inpVol2Vol(i)%procedure_)) isEqual = .FALSE.
                 if (trim(this%fileName_).ne.trim(inpVol2Vol(i)%fileName_)) isEqual = .FALSE.
                 if (this%zMin.ne.inpVol2Vol(i)%zMin)           isEqual = .FALSE.
                 if (this%zMax.ne.inpVol2Vol(i)%zMax)           isEqual = .FALSE.
@@ -136,6 +139,7 @@ contains
         inpVol2Vol(idx)%isActive = .TRUE.
 
         inpVol2Vol(idx)%solver_    = this%solver_
+        inpVol2Vol(idx)%procedure_ = this%procedure_
         inpVol2Vol(idx)%fileName_  = this%fileName_
         inpVol2Vol(idx)%zMin       = this%zMin
         inpVol2Vol(idx)%zMax       = this%zMax
@@ -154,6 +158,7 @@ contains
         else
 
             Call vol2vol_(idx)%initialize(inpVol2Vol(idx)%solver_, &
+                                          inpVol2Vol(idx)%procedure_, &
                                           inpVol2Vol(idx)%fileName_, &
                                           inpVol2Vol(idx)%zMin, &
                                           inpVol2Vol(idx)%zMax, &
@@ -176,6 +181,7 @@ contains
         inpVol2Vol(idx)%isActive = .FALSE.
 
         inpVol2Vol(idx)%solver_    = ""
+        inpVol2Vol(idx)%procedure_ = ""
         inpVol2Vol(idx)%fileName_  = ""
         inpVol2Vol(idx)%zMin       = 0.0
         inpVol2Vol(idx)%zMax       = 0.0
@@ -244,10 +250,11 @@ contains
 
     End Subroutine
 
-    subroutine initializeGrid2Grid(hosSolver, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, v2vIndex) &
+    subroutine initializeGrid2Grid(hosSolver, hosProcedure, hosFileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, v2vIndex) &
         bind(c, name='__modgrid2grid_MOD_initializegrid2grid')
         implicit None
         character(kind=c_char, len=1), dimension(StringLength),intent(in) :: hosSolver
+        character(kind=c_char, len=1), dimension(StringLength),intent(in) :: hosProcedure
         character(kind=c_char, len=1), dimension(StringLength),intent(in) :: hosFileName
         Double precision, intent(in)   :: zMin, zMax
         integer, intent(in)            :: nZmin, nZmax
@@ -256,6 +263,7 @@ contains
         !! --------------------------------------------------------------------------
         Type(typinpVol2Vol)            :: tmpInpVol2Vol
         character(len=StringLength)    :: charF_hosSolver
+        character(len=StringLength)    :: charF_hosProcedure
         character(len=StringLength)    :: charF_hosFileName
         integer :: i
 
@@ -269,6 +277,15 @@ contains
             end if
         enddo
 
+        charF_hosProcedure = ''
+        do i = 1, StringLength
+            if (hosProcedure(i) == c_null_char ) then
+                exit
+            else
+                charF_hosProcedure(i:i) = hosProcedure(i)
+            end if
+        enddo
+
         charF_hosFileName = ''
         do i = 1, StringLength
             if (hosFileName(i) == c_null_char ) then
@@ -279,6 +296,7 @@ contains
         enddo
 
         tmpInpVol2Vol%solver_    = charF_hosSolver
+        tmpInpVol2Vol%procedure_ = charF_hosProcedure
         tmpInpVol2Vol%fileName_  = charF_hosFileName
         tmpInpVol2Vol%zMin       = real(zMin, RP)
         tmpInpVol2Vol%zMax       = real(zMax, RP)

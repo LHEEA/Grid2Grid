@@ -284,6 +284,7 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
 
     HOSdict     = dict%subDict(hosTypeName)
     this%hosSolver_ = HOSdict%getChar("type")
+    this%procedure_ = HOSdict%getChar("procedure")
 
     if ( (.not.(isStringEqual(this%hosSolver_, "nwt"))).and.&
          (.not.(isStringEqual(this%hosSolver_, "ocean"))) ) then
@@ -831,6 +832,14 @@ subroutine checkPostG2GParameter(this)
         iflag = 1
     end if
 
+    !! Solver Check
+    if ((this%procedure_.ne."velocity").and.(this%procedure_.ne."potential")) then
+        write(*,*) "    [ERROR] Grid2Grid, checkPostG2GParameter"
+        write(*,*) "        Wrong reconstruction procedure is given "
+        write(*,*) "        given reconstruction procedure : ", this%procedure_
+        iflag = 1
+    end if
+
     !! Start Time and End Time Check
     if (this%endTime_.le.this%startTime_) then
         write(*,*) "    [ERROR] Grid2Grid, checkPostG2GParameter"
@@ -964,6 +973,7 @@ subroutine checkPostG2GParameter(this)
         write(*,1001) ""
         write(*,1001) " HOS Grid2Grid Post Input File : ", trim(this%postinputfile_%name)
         write(*,1001) " HOS Solver Type               : ", trim(this%hosSolver_)
+        write(*,1001) " Reconstruction Procedure       : ", trim(this%procedure_)
         write(*,1001) " HOS Result         Input File : ", trim(this%hosFileName_)
         write(*,1001) ""
         write(*,1001) " Post Processing Parameters"

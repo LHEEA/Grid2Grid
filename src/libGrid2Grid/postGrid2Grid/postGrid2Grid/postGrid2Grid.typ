@@ -16,6 +16,9 @@ Type, public :: typPostGrid2Grid
         !!- HOS Result File Name
         Character(len=StringLength) :: hosFileName_
 
+        !!- Reconstruct procedure (velocity or potential)
+        Character(len=StringLength) :: procedure_
+
         !!- Output Option
         logical                     :: isWriteVTK_       = .TRUE.
 

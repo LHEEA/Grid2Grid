@@ -1,14 +1,24 @@
-subroutine allocOceanMode(this, nXo2p1, nYmode)
+subroutine allocOceanMode(this, procedure, nXo2p1, nYmode)
     class(typHOSOceanMode), intent(inout) :: this
     integer, intent(in) :: nXo2p1, nYmode
+    character(len=*) :: procedure
 
     this%nXo2p1 = nXo2p1
     this%nYmode = nYmode
 
-    allocate(this%modeX(nXo2p1, nYmode),&
-             this%modeY(nXo2p1, nYmode),&
-             this%modeZ(nXo2p1, nYmode),&
-             this%modet(nXo2p1, nYmode),&
+    if (procedure=='velocity') then
+        allocate(this%modeX(nXo2p1, nYmode),&
+                 this%modeY(nXo2p1, nYmode),&
+                 this%modeZ(nXo2p1, nYmode))
+        this%modeX = 0.0_RP
+        this%modeY = 0.0_RP
+        this%modeZ = 0.0_RP
+    elseif (procedure=='potential') then
+        allocate(this%mode(nXo2p1, nYmode))
+        this%mode = 0.0_RP
+    endif
+
+    allocate(this%modet(nXo2p1, nYmode),&
              this%modeFS(nXo2p1, nYmode),&
              this%modeFSx(nXo2p1, nYmode),&
              this%modeFSy(nXo2p1, nYmode),&
@@ -23,9 +33,7 @@ subroutine allocOceanMode(this, nXo2p1, nYmode)
     allocate( this%ikx(nXo2p1, nYmode) )
     allocate( this%iky(nXo2p1, nYmode) )
 
-    this%modeX = 0.0_RP
-    this%modeY = 0.0_RP
-    this%modeZ = 0.0_RP
+
     this%modet = 0.0_RP
     this%modeFS = 0.0_RP
     this%modeFSx = 0.0_RP
@@ -36,6 +44,7 @@ end subroutine
 
 subroutine destroyOceanMode(this)
     class(typHOSOceanMode), intent(inout) :: this
+    if (allocated(this%mode))  deallocate( this%mode  )
     if (allocated(this%modeX)) deallocate( this%modeX )
     if (allocated(this%modeY)) deallocate( this%modeY )
     if (allocated(this%modeZ)) deallocate( this%modeZ )

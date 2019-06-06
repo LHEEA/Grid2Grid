@@ -62,10 +62,11 @@ subroutine initHOSSurf2VolDict(this, HOSdict)
 End Subroutine
 
 !!- Initialize HOS surf2Vol
-subroutine initHOS(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+subroutine initHOS(this, solver, procedure,fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     implicit none
     class(typHOSSurf2Vol),intent(inout) :: this
     character(len=*),intent(in) :: solver
+    character(len=*),intent(in) :: procedure
     character(len=*),intent(in) :: fileName
     real(RP), intent(in)        :: zMin, zMax
     integer, intent(in)         :: nZmin, nZmax
@@ -76,7 +77,7 @@ subroutine initHOS(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, 
     !!- Solver Check (HOS Ocean or HOS NWT)
     if ((solver.ne."NWT").and.(solver.ne."Ocean")) then
         write(*,*) "    [ERROR] Grid2Grid, typHOSSurf2Vol::initHOS(solver, fileName, zMin, zMax, nZmin, nZmax) "
-        write(*,*) "        Wrong solver is given when HOS surf2Vol initilize"
+        write(*,*) "        Wrong solver is given when HOS surf2Vol initialize"
         write(*,*) "        given solver : ", solver
         stop
     end if
@@ -100,9 +101,9 @@ subroutine initHOS(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, 
 
     !!- Initialize Solver Class
     if (this%HOSSolver_.eq."NWT") then
-        Call this%hosNWTSurf2Vol_%initialize(fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+        Call this%hosNWTSurf2Vol_%initialize(procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     else if (this%HOSSolver_.eq."Ocean") then
-        Call this%hosOceanSurf2Vol_%initialize(fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+        Call this%hosOceanSurf2Vol_%initialize(procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     endif
 
     !!- Set Simulation Time Variables
