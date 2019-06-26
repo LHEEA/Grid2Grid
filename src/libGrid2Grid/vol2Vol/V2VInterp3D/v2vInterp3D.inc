@@ -53,7 +53,7 @@ subroutine initialize3D(this,kX, kY, kZ, kT)
         write(*,*) 'Error initializing 3D dEtady spline: '//get_status_message(iflag)
     end if
     !! Initialize detadt spline type
-    Call this%spl3detadx%initialize(this%xArg, this%yArg, this%tArg, this%detadtValue, &
+    Call this%spl3detadt%initialize(this%xArg, this%yArg, this%tArg, this%detadtValue, &
                                  kX, kY, kZ, iflag)
     if (iflag/=0) then
         write(*,*) 'Error initializing 3D dEtadt spline: '//get_status_message(iflag)

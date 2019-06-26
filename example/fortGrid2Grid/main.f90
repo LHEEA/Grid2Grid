@@ -76,13 +76,13 @@
 		Call getHOSeta(hosIndex, x, y , t, eta)
 
 		!! Get Wave Elevation derivative
-    Call getHOSdeta(hosIndex, x, y , t, detadx, detady, detadt)
+    	Call getHOSdeta(hosIndex, x, y , t, detadx, detady, detadt)
 
 		!! Get Flow Velocity
 		Call getHOSU(hosIndex, x, y, z, t, u, v ,w)
 
 		!! Get Flow Velocity derivative
-    Call getHOSdU(hosIndex, x, y, z, t, dudx, dvdy ,dudy, dudz, dvdz)
+    	Call getHOSdU(hosIndex, x, y, z, t, dudx, dvdy ,dudy, dudz, dvdz)
 
 		!! Get Dynamic Pressure
 		Call getHOSPd(hosIndex, x, y, z, t, pd)

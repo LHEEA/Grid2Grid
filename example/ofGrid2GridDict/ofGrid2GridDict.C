@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     HOSDict.add(keyType("fileType"), word("ASCII"));
 
-    HOSDict.add(keyType("filePath"), word("../modes_HOS_SWENSE.dat") );
+    HOSDict.add(keyType("filePath"), word("../modes_HOS_SWENSE_HOSNWT.dat") );
 
     HOSDict.add(keyType("interpolationOrder"), scalar(3));
 

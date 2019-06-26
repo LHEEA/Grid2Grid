@@ -21,7 +21,7 @@ HOSNWT
 {
     type            NWT;
     fileType        ASCII;
-    filePath        ../modes_HOS_SWENSE.dat;
+    filePath        ../modes_HOS_SWENSE_HOSNWT.dat;
     interpolationOrder 3;
     zMeshType       meshRatio;
     zMin            -0.6;

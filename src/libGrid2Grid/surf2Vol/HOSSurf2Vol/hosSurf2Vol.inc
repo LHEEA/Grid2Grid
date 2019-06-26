@@ -62,11 +62,10 @@ subroutine initHOSSurf2VolDict(this, HOSdict)
 End Subroutine
 
 !!- Initialize HOS surf2Vol
-subroutine initHOS(this, solver, procedure,fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+subroutine initHOS(this, solver, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     implicit none
     class(typHOSSurf2Vol),intent(inout) :: this
     character(len=*),intent(in) :: solver
-    character(len=*),intent(in) :: procedure
     character(len=*),intent(in) :: fileName
     real(RP), intent(in)        :: zMin, zMax
     integer, intent(in)         :: nZmin, nZmax
@@ -101,9 +100,9 @@ subroutine initHOS(this, solver, procedure,fileName, zMin, zMax, nZmin, nZmax, z
 
     !!- Initialize Solver Class
     if (this%HOSSolver_.eq."NWT") then
-        Call this%hosNWTSurf2Vol_%initialize(procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+        Call this%hosNWTSurf2Vol_%initialize(fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     else if (this%HOSSolver_.eq."Ocean") then
-        Call this%hosOceanSurf2Vol_%initialize(procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+        Call this%hosOceanSurf2Vol_%initialize(fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     endif
 
     !!- Set Simulation Time Variables

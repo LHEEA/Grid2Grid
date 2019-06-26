@@ -95,7 +95,7 @@ Subroutine testVol2Vol
 
     !! - HOS Ocean Intialize
     fileName1 = "data-modes_HOS_SWENSE.dat/hosOcean_2DIrr_modes_HOS_SWENSE.dat"
-    Call hosV2V%initialize('Ocean',"velocity",fileName1, zMin, zMax, nZmin, nZmax)
+    Call hosV2V%initialize('Ocean', fileName1, zMin, zMax, nZmin, nZmax)
 
     t  = 0.0_RP
     !! Time Loop
@@ -130,7 +130,7 @@ Subroutine testVol2Vol
     !! - HOS NWT Intialize
 
     fileName2 = "data-modes_HOS_SWENSE.dat/hosNWT_2DIrr_modes_HOS_SWENSE.dat"
-    Call hosV2V%initialize('NWT',"velocity",fileName2, zMin, zMax, nZmin, nZmax)
+    Call hosV2V%initialize('NWT', fileName2, zMin, zMax, nZmin, nZmax)
 
     t  = 0.0_RP
     !! Time Loop
@@ -193,7 +193,7 @@ subroutine testSurf2Vol
     !! - Initialize HOS Ocean Surf2Vol
     fileName1 = "data-modes_HOS_SWENSE.dat/hosOcean_2DIrr_modes_HOS_SWENSE.dat"
 
-    call hosS2V%initialize('Ocean',"velocity",fileName1, zMin, zMax, nZmin, nZmax)
+    call hosS2V%initialize('Ocean', fileName1, zMin, zMax, nZmin, nZmax)
 
     do iTime = 0, 15        !! HOS time Index
 
@@ -225,7 +225,7 @@ subroutine testSurf2Vol
     ! - Initialize HOS NWT Surf2Vol
     fileName2 = "data-modes_HOS_SWENSE.dat/hosNWT_3DReg_modes_HOS_SWENSE.dat"
 
-    call hosS2V%initialize('NWT',"velocity",fileName2, zMin, zMax, nZmin, nZmax)
+    call hosS2V%initialize('NWT', fileName2, zMin, zMax, nZmin, nZmax)
 
     do iTime = 0, 2        !! HOS time Index
 
