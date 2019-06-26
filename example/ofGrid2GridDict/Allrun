@@ -1,0 +1,5 @@
+
+(
+    blockMesh
+    ./ofGrid2GridDict
+)   2>&1 | tee log.run

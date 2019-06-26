@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 
     // Set HOS Solver Type
     const word HOSsolver_("NWT");
-    const word HOSFileName_("../modes_HOS_SWENSE.dat");
+    const word HOSFileName_("../modes_HOS_SWENSE_HOSNWT.dat");
 
     // Set File Name
     string strHOSSolver = string(HOSsolver_);

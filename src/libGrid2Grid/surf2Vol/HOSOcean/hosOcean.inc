@@ -17,7 +17,7 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
     this%hosFile_%name = HOSdict%getChar("filePath")
     this%hosFile_%unit = callFileUnit()
 
-    this%hosProcedure_ = HOSdict%getChar("procedure")
+    this%hosProcedure_ = HOSdict%getCharOrDefault("procedure", "velocity")
 
     HOSfileType = HOSdict%getCharOrDefault("fileType", "NONE")
 
@@ -92,7 +92,7 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
 End Subroutine
 
 !!!- initialize HOS Ocean reading Module
-SUBROUTINE initHOSOcean(this, procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
+SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     !---------------------------------------------------------
     !   Input :
     !       fileName : file path of HOS Ocean mode file
@@ -103,7 +103,6 @@ SUBROUTINE initHOSOcean(this, procedure, fileName, zMin, zMax, nZmin, nZmax, zMi
     !---------------------------------------------------------
     implicit none
     class(typHOSOcean), intent(inout) :: this
-    character(len=*),intent(in) :: procedure
     character(len=*),intent(in) :: fileName
     real(rp),intent(in) :: zMin, zMax
     integer, intent(in) :: nZmin, nZmax
@@ -112,7 +111,7 @@ SUBROUTINE initHOSOcean(this, procedure, fileName, zMin, zMax, nZmin, nZmax, zMi
 
     if (this%isInitialized_) return
     !! - Set HOS volume procedure
-    this%hosProcedure_ = procedure
+    this%hosProcedure_ = "velocity"
 
     !! - Set file name and file unit
     this%hosFile_%name = fileName
@@ -237,7 +236,7 @@ subroutine init_read_mod_HOSOcean(this)
     this%iReadTimeIndex_ = -1
 
     ! set size of HOS Ocean mode array
-    Call this%hosMode_%allocOceanMode(this%hosProcedure_, this%nXo2p1_, this%nYmode_)
+    Call this%hosMode_%allocOceanMode(this%nXo2p1_, this%nYmode_, this%hosProcedure_)
 
 end subroutine
 
@@ -260,9 +259,6 @@ subroutine init_ascii_read_mod_HOSOcean(this, x1, x2)
                                                 this%dtOut_, this%Tstop_, &
                                                 this%nonDimxLen_, this%nonDimyLen_, this%nonDimDepth_, &
                                                 this%gravi, this%dimL_, this%dimT_
-
-
-
 
     CLOSE(this%hosFile_%unit) ! close HOS Ocean file
 
@@ -625,13 +621,13 @@ subroutine reconstructionFFTs_HOSOcean(this)
         iy = 1
 
         if (this%hosProcedure_=='velocity') then
-                this%hosMesh_%aVitX(ix, iy) = this%hosMode_%modeX(ix, iy)
-                this%hosMesh_%aVitY(ix, iy) = this%hosMode_%modeY(ix, iy)
-                this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%modeZ(ix, iy)
+            this%hosMesh_%aVitX(ix, iy) = this%hosMode_%modeX(ix, iy)
+            this%hosMesh_%aVitY(ix, iy) = this%hosMode_%modeY(ix, iy)
+            this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%modeZ(ix, iy)
         elseif (this%hosProcedure_=='potential') then
-                this%hosMesh_%aVitX(ix, iy) = this%hosMode_%ikx(ix, iy) * this%hosMode_%mode(ix, iy)
-                this%hosMesh_%aVitY(ix, iy) = this%hosMode_%iky(ix, iy) * this%hosMode_%mode(ix, iy)
-                this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%ktheta(ix,iy) * this%hosMode_%mode(ix, iy)
+            this%hosMesh_%aVitX(ix, iy) = this%hosMode_%ikx(ix, iy) * this%hosMode_%mode(ix, iy)
+            this%hosMesh_%aVitY(ix, iy) = this%hosMode_%iky(ix, iy) * this%hosMode_%mode(ix, iy)
+            this%hosMesh_%aVitZ(ix, iy) = this%hosMode_%ktheta(ix,iy) * this%hosMode_%mode(ix, iy)
         endif
 
         this%hosMesh_%aPhit(ix, iy) = this%hosMode_%modet(ix, iy)

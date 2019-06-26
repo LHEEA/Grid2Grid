@@ -83,7 +83,7 @@ Install Grid2Grid
 
       - Installation with HDF5 library (Add the flag: -DHDF_LIBRARY:STRIN="ON")
  
-        cmake -H. -Bbuild -DHDF_LIBRARY:STRIN="ON"
+        cmake -H. -Bbuild -DHDF_LIBRARY:STRING="ON"
 
         cmake --build build
 
@@ -92,6 +92,9 @@ Install Grid2Grid
         cmake -H. -BbuildOF -DBUILD_OF_LIB=ON -DHDF_LIBRARY:STRING="ON"
 
         cmake --build buildOF
+
+
+      Have a look at cbuild.org.
 
     Installation using GNU make
 

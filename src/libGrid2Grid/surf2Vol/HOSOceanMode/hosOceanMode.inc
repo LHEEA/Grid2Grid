@@ -1,19 +1,27 @@
-subroutine allocOceanMode(this, procedure, nXo2p1, nYmode)
+subroutine allocOceanMode(this, nXo2p1, nYmode, procedure)
     class(typHOSOceanMode), intent(inout) :: this
     integer, intent(in) :: nXo2p1, nYmode
-    character(len=*) :: procedure
+    character(len=*), optional :: procedure
+    !!...
+    character(len=300) :: reconstProcedure
 
     this%nXo2p1 = nXo2p1
     this%nYmode = nYmode
 
-    if (procedure=='velocity') then
+    reconstProcedure = "velocity"
+
+    if ( present(procedure) ) then
+        reconstProcedure = procedure
+    end if
+
+    if (reconstProcedure=='velocity') then
         allocate(this%modeX(nXo2p1, nYmode),&
                  this%modeY(nXo2p1, nYmode),&
                  this%modeZ(nXo2p1, nYmode))
         this%modeX = 0.0_RP
         this%modeY = 0.0_RP
         this%modeZ = 0.0_RP
-    elseif (procedure=='potential') then
+    elseif (reconstProcedure=='potential') then
         allocate(this%mode(nXo2p1, nYmode))
         this%mode = 0.0_RP
     endif

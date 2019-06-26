@@ -1,0 +1,35 @@
+#
+#   CMake Installation Procedure
+#
+#    Please Choose the linux command as follows.
+#
+#       Young-Myung Choi (Ecole Centrale de Nantes)
+#       Date : 2019-06-26
+
+
+### 1. Normal installation (w/o HDF5 library, FFTW3 library exists in /usr/local/lib
+(
+    cmake -H. -Bbuild
+    cmake --build build
+) 2>&1 | tee log.compile
+
+
+###  2. Installation with user defined FFTW library
+(
+    cmake -H. -Bbuild -DFFTW3_LIB_PATH=$HOME/fftw/fftw-3.3.8/lib
+    cmake --build build
+) 2>&1 | tee log.compile
+
+###  3. Installation with HDF library & Setting 
+(
+    cmake -H. -Bbuild -DHDF_LIBRARY:STRING="ON" -DHDF5_LIB_PATH=$HOME/hdf5 -DFFTW3_LIB_PATH=$HOME/fftw/fftw-3.3.8/lib
+    cmake --build build
+) 2>&1 | tee log.compile
+
+
+###  3. Installation with all options in OpenFOAM library 
+(
+    cmake -H. -Bbuild -DHDF_LIBRARY:STRING="ON" -DHDF5_LIB_PATH=$HOME/hdf5 -DFFTW3_LIB_PATH=$HOME/fftw/fftw-3.3.8/lib -DBUILD_OF_LIB=ON
+    cmake --build build
+) 2>&1 | tee log.compile
+

@@ -1,21 +1,29 @@
-Subroutine allocNWTMode(this, procedure, nXmode, nYmode, nAddmode)
+Subroutine allocNWTMode(this, nXmode, nYmode, nAddmode, procedure)
     implicit none
     class(typHOSNWTmode), intent(inout) :: this
     integer, intent(in) :: nXmode, nYmode, nAddmode
-    character(len=*) :: procedure
+    character(len=*), optional :: procedure
+    !...
+    character(len=300) :: reconstProcedure
 
     this%nXMode   = nXmode
     this%nYMode   = nYmode
     this%nAddMode = nAddmode
 
-    if (procedure=='velocity') then
+    reconstProcedure = "velocity"
+
+    if ( present(procedure) ) then
+        reconstProcedure = procedure
+    end if
+
+    if (reconstProcedure=='velocity') then
       allocate( this%modeX(nXmode, nYmode) )
       allocate( this%modeY(nXmode, nYmode) )
       allocate( this%modeZ(nXmode, nYmode) )
       this%modeX = 0.0_RP
       this%modeY = 0.0_RP
       this%modeZ = 0.0_RP
-    elseif (procedure=='potential') then
+    elseif (reconstProcedure=='potential') then
       allocate( this%mode(nXmode, nYmode) )
       this%mode = 0.0_RP
     endif

@@ -284,7 +284,7 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
 
     HOSdict     = dict%subDict(hosTypeName)
     this%hosSolver_ = HOSdict%getChar("type")
-    this%procedure_ = HOSdict%getChar("procedure")
+    this%procedure_ = HOSdict%getCharOrDefault("procedure", "velocity")
 
     if ( (.not.(isStringEqual(this%hosSolver_, "nwt"))).and.&
          (.not.(isStringEqual(this%hosSolver_, "ocean"))) ) then
@@ -973,7 +973,7 @@ subroutine checkPostG2GParameter(this)
         write(*,1001) ""
         write(*,1001) " HOS Grid2Grid Post Input File : ", trim(this%postinputfile_%name)
         write(*,1001) " HOS Solver Type               : ", trim(this%hosSolver_)
-        write(*,1001) " Reconstruction Procedure       : ", trim(this%procedure_)
+        write(*,1001) " Reconstruction Procedure      : ", trim(this%procedure_)
         write(*,1001) " HOS Result         Input File : ", trim(this%hosFileName_)
         write(*,1001) ""
         write(*,1001) " Post Processing Parameters"

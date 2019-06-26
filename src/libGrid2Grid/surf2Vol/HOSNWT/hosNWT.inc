@@ -13,7 +13,7 @@ Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
     !! - Set file name and file unit
     this%hosFile_%name = HOSdict%getChar("filePath")
     this%hosFile_%unit = callFileUnit()
-    this%hosProcedure_ = HOSdict%getChar("procedure")
+    this%hosProcedure_ = HOSdict%getCharOrDefault("procedure", "velocity")
 
     !! - Set Added Mode Computation Bool Type
     this%isAddedMode_ = HOSdict%getLogicalOrDefault("addedMode", .TRUE.)
@@ -94,7 +94,7 @@ Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
 End Subroutine
 
 !!!- initialize HOS NWT reading Module
-SUBROUTINE initHOSNWT(this, procedure, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, isAddedMode)
+SUBROUTINE initHOSNWT(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio, isAddedMode)
     !---------------------------------------------------------
     !   Input :
     !       fileName : file path of HOS NWT mode file
@@ -102,7 +102,6 @@ SUBROUTINE initHOSNWT(this, procedure, fileName, zMin, zMax, nZmin, nZmax, zMinR
     !---------------------------------------------------------
     implicit none
     class(typHOSNWT), intent(inout) :: this
-    character(len=*),intent(in) :: procedure
     character(len=*),intent(in) :: fileName
     real(rp),intent(in) :: zMin, zMax
     integer, intent(in) :: nZmin, nZmax
@@ -113,7 +112,7 @@ SUBROUTINE initHOSNWT(this, procedure, fileName, zMin, zMax, nZmin, nZmax, zMinR
     if (this%isInitialized_) return
 
     !! - Set HOS volume procedure
-    this%hosProcedure_ = procedure
+    this%hosProcedure_ = "velocity"
 
     !! - Set file name and file unit
     this%hosFile_%name = fileName
@@ -264,7 +263,7 @@ subroutine init_read_mod_HOSNWT(this)
     this%iReadTimeIndex_ = -1
 
     ! set size of HOS NWT mode array
-    Call this%hosMode_%allocNWTMode(this%hosProcedure_, this%nXmode_, this%nYmode_, this%nAddmode_)
+    Call this%hosMode_%allocNWTMode(this%nXmode_, this%nYmode_, this%nAddmode_, this%hosProcedure_)
 
   end subroutine
 

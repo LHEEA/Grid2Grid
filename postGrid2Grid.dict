@@ -38,15 +38,15 @@ HOSOcean
 {
     type            Ocean;
 
-    filePath        example/modes_HOS_SWENSE_OCean_potential.dat;
-  //filePath        example/modes_HOS_SWENSE_HOSOcean.dat;
+    filePath        example/modes_HOS_SWENSE_HOSOcean.dat;
+    extraInterpolationNumber 1;
 
-	procedure		potential; // 1.velocity 2.potential
-  //procedure		velocity; // 1.velocity 2.potential
+    // Zhaobin's update (It is not available now on GitHub HOS version. 2016-06-26. YM)
+    // procedure		potential; // 1.velocity 2.potential
+    // filePath        example/modes_HOS_SWENSE_OCean_potential.dat;
+    // extraInterpolationNumber 4;
 
-    extraInterpolationNumber 4;
-
-    interpolationOrder  1;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
+    interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 
     $zMesh
 
@@ -61,10 +61,10 @@ HOSNWT
 
     filePath        example/modes_HOS_SWENSE_HOSNWT.dat;
 
-	procedure		velocity; // 1.velocity 2.potential 
+	procedure		velocity; // 1.velocity 2.potential
 
     extraInterpolationNumber 2;
-    
+
 	interpolationOrder  3;      // 1 : Linear, 2: Quadratic, 3 : Cubic (default = 3)
 
     $zMesh
