@@ -41,6 +41,8 @@ private
     integer         :: nHOSTime_
     real(rp)        :: gravi, dimL_, dimT_
 
+    !!- Number of extra interpolation points between HOS node
+    integer :: extraInterpolationNumber
 
     !! - Is HDF5 format
     logical :: isHDF5Format_ = .false.

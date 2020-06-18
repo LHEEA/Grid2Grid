@@ -30,20 +30,28 @@ subroutine initializePostG2G(this, inputFileName)
     !! Check Input Parameters
     Call checkPostG2GParameter(this)
 
-    !! Build 3D Mesh
-    Call this%rectLGrid_%initialize(this%isBuildAirMesh_, this%zflag_)
+    if (this%isWriteVTK_) then
 
-    !! Delete VTK Folder and re-make
-    CALL System("rm -r "//trim(postG2GVTK)//"*.vtk")
-    CALL System("mkdir -p "//trim(postG2GVTK))
+        !! Build 3D Mesh
+        Call this%rectLGrid_%initialize(this%isBuildAirMesh_, this%zflag_)
 
-    !! Make Wave Probe Result File
-    CALL System("rm "//trim(this%waveFile_%name))
-    this%waveFile_%unit = callFileUnit()
+        !! Delete VTK Folder and re-make
+        CALL System("rm -r "//trim(postG2GVTK)//"*.vtk")
+        CALL System("mkdir -p "//trim(postG2GVTK))
 
-    open(unit = this%waveFile_%unit,&
-         file = this%waveFile_%name,&
-         status = 'replace')
+    end if
+
+    if (this%isWriteWaveProbe_) then
+
+        !! Make Wave Probe Result File
+        CALL System("rm "//trim(this%waveFile_%name))
+        this%waveFile_%unit = callFileUnit()
+
+        open(unit = this%waveFile_%unit,&
+             file = this%waveFile_%name,&
+             status = 'replace')
+
+    end if
 
     this%isInitialized_ = .TRUE.
 
@@ -330,122 +338,124 @@ subroutine readPostG2GInputFileDict(this, inputFilePath)
     this%isWriteVTK_  = dict%getLogical("writeVTK")
 
     if (this%isWriteVTK_) then
+
         vtkDict = dict%subDict("vtkMesh")
-    end if
 
-    this%isBuildAirMesh_ = vtkDict%getLogicalOrDefault("airMesh", .false.)
+        this%isBuildAirMesh_ = vtkDict%getLogicalOrDefault("airMesh", .false.)
 
-    this%rectLGrid_%xMin_ = vtkDict%getReal("xMin")
-    if (this%rectLGrid_%xMin_.lt.0.0) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong xMin is given, xMin should be positive or zero"
-        write(*,*) "        given origin xMin :", this%rectLGrid_%xMin_
-        stop
-    end if
-
-    this%rectLGrid_%xMax_ = vtkDict%getReal("xMax")
-    if (this%rectLGrid_%xMax_.lt.0.0) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong xMax is given, xMax should be positive or zero"
-        write(*,*) "        given origin xMax :", this%rectLGrid_%xMax_
-        stop
-    end if
-
-    this%rectLGrid_%yMin_ = vtkDict%getReal("yMin")
-    if (this%rectLGrid_%yMin_.lt.0.0) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong yMin is given, yMin should be positive or zero"
-        write(*,*) "        given origin xMin :", this%rectLGrid_%yMin_
-        stop
-    end if
-
-    this%rectLGrid_%yMax_ = vtkDict%getReal("yMax")
-    if (this%rectLGrid_%yMax_.lt.0.0) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong yMax is given, yMax should be positive or zero"
-        write(*,*) "        given origin yMax :", this%rectLGrid_%yMax_
-        stop
-    end if
-
-    this%rectLGrid_%zMin_ = vtkDict%getReal("zMin")
-    if (this%rectLGrid_%zMin_.ge.0.0) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong zMin is given, zMin should be negative"
-        write(*,*) "        given origin zMin :", this%rectLGrid_%zMin_
-        stop
-    end if
-
-    this%rectLGrid_%zMax_ = vtkDict%getReal("zMax")
-    if (this%rectLGrid_%zMax_.lt.0.0) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong zMax is given, zMax should be positive"
-        write(*,*) "        given origin zMax :", this%rectLGrid_%zMax_
-        stop
-    end if
-
-    this%rectLGrid_%nX_    = vtkDict%getInt("nX")
-    if (this%rectLGrid_%nX_.le.1) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong nX is given, nX should be larger than 1"
-        write(*,*) "        given origin nX :", this%rectLGrid_%nX_
-        stop
-    end if
-
-    this%rectLGrid_%nY_    = vtkDict%getInt("nY")
-    if (this%rectLGrid_%nY_.le.1) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong nY is given, nY should be larger than 1"
-        write(*,*) "        given origin nY :", this%rectLGrid_%nY_
-        stop
-    end if
-
-    this%rectLGrid_%nZmin_ = vtkDict%getInt("nZMin")
-    if (this%rectLGrid_%nZmin_.le.3) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong nZmin is given, nZ should be larger than 3"
-        write(*,*) "        given origin nZmin :", this%rectLGrid_%nZmin_
-        stop
-    end if
-
-    this%rectLGrid_%nZmax_ = vtkDict%getInt("nZMax")
-    if (this%rectLGrid_%nZmax_.le.3) then
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong nZmax is given, nZ should be larger than 3"
-        write(*,*) "        given origin nZmax :", this%rectLGrid_%nZmax_
-        stop
-    end if
-
-    zMeshType = vtkDict%getChar("zMeshType")
-
-    if (isStringEqual(zMeshType, "uniform")) then
-        this%zflag_ = INDEX_UNIFORM_MESH    ! Uniform Mesh
-    else if (isStringEqual(zMeshType, "sine")) then
-        this%zflag_ = INDEX_SINE_MESH       ! Sine Distributed Mesh
-    else if (isStringEqual(zMeshType, "meshratio")) then
-        this%zflag_ = INDEX_GEOMETRICRATIO_MESH   ! GEOMETRIC RATIO Mesh
-
-        this%rectLGrid_%zMinRatio_ = vtkDict%getRealOrDefault("zMinRatio", 1.0_RP)
-        this%rectLGrid_%zMaxRatio_ = vtkDict%getRealOrDefault("zMaxRatio", 1.0_RP)
-
-        if (this%rectLGrid_%zMinRatio_.le.0.0) then
+        this%rectLGrid_%xMin_ = vtkDict%getReal("xMin")
+        if (this%rectLGrid_%xMin_.lt.0.0) then
             write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-            write(*,*) "        zMinRatio should be larger than 0.0"
-            write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
+            write(*,*) "        Wrong xMin is given, xMin should be positive or zero"
+            write(*,*) "        given origin xMin :", this%rectLGrid_%xMin_
             stop
         end if
 
-        if (this%rectLGrid_%zMaxRatio_.le.0.0) then
+        this%rectLGrid_%xMax_ = vtkDict%getReal("xMax")
+        if (this%rectLGrid_%xMax_.lt.0.0) then
             write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-            write(*,*) "        zMaxRatio should be larger than 0.0"
-            write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
+            write(*,*) "        Wrong xMax is given, xMax should be positive or zero"
+            write(*,*) "        given origin xMax :", this%rectLGrid_%xMax_
             stop
         end if
-    else
-        write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
-        write(*,*) "        Wrong input file format is given. Input file should have following form :"
-        write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
-        write(*,*) "        Default mesh configuration will be used."
-        this%zflag_ = INDEX_UNIFORM_MESH
+
+        this%rectLGrid_%yMin_ = vtkDict%getReal("yMin")
+        if (this%rectLGrid_%yMin_.lt.0.0) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong yMin is given, yMin should be positive or zero"
+            write(*,*) "        given origin xMin :", this%rectLGrid_%yMin_
+            stop
+        end if
+
+        this%rectLGrid_%yMax_ = vtkDict%getReal("yMax")
+        if (this%rectLGrid_%yMax_.lt.0.0) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong yMax is given, yMax should be positive or zero"
+            write(*,*) "        given origin yMax :", this%rectLGrid_%yMax_
+            stop
+        end if
+
+        this%rectLGrid_%zMin_ = vtkDict%getReal("zMin")
+        if (this%rectLGrid_%zMin_.ge.0.0) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong zMin is given, zMin should be negative"
+            write(*,*) "        given origin zMin :", this%rectLGrid_%zMin_
+            stop
+        end if
+
+        this%rectLGrid_%zMax_ = vtkDict%getReal("zMax")
+        if (this%rectLGrid_%zMax_.lt.0.0) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong zMax is given, zMax should be positive"
+            write(*,*) "        given origin zMax :", this%rectLGrid_%zMax_
+            stop
+        end if
+
+        this%rectLGrid_%nX_    = vtkDict%getInt("nX")
+        if (this%rectLGrid_%nX_.le.1) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong nX is given, nX should be larger than 1"
+            write(*,*) "        given origin nX :", this%rectLGrid_%nX_
+            stop
+        end if
+
+        this%rectLGrid_%nY_    = vtkDict%getInt("nY")
+        if (this%rectLGrid_%nY_.le.1) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong nY is given, nY should be larger than 1"
+            write(*,*) "        given origin nY :", this%rectLGrid_%nY_
+            stop
+        end if
+
+        this%rectLGrid_%nZmin_ = vtkDict%getInt("nZMin")
+        if (this%rectLGrid_%nZmin_.le.3) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong nZmin is given, nZ should be larger than 3"
+            write(*,*) "        given origin nZmin :", this%rectLGrid_%nZmin_
+            stop
+        end if
+
+        this%rectLGrid_%nZmax_ = vtkDict%getInt("nZMax")
+        if (this%rectLGrid_%nZmax_.le.3) then
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong nZmax is given, nZ should be larger than 3"
+            write(*,*) "        given origin nZmax :", this%rectLGrid_%nZmax_
+            stop
+        end if
+
+        zMeshType = vtkDict%getChar("zMeshType")
+
+        if (isStringEqual(zMeshType, "uniform")) then
+            this%zflag_ = INDEX_UNIFORM_MESH    ! Uniform Mesh
+        else if (isStringEqual(zMeshType, "sine")) then
+            this%zflag_ = INDEX_SINE_MESH       ! Sine Distributed Mesh
+        else if (isStringEqual(zMeshType, "meshratio")) then
+            this%zflag_ = INDEX_GEOMETRICRATIO_MESH   ! GEOMETRIC RATIO Mesh
+
+            this%rectLGrid_%zMinRatio_ = vtkDict%getRealOrDefault("zMinRatio", 1.0_RP)
+            this%rectLGrid_%zMaxRatio_ = vtkDict%getRealOrDefault("zMaxRatio", 1.0_RP)
+
+            if (this%rectLGrid_%zMinRatio_.le.0.0) then
+                write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+                write(*,*) "        zMinRatio should be larger than 0.0"
+                write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
+                stop
+            end if
+
+            if (this%rectLGrid_%zMaxRatio_.le.0.0) then
+                write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+                write(*,*) "        zMaxRatio should be larger than 0.0"
+                write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
+                stop
+            end if
+        else
+            write(*,*) "    [Error] readPostG2GInputFileDict(filePath)"
+            write(*,*) "        Wrong input file format is given. Input file should have following form :"
+            write(*,*) "        zMesh   meshRatio   zMinRatio   zMaxRatio"
+            write(*,*) "        Default mesh configuration will be used."
+            this%zflag_ = INDEX_UNIFORM_MESH
+        end if
+
     end if
 
     !!... Wave Probe Dictionary ------------------------------------------------

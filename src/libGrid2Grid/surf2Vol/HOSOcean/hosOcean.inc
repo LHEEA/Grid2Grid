@@ -75,6 +75,8 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
         zMaxRatio    = HOSdict%getRealOrDefault("zMaxRatio", 3.0_RP)
     end if
 
+     this%extraInterpolationNumber = this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
+
     ! Read and initalize HOS simulation parameter
     Call this%init_read_mod()
 
@@ -135,6 +137,8 @@ SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
         trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
       stop
     endif
+
+    this%extraInterpolationNumber = 1
 
     ! Read and initalize HOS simulation parameter
     Call this%init_read_mod()
@@ -206,14 +210,14 @@ subroutine init_read_mod_HOSOcean(this)
     this%nXo2p1Org_ = this%nXmodeOrg_ / 2 + 1
 
     ! Set Simulation Parameters
-    this%nXmode_   = nint(x1) * this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
+    this%nXmode_   = nint(x1) * this%extraInterpolationNumber
 
     !! Consider 2D Case
     this%nYmodeOrg_  = nint(x2)
     if (x2.eq.1) then
       this%nYmode_     = nint(x2)
     else
-      this%nYmode_   = nint(x2) * this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
+      this%nYmode_   = nint(x2) * this%extraInterpolationNumber
     end if
     this%nYo2p1Org_ = this%nYmodeOrg_ / 2 + 1
 

@@ -35,6 +35,9 @@ private
     real(rp)        :: nonDimxLen_, nonDimyLen_
     real(rp)        :: nonDimzMin_, nonDimzMax_
 
+    !!- Number of extra interpolation points between HOS node
+    integer :: extraInterpolationNumber
+
     !!- Added Mode Computation Bool
     logical  :: isAddedMode_ = .true.
 

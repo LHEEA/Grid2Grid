@@ -77,6 +77,8 @@ Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
         zMaxRatio    = HOSdict%getRealOrDefault("zMaxRatio", 3.0_RP)
     end if
 
+    this%extraInterpolationNumber = this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
+
     ! Read and initalize HOS simulation parameter depending on file extension
     Call this%init_read_mod()
 
@@ -144,6 +146,8 @@ SUBROUTINE initHOSNWT(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxR
         trim(this%hosFile_%name), "' (should be .dat, .h5, or .hdf5)"
       stop
     endif
+
+    this%extraInterpolationNumber = 1
 
     ! Read and initalize HOS simulation parameter depending on file extension
     Call this%init_read_mod()
@@ -236,14 +240,14 @@ subroutine init_read_mod_HOSNWT(this)
 
 
     ! Set Simulation Parameters
-    this%nXmode_   = nint(x1) * this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
+    this%nXmode_   = nint(x1) * this%extraInterpolationNumber
 
     !! Consider 2D Case
-    this%nYmodeOrg_  = nint(x2)
+    this%nYmodeOrg_ = nint(x2)
     if (x2.eq.1) then
-      this%nYmode_     = nint(x2)
+      this%nYmode_  = nint(x2)
     else
-      this%nYmode_   = nint(x2) * this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
+      this%nYmode_ = nint(x2) * this%extraInterpolationNumber
     end if
 
     this%nAddmode_ = nint(x3)
