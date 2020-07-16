@@ -19,14 +19,20 @@ Type, public :: typPostGrid2Grid
         !!- Reconstruct procedure (velocity or potential)
         Character(len=StringLength) :: procedure_
 
-        !!- Output Option
-        logical                     :: isWriteVTK_       = .TRUE.
+        !!- Output Option [VTK]
+        logical                     :: isWriteVTK_
 
-        !!- Output Option
-        logical                     :: isWriteWaveProbe_ = .TRUE.
+        !!- Output Option [Wave Probes]
+        logical                     :: isWriteWaveProbe_
+
+        !!- Output Option [Velocity Probes]
+        logical                     :: isWriteVelocityProbe_
+
+        !!- Output Option [Pressure Probes]
+        logical                     :: isWritePressureProbe_
 
         !!- Grid Construction
-        logical                     :: isBuildAirMesh_ = .FALSE.
+        logical                     :: isBuildAirMesh_
 
         !!- Start & End Time
         Real(RP)                    :: startTime_, endTime_, dt_
@@ -43,23 +49,16 @@ Type, public :: typPostGrid2Grid
         !!- rectilinearGrid
         Type(typRectilinearGrid)       :: rectLGrid_
 
+        !!... Wave Elevation Probes
+        Type(typProbes) :: waveProbe
 
-        !!- Number of Wave probe
-        integer                        :: nWaveProbe_
+        !!... Velocity Probes
+        Type(typProbes) :: velocityProbe
 
-        !!- wave probe
-        Type(typWaveProbe),allocatable :: waveProbe_(:)
-
-        !!- Logical value for wave probe file Header
-        logical                        :: isWaveProbeOutHeader_ = .TRUE.
-
-        !!- Wave Elevation Result File IO
-        type(typFileIO)                :: waveFile_
+        !!... Pressure Probes
+        Type(typProbes) :: pressureProbe
 
     contains
-
-        !!- Read Grid2Grid Post Processing Input Program
-        procedure, pass, private :: readPostG2GInputFile
 
         !!- Read Grid2Grid Post Processing Input Program (Dictionary Type)
         procedure, pass, private :: readPostG2GInputFileDict

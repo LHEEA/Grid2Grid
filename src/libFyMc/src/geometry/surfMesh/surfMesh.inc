@@ -422,11 +422,11 @@ Subroutine destroySurfMesh(this)
 
 End Subroutine
 
-Subroutine finalSurfMesh(this)
-    Implicit None
-    Type(typSurfMesh), intent(inout) :: this
-    Call this%destroy()
-End Subroutine
+! Subroutine finalSurfMesh(this)
+!     Implicit None
+!     Type(typSurfMesh), intent(inout) :: this
+!     Call this%destroy()
+! End Subroutine
 
 !! ------------------------------------------------------------------ !!
 !! End Procedures

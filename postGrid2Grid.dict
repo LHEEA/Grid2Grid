@@ -12,8 +12,11 @@
 
 Grid2Grid       HOSOcean;
 
-writeVTK            true;
-writeWaveProbe      true;
+writeVTK                false;
+
+writeWaveProbe          true;
+writeVelocityProbe      true;
+writePressureProbe      true;
 
 zMesh
 {
@@ -97,9 +100,9 @@ vtkMesh
 
 waveProbe
 {
-    waveProbeFile   waveElevation.dat;
+    outputFile   waveElevation.dat;
 
-    waveProbes
+    probeList
     {
         waveProbes1
         {
@@ -112,6 +115,32 @@ waveProbe
         waveProbes3
         {
             position    ( 2.0     3.0 );
+        }
+    }
+}
+
+velocityProbe
+{
+    outputFile  velocityProbe.dat;
+
+    probeList
+    {
+        velocityProbes1
+        {
+            position    (0.0  2.0  -0.5);
+        }
+    }
+}
+
+pressureProbe
+{
+    outputFile  pressureProbe.dat;
+
+    probeList
+    {
+        pressureProbes1
+        {
+            position    (0.0  2.0  -0.5);
         }
     }
 }

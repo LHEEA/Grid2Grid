@@ -59,6 +59,12 @@ Implicit None
     !!... Wave Probe Data Class
     Include "waveProbe/waveProbe.typ"
 
+    !!... Individual probe class
+    Include "probes/probe/probe.typ"
+
+    !!... Control Class of Probes
+    Include "probes/probes.typ"
+
     !!... Post Processing Class
     Include "postGrid2Grid/postGrid2Grid.typ"
 
@@ -70,6 +76,8 @@ contains
     Include "rectilinearGrid/rectilinearGrid.inc"
 
     !! Include "waveProbe/waveProbe.inc"
+
+    Include "probes/probes.inc"
 
     !!... Post Processing class member function
     Include "postGrid2Grid/postGrid2Grid.inc"
