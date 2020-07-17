@@ -20,8 +20,8 @@ writePressureProbe      true;
 
 zMesh
 {
-    zMin           -0.2;
-    zMax            0.2;
+    zMin           -1.0;
+    zMax            1.0;
 
     nZMin           30;
     nZMax           30;

@@ -42,8 +42,6 @@ Subroutine initialize_typProbes( this, dict, variableType )
 
     end if
 
-    Call this%writeHeaderOutput( this%outFile%unit )
-
     !!... Initialize the probes
 
     probeListDict = this%dict_%subDict("probeList")
@@ -171,8 +169,6 @@ Subroutine correct_typProbes(this, hosVol2Vol, simulTime)
     Real(RP) :: x, y, z, u, v, w
     integer :: iProbe
 
-    write(*,*) "d"
-
     !!... Get Flow Information at the probe position
     if ( this%ENUM_PROBE == ENUM_PROBE_WAVE_ELEVATION ) then
 
@@ -180,16 +176,7 @@ Subroutine correct_typProbes(this, hosVol2Vol, simulTime)
         do iProbe = 1, this%nProbe_
             x = this%probes_(iProbe)%xPos_
             y = this%probes_(iProbe)%yPos_
-
-            this%probes_(iProbe)%scalar_ = 1.0_RP
-
-            write(*,*) "e"
-            u = hosVol2Vol%getEta(x ,y, simulTime)
-
-            write(*,*) "f"
-
             this%probes_(iProbe)%scalar_ = hosVol2Vol%getEta(x ,y, simulTime)
-
         enddo
 
     else if ( this%ENUM_PROBE == ENUM_PROBE_VELOCITY ) then

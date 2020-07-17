@@ -198,35 +198,10 @@ subroutine correctPostG2G(this, simulTime)
 
     end if
 
-    write(*,*) "here"
-
     !!... Wave Probe
     if (this%isWriteWaveProbe_) then
-
-        x = 0.0_Rp
-        y = 0.0_Rp
-        z = 0.0_Rp
-
-        write(*,*) "dddd", x, y, simulTime
-
-        ! eta = this%hosVol2Vol_%getEta(x, y, simulTime)
-
-        Call this%hosVol2Vol_%getFlow(x, y, z, simulTime, eta, u, v, w, pd)
-
-        write(*,*) "dd223"
-
-        write(*,*) eta
-
-        write(*,*) "dd22"
-
-        this%waveProbe%probes_(1)%scalar_ = this%hosVol2Vol_%getEta(0.0_RP ,0.0_RP, simulTime)
-
-        write(*,*) "dd"
-
         Call this%waveProbe%correct( this%hosVol2Vol_, simulTime )
     end if
-
-    write(*,*) "there"
 
     !!... Velocity Probe
     if (this%isWriteWaveProbe_) then
