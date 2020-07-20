@@ -10,7 +10,8 @@
 #
 #-------------------------------------------------------------------------- #
 
-Grid2Grid       HOSOcean;
+//Grid2Grid       HOSOcean;
+Grid2Grid       HOSNWT;
 
 writeVTK                false;
 
@@ -56,6 +57,35 @@ HOSOcean
     writeLog        TRUE;
 
     cutAtElevation  FALSE;
+
+    isHOSAmpWeight      TRUE;
+
+    HOSAmpWeight
+    {
+        // HOSAmpWeightType    expWeight;
+
+        // HOSAmpWeightType    stepWeight;
+        HOSAmpWeightType    polyWeight;
+
+        expWeightCoeffs
+        {
+            omegaMin    1.0;
+            alpha       2.0;
+            nExpPower   1.0;
+        }
+
+        stepWeightCoeffs
+        {
+            omegaMin    1.0;
+        }
+
+        polyWeightCoeffs
+        {
+            omegaMin    1.0;
+            omegaMax    3.0;
+        }
+    }
+
 }
 
 HOSNWT
@@ -73,6 +103,35 @@ HOSNWT
     $zMesh
 
     writeLog        TRUE;
+
+    isHOSAmpWeight      TRUE;
+
+    HOSAmpWeight
+    {
+        // HOSAmpWeightType    expWeight;
+
+        // HOSAmpWeightType    stepWeight;
+        HOSAmpWeightType    polyWeight;
+
+        expWeightCoeffs
+        {
+            omegaMin    1.0;
+            alpha       2.0;
+            nExpPower   1.0;
+        }
+
+        stepWeightCoeffs
+        {
+            omegaMin    1.0;
+        }
+
+        polyWeightCoeffs
+        {
+            omegaMin    7.0;
+            omegaMax    14.0;
+        }
+    }
+
 }
 
 simulation

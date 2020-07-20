@@ -79,6 +79,13 @@ Subroutine initHOSNWTSurf2VolDict(this, HOSDict)
 
     this%extraInterpolationNumber = this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
 
+    !!... HOS Amp Weight function Option
+    this%isHOSAmpWeight = this%dict_%getLogicalOrDefault("isHOSAmpWeight", .FALSE.)
+
+    if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+        Call this%HOSWeightFunc%initialize( this%dict_%subDict("HOSAmpWeight") )
+    end if
+
     ! Read and initalize HOS simulation parameter depending on file extension
     Call this%init_read_mod()
 
@@ -148,6 +155,7 @@ SUBROUTINE initHOSNWT(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxR
     endif
 
     this%extraInterpolationNumber = 1
+    this%isHOSAmpWeight = .FALSE.
 
     ! Read and initalize HOS simulation parameter depending on file extension
     Call this%init_read_mod()
@@ -425,6 +433,20 @@ subroutine read_ascii_mod_HOSNWT(this, iTime)
           READ(this%hosFile_%unit,1001,REC=(NRECL+7+8*(i2-1))) (this%hosMode_%modeAdd(i1,i2), i1=1,this%nAddmode_)
           READ(this%hosFile_%unit,1001,REC=(NRECL+8+8*(i2-1))) (this%hosMode_%modeAddt(i1,i2), i1=1,this%nAddmode_)
         end do
+
+        if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+            this%hosMode_%modeX(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeX(:, :)
+            this%hosMode_%modeY(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeY(:, :)
+            this%hosMode_%modeZ(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeZ(:, :)
+            this%hosMode_%modet(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modet(:, :)
+
+            this%hosMode_%modeFS(:, :)  = this%hosMode_%weight(:, :) * this%hosMode_%modeFS(:, :)
+            this%hosMode_%modeFSt(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeFSt(:, :)
+
+            this%hosMode_%modeAdd(:, :)  = this%hosMode_%weightAdd(:, :) * this%hosMode_%modeAdd(:, :)
+            this%hosMode_%modeAddt(:, :) = this%hosMode_%weightAdd(:, :) * this%hosMode_%modeAddt(:, :)
+        end if
+
     elseif (this%hosProcedure_=='potential') then
       NRECL = (iTime + 1)*this%nYmodeOrg_*6
         do i2=1,this%nYmodeOrg_
@@ -435,6 +457,18 @@ subroutine read_ascii_mod_HOSNWT(this, iTime)
           READ(this%hosFile_%unit,1001,REC=(NRECL+5+6*(i2-1))) (this%hosMode_%modeAdd(i1,i2), i1=1,this%nAddmode_)
           READ(this%hosFile_%unit,1001,REC=(NRECL+6+6*(i2-1))) (this%hosMode_%modeAddt(i1,i2), i1=1,this%nAddmode_)
         end do
+
+        if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+            this%hosMode_%mode(:, :)  = this%hosMode_%weight(:, :) * this%hosMode_%mode(:, :)
+            this%hosMode_%modet(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modet(:, :)
+
+            this%hosMode_%modeFS(:, :)  = this%hosMode_%weight(:, :) * this%hosMode_%modeFS(:, :)
+            this%hosMode_%modeFSt(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeFSt(:, :)
+
+            this%hosMode_%modeAdd(:, :)  = this%hosMode_%weightAdd(:, :) * this%hosMode_%modeAdd(:, :)
+            this%hosMode_%modeAddt(:, :) = this%hosMode_%weightAdd(:, :) * this%hosMode_%modeAddt(:, :)
+        end if
+
     endif
 
 
@@ -492,6 +526,19 @@ subroutine read_hdf5_mod_HOSNWT(this, iTime)
     Call read_hdf5_dataset_mod(time_group_id, "modeAdd", nwt_mode_data_dims, this%hosMode_%modeAdd)
     Call read_hdf5_dataset_mod(time_group_id, "modeAddt", nwt_mode_data_dims, this%hosMode_%modeAddt)
 
+    if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+        this%hosMode_%modeX(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeX(:, :)
+        this%hosMode_%modeY(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeY(:, :)
+        this%hosMode_%modeZ(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeZ(:, :)
+        this%hosMode_%modet(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modet(:, :)
+
+        this%hosMode_%modeFS(:, :)  = this%hosMode_%weight(:, :) * this%hosMode_%modeFS(:, :)
+        this%hosMode_%modeFSt(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeFSt(:, :)
+
+        this%hosMode_%modeAdd(:, :)  = this%hosMode_%weightAdd(:, :) * this%hosMode_%modeAdd(:, :)
+        this%hosMode_%modeAddt(:, :) = this%hosMode_%weightAdd(:, :) * this%hosMode_%modeAddt(:, :)
+    end if
+
     ! ! ! Close iTime group
     Call h5gclose_f(time_group_id, error)
 
@@ -507,6 +554,7 @@ end subroutine
 !!- Build HOS NWT Global Mesh & calculate Wave numbers and additional mode part
 subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     implicit none
+    Integer, Parameter :: nOmegaOut = 500
     class(typHOSNWT), intent(inout) :: this
     real(rp),intent(in) :: zMin
     real(rp),intent(in) :: zMax
@@ -527,6 +575,9 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     real(rp) :: expon1, expon2, expon3, expon12
     real(rp) :: kAddx1, kAddx2
     real(rp) :: cshAdd, shAdd
+    !!... HOS Weight Output
+    Real(RP) :: omegaMin, omegaMax, weight, omega, domega
+    integer  :: iomega, fidHOSWeight
     !!!......................................
 
     lAdd = 2
@@ -639,8 +690,65 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
             this%hosMode_%kxy(ix,iy)    = sqrt(kx2 + ky2)
             this%hosMode_%ktheta(ix,iy) = this%hosMode_%kxy(ix,iy) &
                                             *tanh(this%hosMode_%kxy(ix,iy))
+
+            !!... NOTE Check with GD, this  is correct, 2020-07-18, YM
+            this%hosMode_%omega(ix,iy) = sqrt(this%hosMode_%ktheta(ix,iy)) &
+                                       / this%dimT_
+
         end do
     end do
+
+    !!... Compute the weight
+    this%hosMode_%weight(:, :) = 1.0_RP
+
+    if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+
+        !!... For HOS Modes
+        do ix = 1, this%nXmode_
+        do iy = 1, this%nYmode_
+            Call this%HOSWeightFunc%getHOSWeight(   &
+                this%hosMode_%omega(ix,iy),         &
+                this%hosMode_%weight(ix,iy)         )
+        enddo
+        enddo
+
+        !!... Output
+        fidHOSWeight = callFileUnit()
+        open( unit = fidHOSWeight, file = "HOSWeight.dat", status = "replace" )
+
+        omegaMin = minval( this%hosMode_%omega(:, :) )
+        omegaMax = maxval( this%hosMode_%omega(:, :) )
+        domega = (omegaMax - omegaMin) / (nOmegaOut - 1.0_RP)
+
+        write(fidHOSWeight, 1001) "# HOS Amplitude Weight for radial frequency"
+        write(fidHOSWeight, 1001) "#"
+        write(fidHOSWeight, 1003) "#    * omegaMin  [rad/s]: ", omegaMin
+        write(fidHOSWeight, 1003) "#    * omegaMax  [rad/s]: ", omegaMax
+        write(fidHOSWeight, 1001) "#"
+        write(fidHOSWeight, 1002) "#    * nOmegaOut     [-]: ", nOmegaOut
+        write(fidHOSWeight, 1003) "#    * dOmegaOut [rad/s]: ", domega
+        write(fidHOSWeight, 1001) "#"
+        write(fidHOSWeight, 1001) "#   Omega[rad/s]       Weight[-]"
+
+        omega = omegaMin
+        do iomega = 1, nOmegaOut
+
+            Call this%HOSWeightFunc%getHOSWeight(   &
+                omega, weight)
+
+            write(fidHOSWeight, 1101) omega, weight
+
+            omega = omega + domega
+        enddo
+
+        close(fidHOSWeight)
+
+    end if
+
+    1001 format(a)
+    1002 format(a,i16)
+    1003 format(a,1pe16.7)
+    1101 format(2(1pe16.7))
 
     ! Wave maker added mode wave number
     piXAddLen = PI / xLenAdd
@@ -659,6 +767,9 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
         do iy = 1, this%nYmode_
             ky2 = this%hosMode_%ky(iy) * this%hosMode_%ky(iy)
             kxyAdd  = sqrt(kxAdd2 + ky2)
+
+            this%hosMode_%omegaAdd(iAdd, iy) = sqrt(kxyAdd * tan(kxyAdd)) / this%dimT_
+
             kxyAddTwo = 2.d0 * kxyAdd
             kxyAddLx  = kxyAddTwo * this%hosMesh_%nonDimLx
 
@@ -690,6 +801,19 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
         enddo
     enddo
 
+    if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+
+        !!... For HOS Modes
+        do iAdd = 1, this%nAddmode_
+        do iy = 1, this%nYmode_
+            Call this%HOSWeightFunc%getHOSWeight(   &
+                this%hosMode_%omegaAdd(iAdd, iy),   &
+                this%hosMode_%weightAdd(iAdd, iy)   )
+        enddo
+        enddo
+
+    end if
+
 end subroutine
 
 subroutine reconstructionFFTs_HOSNWT(this)
@@ -700,18 +824,19 @@ subroutine reconstructionFFTs_HOSNWT(this)
     real(rp) :: coeff, coeff2
     !!!......................................
 
-    !! - Compute nondimensionalized wave elevation
-    this%hosMesh_%nonDimEta = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFS,'cos','cos')
-    this%hosMesh_%nonDimdEtadt = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFSt,'cos','cos')
     do ix = 1, this%nXmode_
       do iy = 1, this%nYmode_
             this%hosMode_%modeFSx(ix, iy) = -this%hosMode_%kx(ix) * this%hosMode_%modeFS(ix, iy) !this%hosMode_%kx(ix)
             this%hosMode_%modeFSy(ix, iy) = -this%hosMode_%ky(iy) * this%hosMode_%modeFS(ix, iy) !this%hosMode_%kyN2(iy)
       enddo
     end do
+
+    !! - Compute nondimensionalized wave elevation
+    this%hosMesh_%nonDimEta    = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFS,'cos','cos')
+    this%hosMesh_%nonDimdEtadt = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFSt,'cos','cos')
+
     this%hosMesh_%nonDimdEtadx = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFSx,'sin','cos')
     this%hosMesh_%nonDimdEtady = this%hosNWTFFTW_%fourier_2_space(this%hosMode_%modeFSy,'cos','sin')
-
 
     do iz = 1, this%hosMesh_%nZ
         hosZ = this%hosMesh_%nonDimZ(iz)
@@ -834,9 +959,8 @@ subroutine reconstructionFFTs_HOSNWT(this)
         enddo
 
         ! Inverse FFTs
-        this%hosMesh_%nonDimPhiX(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aVitX,'sin','cos')
         if (this%nYmode_.NE.1) then
-            this%hosMesh_%nonDimPhiY(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aVitY,'cos','sin')
+            this%hosMesh_%nonDimPhiY(:,:, iz)    = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aVitY,'cos','sin')
             this%hosMesh_%nonDimdvitYdy(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%adVitYdy,'cos','cos')
             this%hosMesh_%nonDimdvitXdy(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%adVitXdy,'sin','sin')
             this%hosMesh_%nonDimdvitYdz(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%adVitYdz,'cos','sin')
@@ -848,6 +972,8 @@ subroutine reconstructionFFTs_HOSNWT(this)
             this%hosMesh_%nonDimdvitYdz(:,:, iz) = 0.0_rp
             ! this%hosMesh_%nonDimDvDt(:,:, iz) = 0.0_rp
         end if
+
+        this%hosMesh_%nonDimPhiX(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aVitX,'sin','cos')
         this%hosMesh_%nonDimPhiZ(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aVitZ,'cos','cos')
         this%hosMesh_%nonDimPhit(:,:, iz) = this%hosNWTFFTW_%fourier_2_space(this%hosMesh_%aPhit,'cos','cos')
 

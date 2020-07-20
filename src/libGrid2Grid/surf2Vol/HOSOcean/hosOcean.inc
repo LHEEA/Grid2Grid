@@ -77,6 +77,13 @@ Subroutine initHOSOceanSurf2VolDict(this, HOSDict)
 
      this%extraInterpolationNumber = this%dict_%getIntOrDefault("extraInterpolationNumber", 1)
 
+     !!... HOS Amp Weight function Option
+     this%isHOSAmpWeight = this%dict_%getLogicalOrDefault("isHOSAmpWeight", .FALSE.)
+
+     if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+         Call this%HOSWeightFunc%initialize( this%dict_%subDict("HOSAmpWeight") )
+     end if
+
     ! Read and initalize HOS simulation parameter
     Call this%init_read_mod()
 
@@ -139,6 +146,7 @@ SUBROUTINE initHOSOcean(this, fileName, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     endif
 
     this%extraInterpolationNumber = 1
+    this%isHOSAmpWeight = .FALSE.
 
     ! Read and initalize HOS simulation parameter
     Call this%init_read_mod()
@@ -399,6 +407,17 @@ subroutine read_mod_HOSOcean(this, iTime)
         READ(this%hosFile_%unit,1001,REC=NRECL+5+6*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1Org_)
         READ(this%hosFile_%unit,1001,REC=NRECL+6+6*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1Org_)
       end do
+
+      if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+          this%hosMode_%modeX(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeX(:, :)
+          this%hosMode_%modeY(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeY(:, :)
+          this%hosMode_%modeZ(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeZ(:, :)
+          this%hosMode_%modet(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modet(:, :)
+
+          this%hosMode_%modeFS(:, :)  = this%hosMode_%weight(:, :) * this%hosMode_%modeFS(:, :)
+          this%hosMode_%modeFSt(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeFSt(:, :)
+      end if
+
     elseif (this%hosProcedure_=='potential') then
       NRECL = (iTime + 1)*this%nYmodeOrg_*4
       do i2=1,this%nYmode_
@@ -407,8 +426,15 @@ subroutine read_mod_HOSOcean(this, iTime)
         READ(this%hosFile_%unit,1001,REC=NRECL+3+4*(i2-1)) (this%hosMode_%modeFS(i1,i2), i1=1,this%nXo2p1Org_)
         READ(this%hosFile_%unit,1001,REC=NRECL+4+4*(i2-1)) (this%hosMode_%modeFSt(i1,i2), i1=1,this%nXo2p1Org_)
       end do
-    endif
 
+      if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+          this%hosMode_%mode(:, :)    = this%hosMode_%weight(:, :) * this%hosMode_%mode(:, :)
+          this%hosMode_%modet(:, :)   = this%hosMode_%weight(:, :) * this%hosMode_%modet(:, :)
+          this%hosMode_%modeFS(:, :)  = this%hosMode_%weight(:, :) * this%hosMode_%modeFS(:, :)
+          this%hosMode_%modeFSt(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeFSt(:, :)
+      end if
+
+    endif
 
     CLOSE(this%hosFile_%unit)    ! file close
 
@@ -457,6 +483,16 @@ subroutine read_hdf5_mod_HOSOcean(this, iTime)
     Call read_hdf5_dataset_mod(time_group_id, "modeFS", ocean_mode_data_dims, this%hosMode_%modeFS)
     Call read_hdf5_dataset_mod(time_group_id, "modeFSt", ocean_mode_data_dims, this%hosMode_%modeFSt)
 
+    if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+        this%hosMode_%modeX(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeX(:, :)
+        this%hosMode_%modeY(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeY(:, :)
+        this%hosMode_%modeZ(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeZ(:, :)
+        this%hosMode_%modet(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modet(:, :)
+
+        this%hosMode_%modeFS(:, :)  = this%hosMode_%weight(:, :) * this%hosMode_%modeFS(:, :)
+        this%hosMode_%modeFSt(:, :) = this%hosMode_%weight(:, :) * this%hosMode_%modeFSt(:, :)
+    end if
+
     ! ! ! Close iTime group
     Call h5gclose_f(time_group_id, error)
 
@@ -472,6 +508,7 @@ end subroutine
 !!- Build HOS NWT Global Mesh & calculate Wave numbers and additional mode part
 subroutine buildGlobalMesh_HOSOcean(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMaxRatio)
     Implicit none
+    Integer, Parameter :: nOmegaOut = 500
     class(typHOSOcean), intent(inout) :: this
     real(rp),intent(in) :: zMin,  zMax
     integer, intent(in) :: nZmin, nZmax
@@ -481,6 +518,9 @@ subroutine buildGlobalMesh_HOSOcean(this, zMin, zMax, nZmin, nZmax, zMinRatio, z
     integer  :: ix, iy
     integer  :: nxFou, nyFou
     real(rp) :: kXY
+    !!... HOS Weight Output
+    Real(RP) :: omegaMin, omegaMax, weight, omega, domega
+    integer  :: iomega, fidHOSWeight
     !!- Build global mesh -------------------
 
     this%zMin_ = zMin
@@ -591,8 +631,64 @@ subroutine buildGlobalMesh_HOSOcean(this, zMin, zMax, nZmin, nZmax, zMinRatio, z
 
             this%hosMode_%kXY(ix,iy) = kXY
             this%hosMode_%ktheta(ix,iy) = kXY * tanh(kXY * this%nonDimDepth_)
+
+            !!... NOTE Check with GD, this  is correct, 2020-07-18, YM
+            this%hosMode_%omega(ix,iy) = sqrt( this%gravi * this%hosMode_%ktheta(ix,iy) )
+
         enddo
     enddo
+
+    !!... Compute the weight
+    this%hosMode_%weight(:, :) = 1.0_RP
+
+    if ( this%isHOSAmpWeight.EQV..TRUE. ) then
+
+        !!... For HOS Modes
+        do iy = 1, this%nYmode_
+        do ix = 1, this%nXo2p1_
+            Call this%HOSWeightFunc%getHOSWeight(   &
+                this%hosMode_%omega(ix,iy),         &
+                this%hosMode_%weight(ix,iy)         )
+        enddo
+        enddo
+
+        !!... Output
+        fidHOSWeight = callFileUnit()
+        open( unit = fidHOSWeight, file = "HOSWeight.dat", status = "replace" )
+
+        omegaMin = minval( this%hosMode_%omega(:, :) )
+        omegaMax = maxval( this%hosMode_%omega(:, :) )
+        domega = (omegaMax - omegaMin) / (nOmegaOut - 1.0_RP)
+
+        write(fidHOSWeight, 1001) "# HOS Amplitude Weight for radial frequency"
+        write(fidHOSWeight, 1001) "#"
+        write(fidHOSWeight, 1003) "#    * omegaMin  [rad/s]: ", omegaMin
+        write(fidHOSWeight, 1003) "#    * omegaMax  [rad/s]: ", omegaMax
+        write(fidHOSWeight, 1001) "#"
+        write(fidHOSWeight, 1002) "#    * nOmegaOut     [-]: ", nOmegaOut
+        write(fidHOSWeight, 1003) "#    * dOmegaOut [rad/s]: ", domega
+        write(fidHOSWeight, 1001) "#"
+        write(fidHOSWeight, 1001) "#   Omega[rad/s]       Weight[-]"
+
+        omega = omegaMin
+        do iomega = 1, nOmegaOut
+
+            Call this%HOSWeightFunc%getHOSWeight(   &
+                omega, weight)
+
+            write(fidHOSWeight, 1101) omega, weight
+
+            omega = omega + domega
+        enddo
+
+        close(fidHOSWeight)
+
+    end if
+
+    1001 format(a)
+    1002 format(a,i16)
+    1003 format(a,1pe16.7)
+    1101 format(2(1pe16.7))
 
 end subroutine
 
@@ -604,10 +700,7 @@ subroutine reconstructionFFTs_HOSOcean(this)
     real(rp) :: kZ, kD, coeff, coeff2, k
     !!!......................................
 
-    !! - Compute nondimensionalized wave elevation
-    Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFS,this%hosMesh_%nonDimEta)
-    Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFSt,this%hosMesh_%nonDimdEtadt)
-
+    !! - Get Fourier vector for derivatives of wave elevation
     do ix = 1, this%nXo2p1_
       do iy = 1, this%nYmode_
         this%hosMode_%modeFSx(ix, iy) = this%hosMode_%ikx(ix, iy) * this%hosMode_%modeFS(ix, iy) !this%hosMode_%kx(ix)
@@ -615,6 +708,11 @@ subroutine reconstructionFFTs_HOSOcean(this)
       enddo
     end do
 
+    !! - Compute nondimensionalized wave elevation (inverse FFTs)
+    Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFS,this%hosMesh_%nonDimEta)
+    Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFSt,this%hosMesh_%nonDimdEtadt)
+
+    !!... Derivatives of Wave Elevation (inverse FFTs)
     Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFSx,this%hosMesh_%nonDimdEtadx)
     Call this%hosOceanFFTW_%fourier_2_space(this%hosMode_%modeFSy,this%hosMesh_%nonDimdEtady)
 
@@ -742,9 +840,8 @@ subroutine reconstructionFFTs_HOSOcean(this)
             enddo
         enddo
 
-        Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%aVitX, this%hosMesh_%nonDimPhiX(:,:, iz) )
-
         if (this%nYmode_.NE.1) then
+
             Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%aVitY, this%hosMesh_%nonDimPhiY(:,:, iz) )
             ! Call this%hosOceanFFTW_%fourier_2_space( this%hosMesh_%aDvDt, this%hosMesh_%nonDimDvDt(:,:, iz) )
         else
@@ -752,6 +849,7 @@ subroutine reconstructionFFTs_HOSOcean(this)
             ! this%hosMesh_%nonDimDvDt(:,:, iz) = 0.0_rp
         end if
 
+        Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%aVitX, this%hosMesh_%nonDimPhiX(:,:, iz) )
         Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%aVitZ, this%hosMesh_%nonDimPhiZ(:,:, iz) )
         Call this%hosOceanFFTW_%fourier_2_space(this%hosMesh_%aPhit, this%hosMesh_%nonDimPhit(:,:, iz) )
 

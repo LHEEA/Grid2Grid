@@ -45,7 +45,7 @@ Module  modSurf2vol
 #endif
 
     use mfpGlobal, only : CHAR_LEN
-    use mfpGeneral, only : typDictionaryPtr
+    use mfpGeneral, only : typDictionaryPtr, isStringEqual
 
 !-----------------------------------------------------------------------
 Implicit none
@@ -55,6 +55,9 @@ Private
 !!... Module Parameter
 
 !!... Module Data
+
+!!... HOS Mode Weight
+#include "HOSModeWeight/hosModeWeight.typ"
 
     !!... HOS Surf2Vol Base Mesh Class
 #include "HOSMesh/hosMesh.typ"
@@ -84,6 +87,9 @@ Private
 contains
 
 !!... Module Function
+
+!!... HOS Mode Weight
+#include "HOSModeWeight/hosModeWeight.inc"
 
     !!... HOS Surf2Vol Base Mesh Class Member Function
 #include "HOSMesh/hosMesh.inc"

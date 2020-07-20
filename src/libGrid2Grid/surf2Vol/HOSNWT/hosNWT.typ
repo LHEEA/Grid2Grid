@@ -53,6 +53,12 @@ private
     !!- HOS Ocean FFTW Class
     type(typFFFWHosNWT) :: hosNWTFFTW_
 
+    !!- HOS Amp Weight SWITCH
+    Logical :: isHOSAmpWeight
+
+    !!- HOS Amp Weight function
+    type(typHOSModeWeightFunc) :: HOSWeightFunc
+
     !!! Public --------------------------------------------------------
 
     !!- HOS NWT Global Grid

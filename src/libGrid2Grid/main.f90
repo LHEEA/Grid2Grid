@@ -14,11 +14,16 @@ Program main
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+    Use modGrid2GridGlobal
+    use modSurf2vol
+
     Implicit None
     Character(Len =100) :: inputFileName
     inputFileName = "postGrid2Grid.dict"
 
     Call testPost(inputFileName)
+
+    ! Call testHOSModeWeight()
 
     ! Call testSurf2Vol()
 

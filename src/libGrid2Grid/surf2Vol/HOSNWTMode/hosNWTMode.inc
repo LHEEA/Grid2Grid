@@ -43,12 +43,20 @@ Subroutine allocNWTMode(this, nXmode, nYmode, nAddmode, procedure)
     allocate( this%ktheta(nXmode, nYmode) )
     allocate( this%kxAdd(nAddmode) )
 
+    allocate( this%omega(nXmode, nYmode) )
+    allocate( this%weight(nXmode, nYmode) )
+
+    allocate( this%omegaAdd(nAddmode, nYmode) )
+    allocate( this%weightAdd(nAddmode, nYmode) )
 
     this%modet = 0.0_RP
     this%modeFS = 0.0_RP
     this%modeFSx = 0.0_RP
     this%modeFSy = 0.0_RP
     this%modeFSt = 0.0_RP
+
+    this%weight(:, :)    = 1.0_RP
+    this%weightAdd(:, :) = 1.0_RP
 
 end subroutine
 
@@ -72,6 +80,13 @@ Subroutine destroyNWTMode(this)
     if (allocated(this%kxy))      deallocate(this%kxy)
     if (allocated(this%ktheta))   deallocate(this%ktheta)
     if (allocated(this%kxAdd))    deallocate(this%kxAdd)
+
+    if (allocated(this%omega))    deallocate(this%omega)
+    if (allocated(this%omegaAdd)) deallocate(this%omegaAdd)
+
+    if (allocated(this%weight))    deallocate(this%weight)
+    if (allocated(this%weightAdd)) deallocate(this%weightAdd)
+
 End Subroutine
 
 subroutine finalHOSNWTMode(this)
