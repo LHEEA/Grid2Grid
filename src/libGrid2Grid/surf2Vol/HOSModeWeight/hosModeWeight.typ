@@ -1,20 +1,4 @@
 !! ----------------------------------------------------------------
-!! Add HOS Weight Class definition in the below
-!! ----------------------------------------------------------------
-
-!!... Base(Abstract) Class fot HOS Weight
-#include "hosWeightBaseFunc/hosWeightBaseFunc.typ"
-
-!!... HOS Weight: expoential function
-#include "hosWeightExpFunc/hosWeightExpFunc.typ"
-
-!!... HOS Weight: step function
-#include "hosWeightStepFunc/hosWeightStepFunc.typ"
-
-!!... HOS Weight: poly function
-#include "hosWeightPolyFunc/hosWeightPolyFunc.typ"
-
-!! ----------------------------------------------------------------
 !! Wrapper of HOS Weight function
 !! ----------------------------------------------------------------
 

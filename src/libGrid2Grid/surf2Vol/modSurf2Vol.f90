@@ -56,8 +56,26 @@ Private
 
 !!... Module Data
 
-!!... HOS Mode Weight
+!! ----------------------------------------------------------------
+!! Add HOS Weight Class definition in the below
+!! ----------------------------------------------------------------
+
+!!... Base(Abstract) Class fot HOS Weight
+#include "HOSModeWeight/hosWeightBaseFunc/hosWeightBaseFunc.typ"
+
+!!... HOS Weight: expoential function
+#include "HOSModeWeight/hosWeightExpFunc/hosWeightExpFunc.typ"
+
+!!... HOS Weight: step function
+#include "HOSModeWeight/hosWeightStepFunc/hosWeightStepFunc.typ"
+
+!!... HOS Weight: poly function
+#include "HOSModeWeight/hosWeightPolyFunc/hosWeightPolyFunc.typ"
+
+!!... HOS Mode Weight Wrapper Class
 #include "HOSModeWeight/hosModeWeight.typ"
+
+!! ----------------------------------------------------------------
 
     !!... HOS Surf2Vol Base Mesh Class
 #include "HOSMesh/hosMesh.typ"
@@ -88,8 +106,23 @@ contains
 
 !!... Module Function
 
-!!... HOS Mode Weight
+!! ----------------------------------------------------------------
+!! Add HOS Weight Class functions in the below
+!! ----------------------------------------------------------------
+
+!!... HOS Weight: expoential function
+#include "HOSModeWeight/hosWeightExpFunc/hosWeightExpFunc.inc"
+
+!!... HOS Weight: step function
+#include "HOSModeWeight/hosWeightStepFunc/hosWeightStepFunc.inc"
+
+!!... HOS Weight: poly function
+#include "HOSModeWeight/hosWeightPolyFunc/hosWeightPolyFunc.inc"
+
+!!... HOS Mode Weight Wrapper
 #include "HOSModeWeight/hosModeWeight.inc"
+
+!! ----------------------------------------------------------------
 
     !!... HOS Surf2Vol Base Mesh Class Member Function
 #include "HOSMesh/hosMesh.inc"
