@@ -553,19 +553,19 @@ subroutine buildGlobalMesh_HOSOcean(this, zMin, zMax, nZmin, nZmax, zMinRatio, z
                                          nZmin, nZmax, zMinRatio, zMaxRatio)
 
     !... general mode flow quantities in Fourier Domain
-    allocate( this%hosMesh_%aVitX(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%aVitY(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%aVitZ(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%aPhit(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%aDuDt(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%aDvDt(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%aDwDt(this%nXo2p1_, this%nYmode_) )
+    allocate( this%hosMesh_%aVitX(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%aVitX = 0.0_RP
+    allocate( this%hosMesh_%aVitY(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%aVitY = 0.0_RP
+    allocate( this%hosMesh_%aVitZ(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%aVitZ = 0.0_RP
+    allocate( this%hosMesh_%aPhit(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%aPhit = 0.0_RP
+    allocate( this%hosMesh_%aDuDt(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%aDuDt = 0.0_RP
+    allocate( this%hosMesh_%aDvDt(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%aDvDt = 0.0_RP
+    allocate( this%hosMesh_%aDwDt(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%aDwDt = 0.0_RP
 
-    allocate( this%hosMesh_%adVitXdx(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%adVitYdy(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%adVitXdy(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%adVitXdz(this%nXo2p1_, this%nYmode_) )
-    allocate( this%hosMesh_%adVitYdz(this%nXo2p1_, this%nYmode_) )
+    allocate( this%hosMesh_%adVitXdx(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%adVitXdx = 0.0_RP
+    allocate( this%hosMesh_%adVitYdy(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%adVitYdy = 0.0_RP
+    allocate( this%hosMesh_%adVitXdy(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%adVitXdy = 0.0_RP
+    allocate( this%hosMesh_%adVitXdz(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%adVitXdz = 0.0_RP
+    allocate( this%hosMesh_%adVitYdz(this%nXo2p1_, this%nYmode_) ); this%hosMesh_%adVitYdz = 0.0_RP
 
     !-- Build Wave Number
     ! Specify temporary number of points

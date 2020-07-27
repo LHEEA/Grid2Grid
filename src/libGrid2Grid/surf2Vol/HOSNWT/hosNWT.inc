@@ -621,51 +621,71 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
     allocate( this%hosMesh_%nonDimAddPhiZ(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAddPhit(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
 
+    this%hosMesh_%nonDimAddPhiX = 0.0_RP
+    this%hosMesh_%nonDimAddPhiY = 0.0_RP
+    this%hosMesh_%nonDimAddPhiZ = 0.0_RP
+    this%hosMesh_%nonDimAddPhit = 0.0_RP
+
     allocate( this%hosMesh_%nonDimAdddvitXdx(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAdddvitYdY(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAdddvitXdY(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAdddvitXdZ(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAdddvitYdZ(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
 
+    this%hosMesh_%nonDimAdddvitXdx = 0.0_RP
+    this%hosMesh_%nonDimAdddvitYdY = 0.0_RP
+    this%hosMesh_%nonDimAdddvitXdY = 0.0_RP
+    this%hosMesh_%nonDimAdddvitXdZ = 0.0_RP
+    this%hosMesh_%nonDimAdddvitYdZ = 0.0_RP
+
     allocate( this%hosMesh_%nonDimAddDuDt(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAddDvDt(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
     allocate( this%hosMesh_%nonDimAddDwDt(this%hosMesh_%nX, this%hosMesh_%nY, this%hosMesh_%nZ) )
 
-    !... general mode flow quantities in Fourier Domain
-    allocate( this%hosMesh_%aVitX(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%aVitY(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%aVitZ(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%aPhit(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%aDuDt(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%aDvDt(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%aDwDt(this%nXmode_, this%nYmode_) )
+    this%hosMesh_%nonDimAddDuDt = 0.0_RP
+    this%hosMesh_%nonDimAddDvDt = 0.0_RP
+    this%hosMesh_%nonDimAddDwDt = 0.0_RP
 
-    allocate( this%hosMesh_%adVitXdx(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%adVitYdy(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%adVitXdy(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%adVitXdz(this%nXmode_, this%nYmode_) )
-    allocate( this%hosMesh_%adVitYdz(this%nXmode_, this%nYmode_) )
+    !... general mode flow quantities in Fourier Domain
+    allocate( this%hosMesh_%aVitX(this%nXmode_, this%nYmode_) ); this%hosMesh_%aVitX = 0.0_RP
+    allocate( this%hosMesh_%aVitY(this%nXmode_, this%nYmode_) ); this%hosMesh_%aVitY = 0.0_RP
+    allocate( this%hosMesh_%aVitZ(this%nXmode_, this%nYmode_) ); this%hosMesh_%aVitZ = 0.0_RP
+    allocate( this%hosMesh_%aPhit(this%nXmode_, this%nYmode_) ); this%hosMesh_%aPhit = 0.0_RP
+    allocate( this%hosMesh_%aDuDt(this%nXmode_, this%nYmode_) ); this%hosMesh_%aDuDt = 0.0_RP
+    allocate( this%hosMesh_%aDvDt(this%nXmode_, this%nYmode_) ); this%hosMesh_%aDvDt = 0.0_RP
+    allocate( this%hosMesh_%aDwDt(this%nXmode_, this%nYmode_) ); this%hosMesh_%aDwDt = 0.0_RP
+
+    allocate( this%hosMesh_%adVitXdx(this%nXmode_, this%nYmode_) ); this%hosMesh_%adVitXdx = 0.0_RP
+    allocate( this%hosMesh_%adVitYdy(this%nXmode_, this%nYmode_) ); this%hosMesh_%adVitYdy = 0.0_RP
+    allocate( this%hosMesh_%adVitXdy(this%nXmode_, this%nYmode_) ); this%hosMesh_%adVitXdy = 0.0_RP
+    allocate( this%hosMesh_%adVitXdz(this%nXmode_, this%nYmode_) ); this%hosMesh_%adVitXdz = 0.0_RP
+    allocate( this%hosMesh_%adVitYdz(this%nXmode_, this%nYmode_) ); this%hosMesh_%adVitYdz = 0.0_RP
 
     !... added mode flow quantities in Fourier Domain
-    allocate( this%hosMesh_%lVitX(this%nYmode_))
-    allocate( this%hosMesh_%lVitY(this%nYmode_))
-    allocate( this%hosMesh_%lVitZ(this%nYmode_))
-    allocate( this%hosMesh_%lPhit(this%nYmode_))
-    allocate( this%hosMesh_%lDuDt(this%nYmode_))
-    allocate( this%hosMesh_%lDvDt(this%nYmode_))
-    allocate( this%hosMesh_%lDwDt(this%nYmode_))
+    allocate( this%hosMesh_%lVitX(this%nYmode_)); this%hosMesh_%lVitX = 0.0_RP
+    allocate( this%hosMesh_%lVitY(this%nYmode_)); this%hosMesh_%lVitY = 0.0_RP
+    allocate( this%hosMesh_%lVitZ(this%nYmode_)); this%hosMesh_%lVitZ = 0.0_RP
+    allocate( this%hosMesh_%lPhit(this%nYmode_)); this%hosMesh_%lPhit = 0.0_RP
+    allocate( this%hosMesh_%lDuDt(this%nYmode_)); this%hosMesh_%lDuDt = 0.0_RP
+    allocate( this%hosMesh_%lDvDt(this%nYmode_)); this%hosMesh_%lDvDt = 0.0_RP
+    allocate( this%hosMesh_%lDwDt(this%nYmode_)); this%hosMesh_%lDwDt = 0.0_RP
 
-    allocate( this%hosMesh_%ldVitXdx(this%nYmode_))
-    allocate( this%hosMesh_%ldVitYdy(this%nYmode_))
-    allocate( this%hosMesh_%ldVitXdy(this%nYmode_))
-    allocate( this%hosMesh_%ldVitXdz(this%nYmode_))
-    allocate( this%hosMesh_%ldVitYdz(this%nYmode_))
+    allocate( this%hosMesh_%ldVitXdx(this%nYmode_)); this%hosMesh_%ldVitXdx = 0.0_RP
+    allocate( this%hosMesh_%ldVitYdy(this%nYmode_)); this%hosMesh_%ldVitYdy = 0.0_RP
+    allocate( this%hosMesh_%ldVitXdy(this%nYmode_)); this%hosMesh_%ldVitXdy = 0.0_RP
+    allocate( this%hosMesh_%ldVitXdz(this%nYmode_)); this%hosMesh_%ldVitXdz = 0.0_RP
+    allocate( this%hosMesh_%ldVitYdz(this%nYmode_)); this%hosMesh_%ldVitYdz = 0.0_RP
 
     !!- build wave number -----------------
     allocate( this%hosMesh_%csh_add_x(this%nXmode_, this%nYmode_, this%nAddmode_) )
     allocate( this%hosMesh_%k_add_sh_add_x(this%nXmode_, this%nYmode_, this%nAddmode_) )
     allocate( this%hosMesh_%kycsh_add_x(this%nXmode_, this%nYmode_, this%nAddmode_) )
     allocate( this%hosMesh_%kx_add_csh_add_x(this%nXmode_, this%nYmode_, this%nAddmode_) )
+
+    this%hosMesh_%csh_add_x = 0.0_RP
+    this%hosMesh_%k_add_sh_add_x = 0.0_RP
+    this%hosMesh_%kycsh_add_x = 0.0_RP
+    this%hosMesh_%kx_add_csh_add_x = 0.0_RP
 
     !! X, Y General mode wave number
     piXLen = PI / this%hosMesh_%nonDimLx
@@ -768,7 +788,7 @@ subroutine buildGlobalMesh_HOSNWT(this, zMin, zMax, nZmin, nZmax, zMinRatio, zMa
             ky2 = this%hosMode_%ky(iy) * this%hosMode_%ky(iy)
             kxyAdd  = sqrt(kxAdd2 + ky2)
 
-            this%hosMode_%omegaAdd(iAdd, iy) = sqrt(kxyAdd * tan(kxyAdd)) / this%dimT_
+            this%hosMode_%omegaAdd(iAdd, iy) = sqrt( dabs(kxyAdd * tan(kxyAdd)))/ this%dimT_
 
             kxyAddTwo = 2.d0 * kxyAdd
             kxyAddLx  = kxyAddTwo * this%hosMesh_%nonDimLx
