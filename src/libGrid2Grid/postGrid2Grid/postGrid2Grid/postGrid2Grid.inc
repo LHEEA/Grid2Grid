@@ -198,18 +198,18 @@ subroutine correctPostG2G(this, simulTime)
 
     end if
 
-    !!... Wave Probe
+	!!... Wave Probe
     if (this%isWriteWaveProbe_) then
         Call this%waveProbe%correct( this%hosVol2Vol_, simulTime )
     end if
 
     !!... Velocity Probe
-    if (this%isWriteWaveProbe_) then
+    if (this%isWriteVelocityProbe_) then
         Call this%velocityProbe%correct( this%hosVol2Vol_, simulTime )
     end if
 
     !!... Pressure Probe
-    if (this%isWriteWaveProbe_) then
+    if (this%isWritePressureProbe_) then
         Call this%pressureProbe%correct( this%hosVol2Vol_, simulTime )
     end if
 
