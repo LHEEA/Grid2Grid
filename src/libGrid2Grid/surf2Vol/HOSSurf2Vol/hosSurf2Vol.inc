@@ -186,7 +186,13 @@ subroutine writeSurf2VolMeshVTK(this)
 
     !! Make Output Path
     vtkFile%name = trim(surf2VolVTK)
+
+#ifdef __linux__
     CALL System("mkdir -p "//trim(vtkFile%name))
+#else
+	CALL System("mkdir "//trim(vtkFile%name))
+#endif
+
     vtkFile%name = trim(vtkFile%name)//"surf2volMesh.vtk"
     vtkFile%unit = callFileUnit()
 

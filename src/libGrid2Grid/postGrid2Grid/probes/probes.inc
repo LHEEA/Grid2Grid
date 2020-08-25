@@ -143,7 +143,12 @@ Subroutine initialize_typProbes( this, dict, variableType )
         this%outFile%name = this%dict_%getChar("outputFile")
 
         !!... Remove original file if exist
+#ifdef __linux__
         CALL System( "rm "//trim(this%outFile%name) )
+#else 
+		CALL System( "del /s "//trim(this%outFile%name) )
+#endif
+
 
         !!... Get File Unit
         this%outFile%unit = callFileUnit()

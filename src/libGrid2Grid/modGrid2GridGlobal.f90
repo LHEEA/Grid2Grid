@@ -37,9 +37,15 @@ Module modGrid2GridGlobal
     LOGICAL :: isSurf2VolVTKWrite = .FALSE.
 
     ! VTK file Out Directory
+#ifdef __linux__
     Character(len=StringLength),parameter :: vtkDirectory = "./VTK/"
     Character(len=StringLength),parameter :: surf2VolVTK  = trim(vtkDirectory)//"Grid2Grid/"
     Character(len=StringLength),parameter :: postG2GVTK   = trim(vtkDirectory)//"G2G_3DResult/"
+#else
+    Character(len=StringLength),parameter :: vtkDirectory = "VTK"
+    Character(len=StringLength),parameter :: surf2VolVTK  = trim(vtkDirectory)//"\Grid2Grid"
+    Character(len=StringLength),parameter :: postG2GVTK   = trim(vtkDirectory)//"\G2G_3DResult"
+#endif
 
     ! Building Z mesh Index
     integer, parameter :: INDEX_UNIFORM_MESH        = 0

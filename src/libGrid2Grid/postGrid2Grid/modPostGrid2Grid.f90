@@ -54,33 +54,33 @@ Implicit None
 !!... Module Data
 
     !!... Rectilinear grid class to construct 3D HOS Mesh
-    Include "rectilinearGrid/rectilinearGrid.typ"
+#include "rectilinearGrid/rectilinearGrid.typ"
 
     !!... Wave Probe Data Class
-    Include "waveProbe/waveProbe.typ"
+#include "waveProbe/waveProbe.typ"
 
     !!... Individual probe class
-    Include "probes/probe/probe.typ"
+#include "probes/probe/probe.typ"
 
     !!... Control Class of Probes
-    Include "probes/probes.typ"
+#include "probes/probes.typ"
 
     !!... Post Processing Class
-    Include "postGrid2Grid/postGrid2Grid.typ"
+#include "postGrid2Grid/postGrid2Grid.typ"
 
 contains
 
 !!... Module Function
 
     !! Rectilinear grid class member function
-    Include "rectilinearGrid/rectilinearGrid.inc"
+#include "rectilinearGrid/rectilinearGrid.inc"
 
     !! Include "waveProbe/waveProbe.inc"
 
-    Include "probes/probes.inc"
+#include "probes/probes.inc"
 
     !!... Post Processing class member function
-    Include "postGrid2Grid/postGrid2Grid.inc"
+#include "postGrid2Grid/postGrid2Grid.inc"
 
 !-----------------------------------------------------------------------
 End Module
