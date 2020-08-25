@@ -102,4 +102,4 @@ Subroutine getHOSWeightArray_typHOSModeWeightFunc(this, omega, weight)
 
 End Subroutine
 
-#include "testHOSModeWeight.inc"
+#include "HOSModeWeight/testHOSModeWeight.inc"
