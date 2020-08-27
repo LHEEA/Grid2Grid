@@ -101,5 +101,3 @@ Subroutine getHOSWeightArray_typHOSModeWeightFunc(this, omega, weight)
     end if
 
 End Subroutine
-
-#include "testHOSModeWeight.inc"

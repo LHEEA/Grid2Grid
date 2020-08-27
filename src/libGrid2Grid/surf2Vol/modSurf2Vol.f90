@@ -122,6 +122,9 @@ contains
 !!... HOS Mode Weight Wrapper
 #include "HOSModeWeight/hosModeWeight.inc"
 
+!!... HOS Mode Weight Wrapper
+#include "HOSModeWeight/testHOSModeWeight.inc"
+
 !! ----------------------------------------------------------------
 
     !!... HOS Surf2Vol Base Mesh Class Member Function
