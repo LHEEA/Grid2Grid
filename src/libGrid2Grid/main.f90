@@ -18,8 +18,14 @@ Program main
     use modSurf2vol
 
     Implicit None
-    Character(Len =100) :: inputFileName
-    inputFileName = "postGrid2Grid.dict"
+    Character(Len = 300) :: inputFileName
+    
+    if (command_argument_count() >= 1) then 
+        CALL get_command_argument(1, inputFileName)
+        inputFileName = TRIM( inputFileName )
+    else 
+        inputFileName = "postGrid2Grid.dict"
+    end if
 
     Call testPost(inputFileName)
 
