@@ -133,57 +133,43 @@ It requires HDF5 third party library (version >= 1.8.16). You can:
    set(HDF5_LIB_PATH /usr/local/lib/hdf5/build/bin)
    ```
 
-
-
 ## Install Grid2Grid
 
 From version Grid2Grid version 2, CMake is used to compile the Grid2Grid library.
 
 1. Set library dependency and paths for Grid2Grid (Grid2GridOptions.cmake)
-2. Com
 
+   ```cmake
+   ###... Fortran Compiler
+   set(CMAKE_Fortran_COMPILER gfortran)
+   
+   ###... FFTW3 Library Path
+   ### set(FFTW3_LIB_PATH  /home/yomy/Utility/fftw/fftw-3.3.8_GNU/lib)
+   ### set(FFTW3_LIB_PATH  C:/Users/YOUNGCHOI/Choi/fftw-3.3.8/build64/Release)
+   set(FFTW3_LIB_PATH  $FFTW3_LIB_PATH)
+   
+   ###... HDF5 Library Path
+   ### set(HDF5_LIB_PATH  $HDF5_LIB_PATH)
+   ### set(HDF_LIBRARY "ON")
+   
+   ###... Set Library Output path to be OpenFOAM Path
+   ### set(BUILD_OF_LIB "ON")
+   ```
 
+   
 
+2. Configure and Compile  Grid2Grid Project
 
+   <u>In Windows (PowerShell)</u>, (For example: x64, Release Mode)
 
-    
-    There are two ways to compile Grid2Grid. 
-       
-      1. gnu make 
-      2. cmake
-    
-    It is recommended to use cmake instead of gnu make. Makefile will be deleted in a following update. 
-    
-    Installation using CMake
-    
-      - Instllation without HDF5 library
-    
-        cmake -H. -Bbuild 
-      
-        cmake --build build
-    
-      - Installation with HDF5 library (Add the flag: -DHDF_LIBRARY:STRIN="ON")
-     
-        cmake -H. -Bbuild -DHDF_LIBRARY:STRING="ON"
-    
-        cmake --build build
-    
-      - Installation libGrid2Grid on the path $FOAM_USER_LIBBIN (Add the flag -DBUILD_OF_LIB=ON)
-    
-        cmake -H. -BbuildOF -DBUILD_OF_LIB=ON -DHDF_LIBRARY:STRING="ON"
-    
-        cmake --build buildOF
+   ```powershell
+   cmake -S. -Bbuild -A x64 
+   cmake --build build --target ALL_BUILD --config Release
+   ```
 
+   <u>In Linux (Shell, tested in Ubuntu 18.04.4 LTS)</u>
 
-      Have a look at cbuild.org.
-    
-    Installation using GNU make
-    
-      - Path to Grid2Grid and run following command which you want.
-    
-      make
-        : compile main.f90, it generates post processing program of Grid2Grid.
-          And main.f90 contains some subroutine how to connect Grid2Grid to Fortran Program.
-    
-      make createlib
-        : make shared library(libGrid2Grid.so) in /obj directory.
+   ```shell
+   cmake -H. -Bbuild
+   cmake --build build
+   ```
