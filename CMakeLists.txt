@@ -26,15 +26,22 @@ endif()
 
 ###-------------------------------------------------------------------------###
 
-set(COMPILE_LANGUAGE Fortran)                       #
-set(CMAKE_Fortran_COMPILER gfortran)       #... Fortran Compiler Path
+set(COMPILE_LANGUAGE Fortran)
 
 ###-------------------------------------------------------------------------###
 
 set(PROJECT_NAME Grid2Grid)                         #... Project Name
 set(PROJECT_COMPILE_PATH ${CMAKE_HOME_DIRECTORY})   #... COMPILE_PATH
-
 project(${PROJECT_NAME} ${COMPILE_LANGUAGE})        # PROJECT NAME
+
+###-------------------------------------------------------------------------###
+include(Grid2GridOptions.cmake)
+
+#... Fortran Compiler
+if (NOT DEFINED CMAKE_Fortran_COMPILER)
+    set(CMAKE_Fortran_COMPILER gfortran)
+    # set(CMAKE_Fortran_COMPILER ifort)
+endif()
 
 ###-------------------------------------------------------------------------###
 ## GIT
@@ -126,9 +133,18 @@ if ( NOT USE_MKL)
         set(FFTW3_LIB_PATH /usr/local/lib)
     endif()
 
-    find_library(FFTW_LIB_FLAG NAMES libfftw3.a PATHS ${FFTW3_LIB_PATH} ${LIBRARY_DIRS})
+    if (WIN32)
+        find_library(FFTW_LIB_FLAG NAMES fftw3.lib PATHS ${FFTW3_LIB_PATH} ${LIBRARY_DIRS})
+    else()
+        find_library(FFTW_LIB_FLAG NAMES libfftw3.a PATHS ${FFTW3_LIB_PATH} ${LIBRARY_DIRS})
+    endif()
+
     if ("${FFTW_LIB_FLAG}" STREQUAL "FFTW_LIB_FLAG-NOTFOUND")
+        if (WIN32)
+        message("${BoldRed}    [ERROR] library:  fftw3.lib not found.")
+        else()
         message("${BoldRed}    [ERROR] library:  libfftw3.a not found.")
+        endif()
         message("${ColourReset} ${Green}")
         message("    Wrong FFTW3 library path")
         message("")
@@ -138,7 +154,11 @@ if ( NOT USE_MKL)
     endif()
     #... FFTW LIBRARY FLAG
     get_filename_component(FFTW3_LIB_PATH ${FFTW_LIB_FLAG} PATH)
+        if (WIN32)
+        message("${Yellow}    Found fftw3.lib:")
+        else()
         message("${Yellow}    Found libfftw3.a:")
+        endif()
         message("")
         message("${Green}       - FFTW_LIB_FLAG : ${FFTW_LIB_FLAG}")
         message("${Green}       - FFTW3_LIB_PATH : ${FFTW3_LIB_PATH}")
@@ -192,10 +212,18 @@ message("${ColourReset}")
 ###-------------------------------------------------------------------------###
 
 if ( NOT USE_MKL)
+    if (WIN32)
+    find_library(LIBEXIST NAMES fftw3.lib PATHS ${FFTW3_LIB_PATH})
+    else()
     find_library(LIBEXIST NAMES libfftw3.a PATHS ${FFTW3_LIB_PATH})
+    endif()
     if (NOT LIBEXIST)
         message("${BoldRed} ")
+        if (WIN32)
+        message("   [ERROR] library:  fftw3.lib not found.")
+        else()
         message("   [ERROR] library:  libfftw3.a not found.")
+        endif()
         message("${ColourReset} ${Green}")
         message("   Wrong FFTW3 library path")
         message("")
@@ -204,7 +232,11 @@ if ( NOT USE_MKL)
         message( FATAL_ERROR )
     endif()
     #... FFTW LIBRARY FLAG
+    if (WIN32)
+    set(FFTW_LIB_FLAG ${FFTW3_LIB_PATH}/fftw3.lib )
+    else()
     set(FFTW_LIB_FLAG ${FFTW3_LIB_PATH}/libfftw3.a )
+    endif()
 endif()
 
 ###-------------------------------------------------------------------------###
