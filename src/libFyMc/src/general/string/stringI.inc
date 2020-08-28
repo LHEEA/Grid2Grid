@@ -480,13 +480,15 @@ subroutine splitLine(str, nArg, cArg, scArg, lcArg, iArg, rArg, numFlag, scFlag,
             scArg(i) = dummyStr%getLower()
             lcArg(i) = dummyStr%getUpper()
 
-            read(dummyChar, "(i15)", iostat = ioInt) dummyInt
-            read(dummyChar, "(f20.10)", iostat = ioRealF) dummyReal
+            read(dummyChar, *, iostat = ioInt) dummyInt
+            read(dummyChar, *, iostat = ioRealF) dummyReal
 
             if (ioInt.eq.0)  then
                 dummyReal = dummyInt
                 numFlag(i) = .TRUE.
-            else if (ioRealF.eq.0)  then
+            end if
+
+            if (ioRealF.eq.0)  then
                 dummyInt   = int(dummyReal)
                 numFlag(i) = .TRUE.
             end if
