@@ -15,6 +15,12 @@ type,private :: typHOSNWTmode
     real(rp),allocatable :: kx(:), ky(:), kxy(:,:), ktheta(:,:)
     real(rp),allocatable :: kxAdd(:)
 
+    !!- Wave frequency
+    Real(RP), allocatable :: omega(:, :), omegaAdd(:, :)
+
+    !!- HOS Amp Weight
+    Real(RP), allocatable :: weight(:, :), weightAdd(:, :)
+
     contains
 
         procedure, pass :: allocNWTMode

@@ -41,12 +41,17 @@ subroutine allocOceanMode(this, nXo2p1, nYmode, procedure)
     allocate( this%ikx(nXo2p1, nYmode) )
     allocate( this%iky(nXo2p1, nYmode) )
 
+    allocate( this%omega(nXo2p1, nYmode) )
+
+    allocate( this%weight(nXo2p1, nYmode) )
 
     this%modet = 0.0_RP
     this%modeFS = 0.0_RP
     this%modeFSx = 0.0_RP
     this%modeFSy = 0.0_RP
     this%modeFSt = 0.0_RP
+
+    this%weight(:, :) = 1.0_RP
 
 end subroutine
 
@@ -70,6 +75,9 @@ subroutine destroyOceanMode(this)
 
     if (allocated(this%ikx)) deallocate( this%ikx )
     if (allocated(this%iky)) deallocate( this%iky )
+
+    if (allocated(this%omega)) deallocate( this%omega )
+    if (allocated(this%weight)) deallocate( this%weight )
 end subroutine
 
 subroutine finalHOSOceanMode(this)

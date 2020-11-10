@@ -74,17 +74,17 @@ subroutine parse(str,delims,args,nargs)
     ! the delimiters contained in the string 'delims'. Preceding a delimiter in
     ! 'str' by a backslash (\) makes this particular instance not a delimiter.
     ! The integer output variable nargs contains the number of arguments found.
-
+	implicit none
     character(len=*) :: str,delims
     character(len=len_trim(str)) :: strsav
     character(len=*),allocatable :: args(:)
     character(len=len_trim(str)),allocatable :: tempArgs(:)
-    integer :: i
+    integer :: i, na, nargs, k, lenstr
     character(len=1) :: dummy
 
     strsav=str
     call compact(str)
-    na = sizeof(str) / sizeof(dummy)
+    na = STORAGE_SIZE (str) / STORAGE_SIZE (dummy)
     if (na.le.0) then
         nargs = 0
         return
@@ -303,7 +303,7 @@ Logical Function isAllTrue(logicalArray)
     integer :: nn, i
     logical :: dummy
     isAllTrue = .TRUE.
-    nn = sizeof(logicalArray) / sizeof(dummy)
+    nn = STORAGE_SIZE (logicalArray) / STORAGE_SIZE (dummy)
     if (nn.eq.0) then
         isAllTrue = .FALSE.
         return

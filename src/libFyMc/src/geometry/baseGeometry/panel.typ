@@ -85,8 +85,8 @@
         !! Destroy Panel Type
         procedure, pass, public :: destroy => destroyPanel
 
-        !! Destructor
-        final :: finalPanel
+        ! !! Destructor
+        ! final :: finalPanel
 
     end type
 

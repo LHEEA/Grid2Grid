@@ -299,11 +299,11 @@
 
     End Subroutine
 
-    Subroutine finalPanel(this)
-        Implicit None
-        Type(typPanel), intent(inout) :: this
-        Call this%destroy()
-    End Subroutine
+    ! Subroutine finalPanel(this)
+    !     Implicit None
+    !     Type(typPanel), intent(inout) :: this
+    !     Call this%destroy()
+    ! End Subroutine
 
 !! ------------------------------------------------------------------ !!
 !! End Procedures

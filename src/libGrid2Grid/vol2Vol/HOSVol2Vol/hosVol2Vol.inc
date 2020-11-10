@@ -806,62 +806,62 @@ subroutine constructSpline(this)
                 this%itp2D_%dudzValue(1+this%nX_,:, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(1, 1,  :)
             else
                 this%itp3D_%etaValue(1:this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%eta
-                this%itp3D_%etaValue(1+this%nX_, : , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%eta(1, :)
-                this%itp3D_%etaValue(:, 1+this%nY_ , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%eta(:, 1)
+                this%itp3D_%etaValue(1+this%nX_, 1:this%nY_ , it) = this%HOSs2v_(idx)%ptrHOSMesh_%eta(1, 1:this%nY_)
+                this%itp3D_%etaValue(1:this%nX_, 1+this%nY_ , it) = this%HOSs2v_(idx)%ptrHOSMesh_%eta(1:this%nX_, 1)
                 this%itp3D_%etaValue(1+this%nX_, 1+this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%eta(1, 1)
 
                 this%itp3D_%detadxValue(1:this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadx
-                this%itp3D_%detadxValue(1+this%nX_, : , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(1, :)
-                this%itp3D_%detadxValue(:, 1+this%nY_ , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(:, 1)
+                this%itp3D_%detadxValue(1+this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(1, 1:this%nY_)
+                this%itp3D_%detadxValue(1:this%nX_, 1+this%nY_ , it) = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(1:this%nX_, 1)
                 this%itp3D_%detadxValue(1+this%nX_, 1+this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadx(1, 1)
                 this%itp3D_%detadyValue(1:this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detady
-                this%itp3D_%detadyValue(1+this%nX_, : , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detady(1, :)
-                this%itp3D_%detadyValue(:, 1+this%nY_ , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detady(:, 1)
+                this%itp3D_%detadyValue(1+this%nX_, 1:this%nY_ , it) = this%HOSs2v_(idx)%ptrHOSMesh_%detady(1, 1:this%nY_)
+                this%itp3D_%detadyValue(1:this%nX_, 1+this%nY_ , it) = this%HOSs2v_(idx)%ptrHOSMesh_%detady(1:this%nX_, 1)
                 this%itp3D_%detadyValue(1+this%nX_, 1+this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detady(1, 1)
                 this%itp3D_%detadtValue(1:this%nX_, 1:this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadt
-                this%itp3D_%detadtValue(1+this%nX_, : , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(1, :)
-                this%itp3D_%detadtValue(:, 1+this%nY_ , it)          = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(:, 1)
+                this%itp3D_%detadtValue(1+this%nX_, 1:this%nY_ , it) = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(1, 1:this%nY_)
+                this%itp3D_%detadtValue(1:this%nX_, 1+this%nY_ , it) = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(1:this%nX_, 1)
                 this%itp3D_%detadtValue(1+this%nX_, 1+this%nY_, it)  = this%HOSs2v_(idx)%ptrHOSMesh_%detadt(1, 1)
 
                 this%itp3D_%uValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u
-                this%itp3D_%uValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u(1,:,:)
-                this%itp3D_%uValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u(:,1,:)
+                this%itp3D_%uValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u(1,1:this%nY_,:)
+                this%itp3D_%uValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u(1:this%nX_,1,:)
                 this%itp3D_%uValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%u(1,1,:)
 
                 this%itp3D_%vValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%v
-                this%itp3D_%vValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%v(1,:,:)
-                this%itp3D_%vValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%v(:,1,:)
+                this%itp3D_%vValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%v(1,1:this%nY_,:)
+                this%itp3D_%vValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%v(1:this%nX_,1,:)
                 this%itp3D_%vValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%v(1,1,:)
 
                 this%itp3D_%wValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%w
-                this%itp3D_%wValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%w(1,:,:)
-                this%itp3D_%wValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%w(:,1,:)
+                this%itp3D_%wValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%w(1,1:this%nY_,:)
+                this%itp3D_%wValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%w(1:this%nX_,1,:)
                 this%itp3D_%wValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%w(1,1,:)
 
                 this%itp3D_%pdValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd
-                this%itp3D_%pdValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(1,:,:)
-                this%itp3D_%pdValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(:,1,:)
+                this%itp3D_%pdValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(1,1:this%nY_,:)
+                this%itp3D_%pdValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(1:this%nX_,1,:)
                 this%itp3D_%pdValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%pd(1,1,:)
 
                 this%itp3D_%dudxValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx
-                this%itp3D_%dudxValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(1,:,:)
-                this%itp3D_%dudxValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(:,1,:)
+                this%itp3D_%dudxValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(1,1:this%nY_,:)
+                this%itp3D_%dudxValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(1:this%nX_,1,:)
                 this%itp3D_%dudxValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudx(1,1,:)
                 this%itp3D_%dvdyValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy
-                this%itp3D_%dvdyValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy(1,:,:)
-                this%itp3D_%dvdyValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy(:,1,:)
+                this%itp3D_%dvdyValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy(1,1:this%nY_,:)
+                this%itp3D_%dvdyValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy(1:this%nX_,1,:)
                 this%itp3D_%dvdyValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdy(1,1,:)
                 this%itp3D_%dudyValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy
-                this%itp3D_%dudyValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy(1,:,:)
-                this%itp3D_%dudyValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy(:,1,:)
+                this%itp3D_%dudyValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy(1,1:this%nY_,:)
+                this%itp3D_%dudyValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy(1:this%nX_,1,:)
                 this%itp3D_%dudyValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudy(1,1,:)
                 this%itp3D_%dudzValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz
-                this%itp3D_%dudzValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(1,:,:)
-                this%itp3D_%dudzValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(:,1,:)
+                this%itp3D_%dudzValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(1,1:this%nY_,:)
+                this%itp3D_%dudzValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(1:this%nX_,1,:)
                 this%itp3D_%dudzValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dudz(1,1,:)
                 this%itp3D_%dvdzValue(1:this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz
-                this%itp3D_%dvdzValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz(1,:,:)
-                this%itp3D_%dvdzValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz(:,1,:)
+                this%itp3D_%dvdzValue(1+this%nX_, 1:this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz(1,1:this%nY_,:)
+                this%itp3D_%dvdzValue(1:this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz(1:this%nX_,1,:)
                 this%itp3D_%dvdzValue(1+this%nX_, 1+this%nY_, :, it) = this%HOSs2v_(idx)%ptrHOSMesh_%dvdz(1,1,:)
             end if
         else

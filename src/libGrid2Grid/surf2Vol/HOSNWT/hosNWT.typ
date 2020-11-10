@@ -35,6 +35,9 @@ private
     real(rp)        :: nonDimxLen_, nonDimyLen_
     real(rp)        :: nonDimzMin_, nonDimzMax_
 
+    !!- Number of extra interpolation points between HOS node
+    integer :: extraInterpolationNumber
+
     !!- Added Mode Computation Bool
     logical  :: isAddedMode_ = .true.
 
@@ -49,6 +52,12 @@ private
 
     !!- HOS Ocean FFTW Class
     type(typFFFWHosNWT) :: hosNWTFFTW_
+
+    !!- HOS Amp Weight SWITCH
+    Logical :: isHOSAmpWeight
+
+    !!- HOS Amp Weight function
+    type(typHOSModeWeightFunc) :: HOSWeightFunc
 
     !!! Public --------------------------------------------------------
 

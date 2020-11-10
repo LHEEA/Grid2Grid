@@ -69,7 +69,7 @@
 
         procedure, pass, public :: destroy => destroySurfMesh
 
-        final :: finalSurfMesh
+        ! final :: finalSurfMesh
 
     end type
 

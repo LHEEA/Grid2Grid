@@ -13,6 +13,12 @@ type,private :: typHOSOceanMode
     real(rp), allocatable :: kx(:), kyN2(:), ktheta(:,:), kxy(:,:)
     complex(cp), allocatable :: ikx(:,:), iky(:,:)
 
+    !!- Wave frequency
+    Real(RP), allocatable :: omega(:, :)
+
+    !!- HOS Weight
+    Real(RP), allocatable :: weight(:, :)
+
     contains
 
         !!- Allocate Dynamic Array

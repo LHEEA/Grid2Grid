@@ -41,6 +41,8 @@ private
     integer         :: nHOSTime_
     real(rp)        :: gravi, dimL_, dimT_
 
+    !!- Number of extra interpolation points between HOS node
+    integer :: extraInterpolationNumber
 
     !! - Is HDF5 format
     logical :: isHDF5Format_ = .false.
@@ -53,6 +55,12 @@ private
 
     !!- HOS Ocean FFTW Class
     type(typFFFWHosOcean) :: hosOceanFFTW_
+
+    !!- HOS Amp Weight SWITCH
+    Logical :: isHOSAmpWeight
+
+    !!- HOS Amp Weight function
+    type(typHOSModeWeightFunc) :: HOSWeightFunc
 
     !!! Public --------------------------------------------------------
 

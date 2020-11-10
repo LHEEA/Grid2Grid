@@ -45,7 +45,7 @@ Module  modSurf2vol
 #endif
 
     use mfpGlobal, only : CHAR_LEN
-    use mfpGeneral, only : typDictionaryPtr
+    use mfpGeneral, only : typDictionaryPtr, isStringEqual
 
 !-----------------------------------------------------------------------
 Implicit none
@@ -55,6 +55,27 @@ Private
 !!... Module Parameter
 
 !!... Module Data
+
+!! ----------------------------------------------------------------
+!! Add HOS Weight Class definition in the below
+!! ----------------------------------------------------------------
+
+!!... Base(Abstract) Class fot HOS Weight
+#include "HOSModeWeight/hosWeightBaseFunc/hosWeightBaseFunc.typ"
+
+!!... HOS Weight: expoential function
+#include "HOSModeWeight/hosWeightExpFunc/hosWeightExpFunc.typ"
+
+!!... HOS Weight: step function
+#include "HOSModeWeight/hosWeightStepFunc/hosWeightStepFunc.typ"
+
+!!... HOS Weight: poly function
+#include "HOSModeWeight/hosWeightPolyFunc/hosWeightPolyFunc.typ"
+
+!!... HOS Mode Weight Wrapper Class
+#include "HOSModeWeight/hosModeWeight.typ"
+
+!! ----------------------------------------------------------------
 
     !!... HOS Surf2Vol Base Mesh Class
 #include "HOSMesh/hosMesh.typ"
@@ -84,6 +105,27 @@ Private
 contains
 
 !!... Module Function
+
+!! ----------------------------------------------------------------
+!! Add HOS Weight Class functions in the below
+!! ----------------------------------------------------------------
+
+!!... HOS Weight: expoential function
+#include "HOSModeWeight/hosWeightExpFunc/hosWeightExpFunc.inc"
+
+!!... HOS Weight: step function
+#include "HOSModeWeight/hosWeightStepFunc/hosWeightStepFunc.inc"
+
+!!... HOS Weight: poly function
+#include "HOSModeWeight/hosWeightPolyFunc/hosWeightPolyFunc.inc"
+
+!!... HOS Mode Weight Wrapper
+#include "HOSModeWeight/hosModeWeight.inc"
+
+!!... HOS Mode Weight Wrapper
+#include "HOSModeWeight/testHOSModeWeight.inc"
+
+!! ----------------------------------------------------------------
 
     !!... HOS Surf2Vol Base Mesh Class Member Function
 #include "HOSMesh/hosMesh.inc"
