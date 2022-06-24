@@ -111,8 +111,6 @@ Grid2Grid::Grid2Grid
 
     Info << "transMatrixToOF_ "   << transMatrixToOF_   << endl;
     Info << "transMatrixFromOF_ " << transMatrixFromOF_ << endl;
-
-    std::cin.get();
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -201,7 +199,7 @@ void Grid2Grid::getGrid2GridPosition
 void Grid2Grid::step()
 {
     // Get OpenFOAM Simulation Time
-    double timeGri2Grid( mesh_.time().value() );
+    double timeGri2Grid( getGrid2GridTIme(mesh_.time().value()) );
 
     Info << "Grid2Grid Time : " << timeGri2Grid << endl;
 
@@ -300,15 +298,6 @@ vector Grid2Grid::U
 	// Get Grid2Grid Position
     double Grid2GridX, Grid2GridY, Grid2GridZ;
 	getGrid2GridPosition(x, Grid2GridX, Grid2GridY, Grid2GridZ);
-
-    Info << "OpenFOAM Position : " << x << endl;
-    Info << "Grid2Grid Position : "
-         << Grid2GridX << " "
-         << Grid2GridY << " "
-         << Grid2GridZ << " "
-         << endl;
-
-    std::cin.get();
 
     // Get Grid2Grid Time
     double Grid2GridTime( getGrid2GridTIme(time) );
